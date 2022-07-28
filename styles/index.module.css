@@ -1,0 +1,28 @@
+.container {
+    padding: 0 8%;
+}
+
+.mainimage {
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+
+.titletext {
+    font-family: "coffeematcha";
+}
+
+@media only screen and (max-width:1350px) {
+    .titletext {
+        font-size: 5rem;
+    }
+}
+
+@media only screen and (max-width:700px) {
+    .mainimage {
+        margin: 0 -8%;
+    }
+}

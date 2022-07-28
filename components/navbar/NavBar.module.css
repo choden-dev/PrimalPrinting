@@ -1,0 +1,7 @@
+.navigationitems {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    margin-left: auto;
+    align-items: center;
+}
