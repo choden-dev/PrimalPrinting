@@ -4,13 +4,13 @@ import {
   Image,
   Heading,
   Text,
+  Button,
   Divider,
   Grid
 } from '@chakra-ui/react'
 import NavBar from '../components/navbar/NavBar'
 import styles from '../styles/index.module.css'
 import DescriptionCard from '../components/descriptioncard/DescriptionCard'
-import { Description } from '@mui/icons-material'
 
 const Home: NextPage = () => {
   return (
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
           minW="1200px"
           maxH="100vh"
           width="100%"
-          filter="brightness(0.35)"
+          filter="brightness(0.5)"
         />
         <Box
           position="absolute"
@@ -35,19 +35,17 @@ const Home: NextPage = () => {
           <Heading
             color="white"
             fontFamily="coffeematcha"
-            fontSize={{ base: "4rem", lg: "7rem", xl: "10rem" }}
+            fontSize={{ base: "5rem", lg: "7rem", xl: "10rem" }}
             fontWeight="400"
 
           >
-            Coursebooks?
+            We Print <br /> Anything!
           </Heading>
-          <Text
-            fontSize={{ base: "xl", lg: "3xl" }}
-            color="white"
+          <Button
+            colorScheme="whiteAlpha"
+            marginTop="5rem"
             fontWeight="300"
-          >
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas deleniti veritatis ea optio atque ipsum velit quae soluta nulla unde.
-          </Text>
+            size="lg">Explore our Products</Button>
         </Box>
       </Box>
 
@@ -64,14 +62,17 @@ const Home: NextPage = () => {
         <Divider margin="2rem 0" />
         <Box display="flex"
           flexWrap="wrap"
-          gap='1rem'
-          maxW='60rem'
+          gap='4rem'
+ 
           justifyContent="center"
         >
-          <DescriptionCard icon={<Image src='cheap.png' />} name={'Low Prices'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-          <DescriptionCard icon={<Image src='cheap.png' />} name={'Reliable'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
+          <DescriptionCard icon={''} name={'Low Prices'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
+          <DescriptionCard icon={''} name={'Reliable'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
+          <DescriptionCard icon={''} name={'Faster'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
 
         </Box>
+        <Divider margin="2rem 0" />
+
 
       </Box>
     </Box >
