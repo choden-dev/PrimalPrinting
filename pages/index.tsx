@@ -5,13 +5,13 @@ import {
   Heading,
   Text,
   Button,
-  Divider,
-  Grid
+
 } from '@chakra-ui/react'
 import NavBar from '../components/navbar/NavBar'
 import styles from '../styles/index.module.css'
 import DescriptionCard from '../components/descriptioncard/DescriptionCard'
-
+import TestimonialCard from '../components/testimonialcard/TestimonialCard'
+import SectionHeading from '../components/sectionheading/SectionHeading'
 const Home: NextPage = () => {
   return (
     <Box className={styles.container}>
@@ -37,7 +37,6 @@ const Home: NextPage = () => {
             fontFamily="coffeematcha"
             fontSize={{ base: "5rem", lg: "7rem", xl: "10rem" }}
             fontWeight="400"
-
           >
             We Print <br /> Anything!
           </Heading>
@@ -51,29 +50,64 @@ const Home: NextPage = () => {
 
       <Box
         alignSelf="center"
-        textAlign="center">
-        <Heading
-          marginTop="5rem"
-          size="xl"
-          fontWeight="300"
-          color="brown.900">
-          Why Primal Printing?
-        </Heading>
-        <Divider margin="2rem 0" />
-        <Box display="flex"
-          flexWrap="wrap"
-          gap='4rem'
- 
-          justifyContent="center"
-        >
-          <DescriptionCard icon={''} name={'Low Prices'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-          <DescriptionCard icon={''} name={'Reliable'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-          <DescriptionCard icon={''} name={'Faster'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-
+        textAlign="center"
+        marginTop="3rem"
+      >
+        <Box className={styles.secheading}>
+          <SectionHeading text={"Why Primal Printing?"} />
         </Box>
-        <Divider margin="2rem 0" />
+        <Box
+          marginTop="3rem"
+          width="100vw"
+          backgroundColor="brown.100"
+          display="flex"
+          justifyContent="center"
+          padding="4rem 7%"
+        >
+          <Box
+
+            maxWidth="1500px"
+            flexWrap="wrap"
+            gap={{ base: '2rem', lg: '4rem' }}
+            display="flex"
+            justifyContent="center"
+
+          >
+            <DescriptionCard icon={''} name={'Low Prices'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
+            <DescriptionCard icon={''} name={'Reliable'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
+            <DescriptionCard icon={''} name={'Faster'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
+
+          </Box>
+        </Box>
 
 
+      </Box>
+      <Box
+        minHeight="35rem"
+        marginTop="3rem"
+        display="flex"
+        flexDir="column"
+        justifyContent="center"
+     
+      >
+        <Box className={styles.secheading}>
+          <SectionHeading text={"Testimonials"} />
+        </Box>
+        <Box margin="auto">
+          <TestimonialCard />
+        </Box>
+      </Box>
+
+      <Box
+        display="flex"
+        width="100%"
+        marginTop="3rem"
+      >
+        <Box
+          className={styles.secheading}
+        >
+          <SectionHeading text={"Popular Products"} />
+        </Box>
       </Box>
     </Box >
 

@@ -3,7 +3,6 @@ import {
     Heading,
     Text,
     Image,
-
 } from '@chakra-ui/react'
 import styles from './DescriptionCard.module.css'
 type Props = {
@@ -18,10 +17,10 @@ export default function DescriptionCard({ icon, name, description }: Props) {
             className={styles.container}
             minWidth="15rem"
             flex="1"
-            padding="2rem 2rem 2rem 3rem"
+            padding="2rem"
             display="flex"
             flexDir="column"
-            border="1px"
+            
             borderLeft="none"
             borderColor="brown.200"
             borderRadius="sm"
@@ -31,22 +30,24 @@ export default function DescriptionCard({ icon, name, description }: Props) {
             backgroundColor="white"
             gap="0.5rem"
             position="relative"
-            overflow="hidden"
-            >
+
+        >
             <Image
-            src='binder.png'
-            position="absolute"
-         
+                src='binder.png'
+                position="absolute"
+
             >
 
             </Image>
             {icon}
+
             <Heading
                 alignSelf="flex-start"
-                fontWeight="300"
+                fontWeight="400"
                 size="lg">
                 {name}
             </Heading>
+
             <Text fontWeight="10">
                 {description}
             </Text>

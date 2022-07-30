@@ -9,7 +9,10 @@ body {
   font-family: -apple-system, Quicksand, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 
+}
 
+body{
+  overflow-x: hidden;
 }
 
 @font-face {
