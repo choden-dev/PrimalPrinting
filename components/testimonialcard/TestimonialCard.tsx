@@ -3,7 +3,7 @@ import {
     Heading,
     Text,
     Image,
-    Button
+    Button,
 } from '@chakra-ui/react'
 import {
     ExternalLinkIcon
@@ -48,7 +48,9 @@ export default function TestimonialCard({ toDisplay }: Props) {
                 >
                     {toDisplay.title}
                 </Heading>
-                <Text>
+                <Text
+                    fontSize="lg"
+                    fontWeight="300">
                     {toDisplay.description}
                 </Text>
                 <Box display="flex"
@@ -61,7 +63,7 @@ export default function TestimonialCard({ toDisplay }: Props) {
                     </Button>
                     <Heading
                         marginLeft="auto"
-                        fontWeight="light"
+                        fontWeight="400"
                         size="sm"
                         textAlign="right">
                         -Yeddy yang

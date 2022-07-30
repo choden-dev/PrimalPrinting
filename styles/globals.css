@@ -11,8 +11,23 @@ body {
 
 }
 
-body{
+body {
   overflow-x: hidden;
+}
+
+.secheading {
+  border: 2px solid #672212;
+  height: 0.5rem;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+  align-items: center;
+  margin: auto;
+  align-items: center;
+  border-right: none;
+  border-left: none;
 }
 
 @font-face {

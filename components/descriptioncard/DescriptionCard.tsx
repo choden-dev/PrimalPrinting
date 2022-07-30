@@ -30,6 +30,11 @@ export default function DescriptionCard({ name, description }: Props) {
             backgroundColor="white"
             gap="0.5rem"
             position="relative"
+            transition="transform 0.5s"
+
+            _hover={{
+                transform: "scale(1.01) translateZ(0)",
+            }}
 
         >
             <Image
@@ -45,7 +50,8 @@ export default function DescriptionCard({ name, description }: Props) {
                 {name}
             </Heading>
 
-            <Text fontWeight="10">
+            <Text fontWeight="10"
+                fontSize="lg">
                 {description}
             </Text>
         </Box>

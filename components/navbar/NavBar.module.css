@@ -2,6 +2,8 @@
     list-style: none;
     display: flex;
     gap: 2rem;
-    margin-left: auto;
     align-items: center;
+    width:100%;
+    margin-left:2rem;
 }
+

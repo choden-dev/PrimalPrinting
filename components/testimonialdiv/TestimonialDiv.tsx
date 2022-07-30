@@ -21,13 +21,23 @@ const testimonials: infoStructure[] = [{ title: "Yeddyyang", description: "Lorem
 export default function TestimonialDiv({ }: Props) {
     const [index, setTest] = React.useState<number>(0);
     const [isForward, setIsForward] = React.useState<boolean>(true);
+    const [isAutoChange, setIsAutoChange] = React.useState<boolean>(true);
+    React.useEffect(() => {
+        if (!isAutoChange) return;
+        setTimeout(() => {
+            setIsForward(true);
+            index + 1 < testimonials.length ? setTest(index + 1) : setTest(0);
+        }, 2500);
+    }, [index])
 
     const back = () => {
         setIsForward(false);
+        setIsAutoChange(false);
         index - 1 >= 0 ? setTest(index - 1) : setTest(testimonials.length - 1);
     }
     const forward = () => {
         setIsForward(true);
+        setIsAutoChange(false);
         index + 1 < testimonials.length ? setTest(index + 1) : setTest(0);
     }
 

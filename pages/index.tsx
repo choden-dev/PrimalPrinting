@@ -14,6 +14,8 @@ import ProductDiv from '../components/productdiv/ProductDiv'
 import TestimonialDiv from '../components/testimonialdiv/TestimonialDiv'
 import SectionHeading from '../components/sectionheading/SectionHeading'
 import DescriptionDiv from '../components/descriptiondiv/DescriptionDiv'
+import WhatNextDiv from '../components/whatnextdiv/WhatNextDiv'
+import Footer from '../components/footer/Footer'
 
 
 const Home: NextPage = () => {
@@ -57,7 +59,7 @@ const Home: NextPage = () => {
         textAlign="center"
         marginTop="8rem"
       >
-        <Box className={styles.secheading}>
+        <Box className="secheading">
           <SectionHeading text={"Why Primal Printing?"} />
         </Box>
         <Box
@@ -78,7 +80,7 @@ const Home: NextPage = () => {
         flexDir="column"
         justifyContent="center"
       >
-        <Box className={styles.secheading}>
+        <Box className="secheading">
           <SectionHeading text={"Testimonials"} />
         </Box>
         <Box display="flex"
@@ -96,13 +98,21 @@ const Home: NextPage = () => {
         marginTop="2rem"
       >
         <Box
-          className={styles.secheading}
+          className="secheading"
         >
           <SectionHeading text={"Popular Products"} />
         </Box>
         <ProductDiv />
 
       </Box>
+      <Box
+        marginTop="3rem">
+        <Box className="secheading">
+          <SectionHeading text={"What Next?"} />
+        </Box>
+        <WhatNextDiv />
+      </Box>
+      <Footer />
     </Box >
 
   )

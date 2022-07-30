@@ -4,3 +4,8 @@
     top: 0;
 
 }
+
+.container{
+    backface-visibility: hidden;
+}
+

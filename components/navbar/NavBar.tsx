@@ -1,7 +1,7 @@
 import React from 'react'
 import {
     Box,
-    Text,
+    Heading,
     Image,
     IconButton,
     ButtonGroup
@@ -26,27 +26,35 @@ export default function NavBar({ }: Props) {
             padding="0 2rem"
             alignItems="center">
             <Image
+                cursor="pointer"
                 height="4rem"
                 width="auto"
                 src='/primallogo.jpg'
                 alt='logo'>
             </Image>
             <ul className={styles.navigationitems}>
+                <li>
+                    <Heading size="md" fontWeight="500">About</Heading>
+                </li>
+                <li>
+                    <Heading size="md" fontWeight="500">Contact</Heading>
+                </li>
 
-                <ButtonGroup>
-                    <IconButton
-                        icon={<InstagramIcon />}
-                        aria-label='instagram'
-                        variant="browned"
-                    />
-                    <IconButton
-                        icon={<FacebookIcon />}
-                        aria-label='facebook'
-                        bgColor='brown.200'
-                        variant="browned"
-                    />
-                </ButtonGroup>
             </ul>
+            <ButtonGroup
+                marginLeft="auto">
+                <IconButton
+                    icon={<InstagramIcon />}
+                    aria-label='instagram'
+                    variant="browned"
+                />
+                <IconButton
+                    icon={<FacebookIcon />}
+                    aria-label='facebook'
+                    bgColor='brown.200'
+                    variant="browned"
+                />
+            </ButtonGroup>
         </Box>
     )
 }

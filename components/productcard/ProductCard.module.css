@@ -1,0 +1,10 @@
+.productimage img {
+    transition: all 1s;
+    filter: brightness(0.7);
+}
+
+.productimage:hover img {
+    transform: scale(1.1);
+    filter: brightness(1);
+}
+

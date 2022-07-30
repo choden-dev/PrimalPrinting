@@ -1,16 +1,24 @@
 import React from 'react'
 import {
-    Image,
+
     Box,
     Heading,
     Button,
     Text
 } from "@chakra-ui/react"
-type Props = {}
+import styles from './ProductCard.module.css'
+type Props = {
+    productName: string;
+    productPrice: string;
+    productDescription: any;
+    image: any;
 
-export default function ProductCard({ }: Props) {
+}
+
+export default function ProductCard({ productName, productPrice, productDescription, image }: Props) {
     return (
         <Box
+            className={styles.productimage}
             display="flex"
             flexDir="column"
             minW="15rem"
@@ -20,10 +28,10 @@ export default function ProductCard({ }: Props) {
             backgroundColor="white"
             boxShadow="0 0 10px rgb(33,33,33)">
             <Box
+
                 maxH="15rem"
                 overflow="hidden">
-                <Image
-                    src="placeholder.png" />
+                {image}
             </Box>
             <Box
                 gap="1rem"
@@ -31,13 +39,14 @@ export default function ProductCard({ }: Props) {
                 flexDir="column"
                 padding="1.5rem">
                 <Heading
-                    fontWeight="400"
+                    fontWeight="300"
                     color="brown.800"
                     as="u">
-                    Love Them
+                    {productName}
                 </Heading>
-                <Text>
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quasi, ex repudiandae a suscipit doloremque optio possimus quis vel eligendi et?
+                <Text
+                    fontWeight="300">
+                    {productDescription}
                 </Text>
 
                 <Box display="flex"
@@ -45,8 +54,8 @@ export default function ProductCard({ }: Props) {
                     <Text
                         color="brown.900"
                         fontSize="3xl"
-                        fontWeight="700">
-                        $69
+                        fontWeight="500">
+                        {productPrice}
                     </Text>
                     <Button
                         marginLeft="auto"
@@ -54,7 +63,9 @@ export default function ProductCard({ }: Props) {
                         Find out More
                     </Button>
                 </Box>
+
             </Box>
+
         </Box >
     )
 }
