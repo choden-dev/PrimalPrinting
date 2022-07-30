@@ -2,14 +2,18 @@ import {
     Box,
     Heading,
     Text,
-    Divider,
     Image,
+    Button
 } from '@chakra-ui/react'
-
+import {
+    ExternalLinkIcon
+} from '@chakra-ui/icons'
+import { infoStructure } from '../../contexts/types'
 type Props = {
+    toDisplay: infoStructure;
 }
 
-export default function TestimonialCard({ }: Props) {
+export default function TestimonialCard({ toDisplay }: Props) {
     return (
         <Box
             maxWidth="800px"
@@ -17,14 +21,16 @@ export default function TestimonialCard({ }: Props) {
             flexDir="column"
             justifyContent="center"
             textAlign="left"
-            gap="2rem"
+            margin="3rem 0"
             padding="0 1rem"
             borderColor="brown.900"
             position="relative"
         >
-            <Divider />
             <Box
                 padding={{ base: "1rem", lg: "1rem 4rem" }}
+                display="flex"
+                flexDir="column"
+                gap="2rem"
             >
                 <Image
                     position="absolute"
@@ -33,27 +39,36 @@ export default function TestimonialCard({ }: Props) {
                     height="4rem"
                     width="6.5rem"
                     opacity="0.1"
-                    top="2rem"
+                    top="0"
                     left="2rem"
                     transform="scaleX(-1)"
                 />
-                <Heading 
-                fontWeight="500"
-                color="brown.800">
-                    Love
+                <Heading
+                    fontWeight="500"
+                >
+                    {toDisplay.title}
                 </Heading>
                 <Text>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam ipsum non amet impedit quis maiores adipisci vero dolore sed corrupti quasi labore suscipit laudantium nesciunt consequuntur et sapiente itaque ut, autem asperiores maxime vitae numquam culpa molestias. Fugit facilis totam voluptatibus asperiores magni at illo, quisquam ab velit quos laudantium?
+                    {toDisplay.description}
                 </Text>
-                <Heading
-                    fontWeight="light"
-                    size="md"
-                    textAlign="right">
-                    -Yeddy yang
-                </Heading>
+                <Box display="flex"
+                    alignItems="center">
+                    <Button
+                        leftIcon={<ExternalLinkIcon />}
+                        width="8rem"
+                        variant="browned">
+                        See More
+                    </Button>
+                    <Heading
+                        marginLeft="auto"
+                        fontWeight="light"
+                        size="sm"
+                        textAlign="right">
+                        -Yeddy yang
+                    </Heading>
 
+                </Box>
             </Box>
-            <Divider />
         </Box>
     )
 }

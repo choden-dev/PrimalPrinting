@@ -37,21 +37,14 @@ export default function NavBar({ }: Props) {
                     <IconButton
                         icon={<InstagramIcon />}
                         aria-label='instagram'
-                        bgColor='brown.200'
-                        _hover={
-                            {
-                                bgColor: 'brown.700'
-                            }
-                        } />
+                        variant="browned"
+                    />
                     <IconButton
                         icon={<FacebookIcon />}
                         aria-label='facebook'
                         bgColor='brown.200'
-                        _hover={
-                            {
-                                bgColor: 'brown.700'
-                            }
-                        } />
+                        variant="browned"
+                    />
                 </ButtonGroup>
             </ul>
         </Box>

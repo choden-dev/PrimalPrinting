@@ -3,15 +3,19 @@ import {
   Box,
   Image,
   Heading,
-  Text,
+
   Button,
 
 } from '@chakra-ui/react'
+
 import NavBar from '../components/navbar/NavBar'
 import styles from '../styles/index.module.css'
-import DescriptionCard from '../components/descriptioncard/DescriptionCard'
-import TestimonialCard from '../components/testimonialcard/TestimonialCard'
+import ProductDiv from '../components/productdiv/ProductDiv'
+import TestimonialDiv from '../components/testimonialdiv/TestimonialDiv'
 import SectionHeading from '../components/sectionheading/SectionHeading'
+import DescriptionDiv from '../components/descriptiondiv/DescriptionDiv'
+
+
 const Home: NextPage = () => {
   return (
     <Box className={styles.container}>
@@ -51,7 +55,7 @@ const Home: NextPage = () => {
       <Box
         alignSelf="center"
         textAlign="center"
-        marginTop="3rem"
+        marginTop="8rem"
       >
         <Box className={styles.secheading}>
           <SectionHeading text={"Why Primal Printing?"} />
@@ -64,50 +68,40 @@ const Home: NextPage = () => {
           justifyContent="center"
           padding="4rem 7%"
         >
-          <Box
-
-            maxWidth="1500px"
-            flexWrap="wrap"
-            gap={{ base: '2rem', lg: '4rem' }}
-            display="flex"
-            justifyContent="center"
-
-          >
-            <DescriptionCard icon={''} name={'Low Prices'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-            <DescriptionCard icon={''} name={'Reliable'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-            <DescriptionCard icon={''} name={'Faster'} description={'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.'} />
-
-          </Box>
+          <DescriptionDiv />
         </Box>
-
-
       </Box>
       <Box
-        minHeight="35rem"
+        minHeight="16rem"
         marginTop="3rem"
         display="flex"
         flexDir="column"
         justifyContent="center"
-     
       >
         <Box className={styles.secheading}>
           <SectionHeading text={"Testimonials"} />
         </Box>
-        <Box margin="auto">
-          <TestimonialCard />
+        <Box display="flex"
+          alignItems="center"
+          margin="auto">
+          <TestimonialDiv />
         </Box>
       </Box>
 
       <Box
         display="flex"
         width="100%"
-        marginTop="3rem"
+        flexDir="column"
+
+        marginTop="2rem"
       >
         <Box
           className={styles.secheading}
         >
           <SectionHeading text={"Popular Products"} />
         </Box>
+        <ProductDiv />
+
       </Box>
     </Box >
 

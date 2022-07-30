@@ -6,12 +6,12 @@ import {
 } from '@chakra-ui/react'
 import styles from './DescriptionCard.module.css'
 type Props = {
-    icon: any;
+
     name: string;
     description: string;
 }
 
-export default function DescriptionCard({ icon, name, description }: Props) {
+export default function DescriptionCard({ name, description }: Props) {
     return (
         <Box
             className={styles.container}
@@ -20,7 +20,7 @@ export default function DescriptionCard({ icon, name, description }: Props) {
             padding="2rem"
             display="flex"
             flexDir="column"
-            
+            boxShadow="4px 0 15px rgb(33,33,33)"
             borderLeft="none"
             borderColor="brown.200"
             borderRadius="sm"
@@ -37,10 +37,7 @@ export default function DescriptionCard({ icon, name, description }: Props) {
                 position="absolute"
 
             >
-
             </Image>
-            {icon}
-
             <Heading
                 alignSelf="flex-start"
                 fontWeight="400"

@@ -22,6 +22,19 @@ const theme = extendTheme({
             100: '#F3EBE3'
         }
     },
+    components: {
+        Button: {
+            variants: {
+                'browned': {
+                    bg: 'brown.200',
+                    color: 'white',
+                    _hover: {
+                        bg: 'brown.700'
+                    }
+                }
+            }
+        }
+    }
 })
 
 export default theme
