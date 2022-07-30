@@ -40,7 +40,7 @@ export default function DescriptionCard({ name, description }: Props) {
             <Image
                 src='binder.png'
                 position="absolute"
-
+                justifySelf="center"
             >
             </Image>
             <Heading
