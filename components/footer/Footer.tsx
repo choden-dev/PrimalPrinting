@@ -17,8 +17,8 @@ export default function Footer({ }: Props) {
             backgroundColor="brown.100"
             transform="translateX(-7%)"
             marginTop="5rem"
-            
-            flexDir="column">
+            flexDir="column"
+            >
             <Box className="secheading"
                 marginTop="2rem">
                 <Heading

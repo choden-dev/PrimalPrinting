@@ -24,9 +24,9 @@ export default function DescriptionCard({ name, description }: Props) {
             borderLeft="none"
             borderColor="brown.200"
             borderRadius="sm"
-            alignContent="flex-start"
             textAlign="left"
             minHeight="20rem"
+            justifyContent="center"
             backgroundColor="white"
             gap="0.5rem"
             position="relative"
@@ -35,12 +35,10 @@ export default function DescriptionCard({ name, description }: Props) {
             _hover={{
                 transform: "scale(1.01) translateZ(0)",
             }}
-
         >
             <Image
                 src='binder.png'
                 position="absolute"
-                justifySelf="center"
             >
             </Image>
             <Heading

@@ -7,7 +7,6 @@ import {
   Button,
 
 } from '@chakra-ui/react'
-
 import NavBar from '../components/navbar/NavBar'
 import styles from '../styles/index.module.css'
 import ProductDiv from '../components/productdiv/ProductDiv'
@@ -20,7 +19,7 @@ import Footer from '../components/footer/Footer'
 
 const Home: NextPage = () => {
   return (
-    <Box className={styles.container}>
+    <Box className="container">
       <NavBar />
       <Box className={styles.mainimage}>
         <Image

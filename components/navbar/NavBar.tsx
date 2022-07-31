@@ -9,6 +9,7 @@ import {
 import {
     HamburgerIcon
 } from '@chakra-ui/icons'
+import Link from 'next/link'
 import styles from './NavBar.module.css'
 import InstagramIcon from '../Icons/InstagramIcon'
 import FacebookIcon from '../Icons/FacebookIcon'
@@ -32,13 +33,15 @@ export default function NavBar({ }: Props) {
             boxShadow="0 0 10px black"
             padding="0 2rem"
             alignItems="center">
-            <Image
-                cursor="pointer"
-                height="3rem"
-                width="auto"
-                src='/primallogo.png'
-                alt='logo'>
-            </Image>
+            <Link href="/" >
+                <Image
+
+                    cursor="pointer"
+                    height="3rem"
+                    width="auto"
+                    src='/primallogo.png'
+                    alt='logo' />
+            </Link>
             <span className={styles.mobileicon}>
                 <IconButton
                     icon={<HamburgerIcon />}
@@ -53,13 +56,19 @@ export default function NavBar({ }: Props) {
             </span>
             <ul className={`${styles.navigationitems} ${menuOpened && styles.opened}`}>
                 <li>
-                    <Heading size="sm" fontWeight="500">About</Heading>
+                    <Link href="/about">
+                        <Heading size="sm" fontWeight="500">About</Heading>
+                    </Link>
                 </li>
                 <li>
-                    <Heading size="sm" fontWeight="500">Contact</Heading>
+                    <Link href="/contact">
+                        <Heading size="sm" fontWeight="500">Contact</Heading>
+                    </Link>
                 </li>
                 <li>
-                    <Heading size="sm" fontWeight="500">Shop</Heading>
+                    <Link href="/shop">
+                        <Heading size="sm" fontWeight="500">Shop</Heading>
+                    </Link>
                 </li>
 
             </ul>

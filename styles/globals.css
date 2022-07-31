@@ -15,6 +15,15 @@ body {
   overflow-x: hidden;
 }
 
+.container {
+  margin-top: 4rem;
+  padding: 0 7%;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  min-height: 100vh;
+}
+
 .secheading {
   border: 2px solid #672212;
   height: 0.5rem;

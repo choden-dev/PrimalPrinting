@@ -7,9 +7,9 @@ import {
 import {
     SunIcon
 } from '@chakra-ui/icons'
-type Props = {}
+import NextLink from 'next/link'
 
-export default function WhatNextDiv({ }: Props) {
+export default function WhatNextDiv() {
     return (
         <Box
             marginTop="3rem"
@@ -31,10 +31,14 @@ export default function WhatNextDiv({ }: Props) {
                 fontWeight="300"
                 textAlign="center"
             >
-                Get in touch or <Link
-                    color="brown.700"
-                    fontWeight="400">browse our shop
-                </Link>
+                Get in touch or&nbsp;
+                <NextLink href="/shop" passHref>
+                    <Link
+                        as="a"
+                        color="brown.700"
+                        fontWeight="400">browse our shop
+                    </Link>
+                </NextLink>
             </Heading>
         </Box>
     )

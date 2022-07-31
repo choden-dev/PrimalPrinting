@@ -46,9 +46,13 @@ export default function TestimonialDiv({ }: Props) {
             <IconButton
                 onClick={() => back()}
                 aria-label='back'
+                color="#C3B4B1"
                 size="lg"
-                variant="browned"
-                icon={<ArrowBackIcon color="white" />}
+                _hover={{
+                    color: "brown.700"
+                }}
+                variant="unstyled"
+                icon={<ArrowBackIcon />}
             />
             <AnimatePresence exitBeforeEnter>
                 <motion.div style={{ display: 'inline-block' }}
@@ -64,9 +68,13 @@ export default function TestimonialDiv({ }: Props) {
             <IconButton
                 onClick={() => forward()}
                 aria-label="forward"
+                variant="unstyled"
+                color="#C3B4B1"
                 size="lg"
-                variant="browned"
-                icon={<ArrowForwardIcon color="white" />}
+                _hover={{
+                    color: "brown.700"
+                }}
+                icon={<ArrowForwardIcon />}
             />
         </>
     )
