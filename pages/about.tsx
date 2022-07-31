@@ -20,16 +20,15 @@ const About: NextPage = () => {
                 alignSelf="center"
                 display="flex"
                 flexDir="column"
-
                 maxWidth="800px"
-                marginTop="3rem">
+                margin="3rem 0">
                 <Box textAlign="center"
                     display="flex"
                     flexDir="column"
                     gap="1.5rem"
                     position="relative">
                     <Heading
-
+                        color="brown.900"
                         size="4xl"
                         fontWeight="400">
                         Do you need Printing?
@@ -44,30 +43,41 @@ const About: NextPage = () => {
                         height="3rem"
                         bg="brown.100"
                         zIndex="-1" />
+                    <Text
+                        marginTop="2rem"
+                        textAlign="left"
+                        fontWeight="300"
+                    >
+                        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quo vel, facilis rem tempore commodi aliquid molestiae esse accusantium inventore dolor perferendis cupiditate aperiam deserunt ad sapiente praesentium delectus! Doloremque, temporibus?
+                    </Text>
+                    <Stack direction="row"
+                        alignSelf="center"
+                        overflow="hidden"
+                        borderRadius="sm"
 
+                    >
+                        <Box
+                            display="flex"
+                            overflowX="auto">
+                            <Image
+                                height="20rem"
+                                src="placeholder.png" />
+                            <Image
+                                height="20rem"
+                                src="placeholder.png" />
+                            <Image
+                                height="20rem"
+                                src="placeholder.png" />
+                        </Box>
+                    </Stack>
+                    <Text
+                        textAlign="left"
+                        fontWeight="300">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta soluta itaque possimus sint saepe! Dolorum, assumenda perferendis? Impedit, consectetur ab.
+                    </Text>
                 </Box>
 
-                <Text
-                    marginTop="2rem"
-                    textAlign="left"
-                    fontWeight="300"
-                >
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quo vel, facilis rem tempore commodi aliquid molestiae esse accusantium inventore dolor perferendis cupiditate aperiam deserunt ad sapiente praesentium delectus! Doloremque, temporibus?
-                </Text>
-                <Stack direction="row"
-                    alignSelf="center"
-                    overflowX="auto"
-                >
-                    <Image
-                        height="20rem"
-                        src="placeholder.png" />
-                    <Image
-                        height="20rem"
-                        src="placeholder.png" />
-                    <Image
-                        height="20rem"
-                        src="placeholder.png" />
-                </Stack>
+
             </Box>
 
             <Footer />

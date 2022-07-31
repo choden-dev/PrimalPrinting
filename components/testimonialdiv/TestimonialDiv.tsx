@@ -1,7 +1,8 @@
 import React from 'react'
 import TestimonialCard from '../testimonialcard/TestimonialCard'
 import {
-    IconButton
+    IconButton,
+    useMediaQuery
 } from '@chakra-ui/react'
 import {
     ArrowBackIcon,
@@ -22,6 +23,8 @@ export default function TestimonialDiv({ }: Props) {
     const [index, setTest] = React.useState<number>(0);
     const [isForward, setIsForward] = React.useState<boolean>(true);
     const [isAutoChange, setIsAutoChange] = React.useState<boolean>(true);
+    const [smallScreen] = useMediaQuery('(max-width: 600px)');
+
     React.useEffect(() => {
         if (!isAutoChange) return;
         setTimeout(() => {
@@ -44,6 +47,7 @@ export default function TestimonialDiv({ }: Props) {
     return (
         <>
             <IconButton
+                display={smallScreen ? "none" : "inline"}
                 onClick={() => back()}
                 aria-label='back'
                 color="#C3B4B1"
@@ -66,6 +70,7 @@ export default function TestimonialDiv({ }: Props) {
                 </motion.div>
             </AnimatePresence>
             <IconButton
+                display={smallScreen ? "none" : "inline"}
                 onClick={() => forward()}
                 aria-label="forward"
                 variant="unstyled"

@@ -8,16 +8,10 @@
 
 }
 
-.titletext {
-    font-family: "coffeematcha";
-}
 
-
-
-
-@media only screen and (max-width:1350px) {
-    .titletext {
-        font-size: 5rem;
+@media only screen and (max-width:450px){
+    .titletext{
+        font-size:4rem;
     }
 }
 

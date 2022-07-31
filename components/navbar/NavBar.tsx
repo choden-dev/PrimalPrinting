@@ -78,20 +78,20 @@ export default function NavBar({ }: Props) {
                     icon={<InstagramIcon />}
                     aria-label='instagram'
                     variant="unstyled"
-                    color="#C3B4B1"
+                    color="brown.900"
                     size="lg"
                     _hover={{
-                        color: "brown.700"
+                        color: "brown.200"
                     }}
                 />
                 <IconButton
                     icon={<FacebookIcon />}
                     aria-label='facebook'
                     variant="unstyled"
-                    color="#C3B4B1"
+                    color="brown.900"
                     size="lg"
                     _hover={{
-                        color: "brown.700"
+                        color: "brown.200"
                     }}
                 />
             </ButtonGroup>

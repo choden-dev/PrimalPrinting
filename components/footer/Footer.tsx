@@ -4,9 +4,7 @@ import {
     Heading,
     UnorderedList,
     ListItem,
-    Text,
-    Divider,
-    Center
+    Text
 } from '@chakra-ui/react'
 type Props = {}
 
@@ -16,7 +14,7 @@ export default function Footer({ }: Props) {
             width="100vw"
             backgroundColor="brown.100"
             transform="translateX(-7%)"
-            marginTop="5rem"
+            marginTop="auto"
             flexDir="column"
             >
             <Box className="secheading"

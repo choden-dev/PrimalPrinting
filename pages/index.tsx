@@ -36,8 +36,9 @@ const Home: NextPage = () => {
           justifyContent="center"
           alignItems="center"
           textAlign="center"
-          width="70%">
+          width="80%">
           <Heading
+            className={styles.titletext}
             color="white"
             fontFamily="coffeematcha"
             fontSize={{ base: "5rem", lg: "7rem", xl: "10rem" }}

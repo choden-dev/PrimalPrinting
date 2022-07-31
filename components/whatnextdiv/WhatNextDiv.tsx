@@ -12,7 +12,7 @@ import NextLink from 'next/link'
 export default function WhatNextDiv() {
     return (
         <Box
-            marginTop="3rem"
+            margin="3.5rem 0"
             display="flex"
             flexDir="column"
             alignItems="center"
