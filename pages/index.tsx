@@ -19,10 +19,15 @@ import Footer from '../components/footer/Footer'
 
 const Home: NextPage = () => {
   return (
-    <Box className="container">
+    <Box
+      className="container">
       <NavBar />
-      <Box className={styles.mainimage}>
+
+      <Box
+        zIndex="999"
+        className={styles.mainimage}>
         <Image
+
           src='/banner.png'
           alt="books"
           minH="628px"
@@ -32,6 +37,7 @@ const Home: NextPage = () => {
           filter="brightness(0.5)"
         />
         <Box
+
           position="absolute"
           justifyContent="center"
           alignItems="center"
@@ -55,6 +61,7 @@ const Home: NextPage = () => {
       </Box>
 
       <Box
+
         alignSelf="center"
         textAlign="center"
         marginTop="8rem"

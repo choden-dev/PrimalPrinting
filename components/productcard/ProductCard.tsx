@@ -26,6 +26,7 @@ export default function ProductCard({ productName, productPrice, productDescript
             overflow="hidden"
             borderRadius="sm"
             backgroundColor="white"
+            zIndex="999"
             boxShadow="0 0 10px rgb(33,33,33)">
             <Box
 

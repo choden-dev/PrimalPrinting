@@ -31,7 +31,7 @@ export default function DescriptionCard({ name, description }: Props) {
             gap="0.5rem"
             position="relative"
             transition="transform 0.5s"
-
+            zIndex="999"
             _hover={{
                 transform: "scale(1.01) translateZ(0)",
             }}

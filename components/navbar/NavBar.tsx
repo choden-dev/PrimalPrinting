@@ -28,7 +28,7 @@ export default function NavBar({ }: Props) {
             backgroundColor="brown.100"
             position="fixed"
             top="0"
-            zIndex="999"
+            zIndex="9999"
             left="0"
             boxShadow="0 0 10px black"
             padding="0 2rem"

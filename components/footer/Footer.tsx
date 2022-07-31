@@ -16,6 +16,7 @@ export default function Footer({ }: Props) {
             transform="translateX(-7%)"
             marginTop="auto"
             flexDir="column"
+            zIndex="999"
             >
             <Box className="secheading"
                 marginTop="2rem">
