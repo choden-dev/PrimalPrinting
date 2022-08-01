@@ -1,6 +1,6 @@
 import { MongoClient, MongoClientOptions } from 'mongodb';
 
-const MONGODB_URI: string = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB;
 
 // check the MongoDB URI
@@ -27,7 +27,7 @@ export async function connectToDatabase() {
     }
 
     // Connect to cluster
-    let client = new MongoClient(MONGODB_URI);
+    let client = new MongoClient(MONGODB_URI!);
     await client.connect();
     let db = client.db(MONGODB_DB);
 
