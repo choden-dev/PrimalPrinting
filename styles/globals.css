@@ -22,12 +22,11 @@ body {
   flex-direction: column;
   max-width: 100%;
   min-height: 100vh;
-
 }
 
 .secheading {
   z-index: 999;
-  border: 2px solid #672212;
+ 
   height: 0.5rem;
   display: flex;
   position: relative;
@@ -37,8 +36,7 @@ body {
   align-items: center;
   margin: auto;
   align-items: center;
-  border-right: none;
-  border-left: none;
+
 }
 
 @font-face {

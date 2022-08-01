@@ -31,7 +31,7 @@ export default function NavBar({ }: Props) {
             zIndex="9999"
             left="0"
             boxShadow="0 0 10px black"
-            padding="0 2rem"
+            padding="0 7%"
             alignItems="center">
             <Link href="/" >
                 <Image
@@ -54,47 +54,43 @@ export default function NavBar({ }: Props) {
                     }}
                 />
             </span>
-            <ul className={`${styles.navigationitems} ${menuOpened && styles.opened}`}>
-                <li>
-                    <Link href="/about">
-                        <Heading size="sm" fontWeight="500">About</Heading>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/contact">
-                        <Heading size="sm" fontWeight="500">Contact</Heading>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/shop">
-                        <Heading size="sm" fontWeight="500">Shop</Heading>
-                    </Link>
-                </li>
-
-            </ul>
-            <ButtonGroup
-                marginLeft="auto">
-                <IconButton
-                    icon={<InstagramIcon />}
-                    aria-label='instagram'
-                    variant="unstyled"
-                    color="brown.900"
-                    size="lg"
-                    _hover={{
-                        color: "brown.200"
-                    }}
-                />
-                <IconButton
-                    icon={<FacebookIcon />}
-                    aria-label='facebook'
-                    variant="unstyled"
-                    color="brown.900"
-                    size="lg"
-                    _hover={{
-                        color: "brown.200"
-                    }}
-                />
-            </ButtonGroup>
+            <Box marginLeft="auto" display="flex">
+                <ul className={`${styles.navigationitems} ${menuOpened && styles.opened}`}>
+                    <li>
+                        <Link href="/about">
+                            <Heading size="sm" fontWeight="500">About</Heading>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link href="/contact">
+                            <Heading size="sm" fontWeight="500">Contact</Heading>
+                        </Link>
+                    </li>
+                </ul>
+                <ButtonGroup
+                >
+                    <IconButton
+                        icon={<InstagramIcon />}
+                        aria-label='instagram'
+                        variant="unstyled"
+                        color="brown.900"
+                        size="lg"
+                        _hover={{
+                            color: "brown.200"
+                        }}
+                    />
+                    <IconButton
+                        icon={<FacebookIcon />}
+                        aria-label='facebook'
+                        variant="unstyled"
+                        color="brown.900"
+                        size="lg"
+                        _hover={{
+                            color: "brown.200"
+                        }}
+                    />
+                </ButtonGroup>
+            </Box>
         </Box>
     )
 }

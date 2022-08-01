@@ -17,24 +17,8 @@ export default function Footer({ }: Props) {
             marginTop="auto"
             flexDir="column"
             zIndex="999"
-            >
-            <Box className="secheading"
-                marginTop="2rem">
-                <Heading
-                    width="fit-content"
-                    size="xl"
-                    backgroundColor="brown.100"
-                    z-index="998"
-                    fontWeight="300"
-                    padding="0 1rem"
-                    color="brown.900"
-                    position="absolute"
-                >
-                    More Info
-                </Heading>
+        >
 
-
-            </Box>
             <Box
                 display="flex"
                 maxWidth="1100px"
@@ -58,8 +42,8 @@ export default function Footer({ }: Props) {
                 </UnorderedList>
 
             </Box>
-            <Text 
-            textAlign="center">Copyright Primal Printing 2022</Text>
+            <Text
+                textAlign="center">Copyright Primal Printing 2022</Text>
         </Box >
     )
 }

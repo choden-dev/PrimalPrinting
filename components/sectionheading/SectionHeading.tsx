@@ -8,10 +8,8 @@ type Props = {
 export default function SectionHeading({ text }: Props) {
     return (
         <Heading
-            width="fit-content"
             size="xl"
             
-            backgroundColor="white"
             z-index="998"
             fontWeight="300"
             padding="0 1rem"
