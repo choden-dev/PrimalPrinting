@@ -21,7 +21,7 @@ const Shop: NextPage = (data) => {
             <NavBar />
             <Box marginTop="20rem">
                 {items.map((item, index) => {
-                    return <Box>{item.name} is {item.price}</Box>
+                    return <Box key={index}>{item.name} is {item.price}</Box>
                 })}
             </Box>
             <Footer />
