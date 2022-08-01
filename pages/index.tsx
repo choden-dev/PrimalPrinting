@@ -72,31 +72,16 @@ const Home: NextPage = () => {
         <Box
           marginTop="3rem"
           width="100vw"
-          backgroundColor="brown.100"
           display="flex"
           justifyContent="center"
           padding="4rem 7%"
+          position="relative"
         >
+          <Box position="absolute" bg="brown.100" width="100%" height="50%" bottom="0" />
+
           <DescriptionDiv />
         </Box>
       </Box>
-      <Box
-        minHeight="16rem"
-        marginTop="3rem"
-        display="flex"
-        flexDir="column"
-        justifyContent="center"
-      >
-        <Box className="secheading">
-          <SectionHeading text={"Testimonials"} />
-        </Box>
-        <Box display="flex"
-          alignItems="center"
-          margin="auto">
-          <TestimonialDiv />
-        </Box>
-      </Box>
-
       <Box
         display="flex"
         width="100%"
@@ -112,6 +97,25 @@ const Home: NextPage = () => {
         <ProductDiv />
 
       </Box>
+
+      <Box
+        minHeight="16rem"
+        marginTop="3rem"
+        display="flex"
+        flexDir="column"
+        justifyContent="center"
+      >
+        <Box className="secheading">
+          <SectionHeading text={"Testimonials"} />
+        </Box>
+        <Box display="flex"
+          alignItems="center"
+          margin="auto"
+          position="relative">
+          <TestimonialDiv />
+        </Box>
+      </Box>
+
       <Box
         marginTop="3rem">
         <Box className="secheading">

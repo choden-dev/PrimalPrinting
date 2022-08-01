@@ -25,6 +25,7 @@ export default function TestimonialCard({ toDisplay }: Props) {
             padding="0 1rem"
             borderColor="brown.900"
             position="relative"
+            zIndex="999"
         >
             <Box
                 padding={{ base: "1rem", lg: "1rem 4rem" }}
