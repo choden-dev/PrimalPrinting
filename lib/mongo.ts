@@ -1,6 +1,6 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoClientOptions } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI: string = process.env.MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB;
 
 // check the MongoDB URI
@@ -13,8 +13,8 @@ if (!MONGODB_DB) {
     throw new Error('Define the MONGODB_DB environmental variable');
 }
 
-let cachedClient = null;
-let cachedDb = null;
+let cachedClient: any = null;
+let cachedDb: any = null;
 
 export async function connectToDatabase() {
     // check the cached.
@@ -26,14 +26,8 @@ export async function connectToDatabase() {
         };
     }
 
-    // set the connection options
-    const opts = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    };
-
     // Connect to cluster
-    let client = new MongoClient(MONGODB_URI, opts);
+    let client = new MongoClient(MONGODB_URI);
     await client.connect();
     let db = client.db(MONGODB_DB);
 
