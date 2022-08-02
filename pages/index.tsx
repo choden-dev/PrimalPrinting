@@ -121,7 +121,7 @@ const Home: NextPage = () => {
           padding="3rem 0">
           <TestimonialDiv />
         </Box>
-        <Box position="absolute" bottom="5rem" zIndex="-1" width="60%" height="10%" bg="brown.100" />
+        <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.100" />
 
       </Box>
 

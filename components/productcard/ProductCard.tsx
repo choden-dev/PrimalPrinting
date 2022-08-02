@@ -24,6 +24,7 @@ export default function ProductCard({ productName, productPrice, productDescript
             minW="15rem"
             maxW="20rem"
             overflow="hidden"
+            boxShadow="0 0 4px rgb(33,33,33)"
             borderRadius="sm"
             height="fit-content"
             backgroundColor="white"

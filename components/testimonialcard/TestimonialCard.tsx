@@ -16,7 +16,7 @@ type Props = {
 export default function TestimonialCard({ toDisplay }: Props) {
     return (
         <Box
-            maxWidth="800px"
+            maxWidth="1300px"
             display="flex"
             flexDir="column"
             justifyContent="center"
@@ -29,12 +29,14 @@ export default function TestimonialCard({ toDisplay }: Props) {
             borderColor="brown.200"
             padding="2rem"
             borderRadius="sm"
+            boxShadow="0 0 4px rgb(33,33,33)"
         >
             <Box
                 padding={{ base: "1rem", lg: "1rem 4rem" }}
                 display="flex"
                 flexDir="column"
                 gap="2rem"
+                maxWidth="800px"
             >
                 <Image
                     position="absolute"
