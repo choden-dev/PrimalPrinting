@@ -125,11 +125,8 @@ const Home: NextPage = () => {
 
       </Box>
 
-      <Box
-        marginTop="3rem">
-        <Box className="secheading">
-          <SectionHeading text={"What Next?"} />
-        </Box>
+      <Box>
+
         <WhatNextDiv />
       </Box>
       <Footer />

@@ -35,11 +35,9 @@ export default function ProductCard({ productName, productPrice, productDescript
                     boxShadow: "0 0 10px rgb(33,33,33)",
                     transform: "scale(1.1)"
                 }}>
-            <Box
-                transition="all 0.5s"
-                _hover={{
-                    transform: "scale(0.9)"
-                }}
+            <Box className={styles.innersection}
+                transition="transform 0.5s"
+                
             >
                 <Box
                     maxH="15rem"

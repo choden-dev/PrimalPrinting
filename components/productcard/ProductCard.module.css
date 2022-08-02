@@ -8,3 +8,6 @@
     filter: brightness(1);
 }
 
+.productimage:hover .innersection {
+    transform: scale(0.9);
+}

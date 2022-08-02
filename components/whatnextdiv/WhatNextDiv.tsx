@@ -2,7 +2,8 @@ import React from 'react'
 import {
     Box,
     Heading,
-    Link
+    Link,
+    Image
 } from '@chakra-ui/react'
 import {
     SunIcon
@@ -12,14 +13,19 @@ import NextLink from 'next/link'
 export default function WhatNextDiv() {
     return (
         <Box
-            margin="3.5rem 0"
+
             display="flex"
             flexDir="column"
             alignItems="center"
             justifyContent="center"
             gap="2rem"
-            minHeight="20rem">
-                
+            bgRepeat="no-repeat"
+            bgSize="100vw"
+            margin="2rem 0"
+            minHeight="20rem"
+            overflow="hidden"
+            position="relative">
+
             <SunIcon w={20} h={20}
                 color="brown.200" />
             <Heading
