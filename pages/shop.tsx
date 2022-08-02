@@ -5,15 +5,40 @@ import {
 } from '@chakra-ui/react'
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
+import { connectToDatabase } from "../lib/mongo"
 
+export async function getServerSideProps() {
+    try {
+        let { db } = await connectToDatabase();
+        let posts = await db
+            .collection('Items')
+            .find({})
+            .toArray();
+        // return the posts
+        return {
+            props:
+            {
+                message: JSON.parse(JSON.stringify(posts))
+            }
+        };
+    } catch (error) {
+        console.log("failed to get data");
+    }
+}
 
+type ShopItem = {
+    name: string;
+    price: string;
+}
 
-const Shop: NextPage = (data) => {
+type PageProps = {
+    message: ShopItem[];
+}
+
+const Shop: NextPage<PageProps> = (message) => {
     const [items, setItems] = React.useState<any[]>([])
     useEffect(() => {
-        fetch('/api/shop')
-            .then((res) => res.json())
-            .then((res) => setItems(res.message));
+        setItems(message.message)
     }, [])
 
     return (
