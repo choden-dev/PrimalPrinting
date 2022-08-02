@@ -22,10 +22,13 @@ export default function TestimonialCard({ toDisplay }: Props) {
             justifyContent="center"
             textAlign="left"
             margin="3rem 0"
-            padding="0 1rem"
-            borderColor="brown.900"
+            bg="white"
             position="relative"
             zIndex="999"
+            border="1px solid"
+            borderColor="brown.200"
+            padding="2rem"
+            borderRadius="sm"
         >
             <Box
                 padding={{ base: "1rem", lg: "1rem 4rem" }}
@@ -40,7 +43,7 @@ export default function TestimonialCard({ toDisplay }: Props) {
                     height="4rem"
                     width="6.5rem"
                     opacity="0.1"
-                    top="0"
+                    top="1.5rem"
                     left="2rem"
                     transform="scaleX(-1)"
                 />

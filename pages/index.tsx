@@ -15,6 +15,7 @@ import SectionHeading from '../components/sectionheading/SectionHeading'
 import DescriptionDiv from '../components/descriptiondiv/DescriptionDiv'
 import WhatNextDiv from '../components/whatnextdiv/WhatNextDiv'
 import Footer from '../components/footer/Footer'
+import Link from 'next/link'
 
 
 const Home: NextPage = () => {
@@ -52,11 +53,14 @@ const Home: NextPage = () => {
           >
             We Print <br /> Anything!
           </Heading>
-          <Button
-            variant="browned"
-            marginTop="5rem"
-            fontWeight="300"
-            size="lg">Explore our Products</Button>
+          <Link href="/shop" passHref>
+            <Button
+              variant="browned"
+              marginTop="5rem"
+              fontWeight="300"
+              size="lg">Explore our Products</Button>
+
+          </Link>
         </Box>
       </Box>
 
