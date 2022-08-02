@@ -70,7 +70,6 @@ const Home: NextPage = () => {
           <SectionHeading text={"Why Primal Printing?"} />
         </Box>
         <Box
-          marginTop="3rem"
           width="100vw"
           display="flex"
           justifyContent="center"
@@ -90,6 +89,7 @@ const Home: NextPage = () => {
         marginTop="2rem"
       >
         <Box
+        marginTop="3rem"
           className="secheading"
         >
           <SectionHeading text={"Popular Products"} />
@@ -103,17 +103,22 @@ const Home: NextPage = () => {
         marginTop="3rem"
         display="flex"
         flexDir="column"
+        position="relative"
         justifyContent="center"
+        alignItems="center"
       >
-        <Box className="secheading">
+        <Box className="secheading"
+        marginTop="3rem">
           <SectionHeading text={"Testimonials"} />
         </Box>
         <Box display="flex"
           alignItems="center"
           margin="auto"
-          position="relative">
+          padding="3rem 0">
           <TestimonialDiv />
         </Box>
+        <Box position="absolute" bottom="5rem" zIndex="-1" width="60%" height="10%" bg="brown.100" />
+
       </Box>
 
       <Box

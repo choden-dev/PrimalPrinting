@@ -19,7 +19,7 @@ export default function ProductDiv({ }: Props) {
 
             width="100vw"
             transform="translateX(-7%)"
-            marginTop="3rem"
+            marginTop="2rem"
             display="flex"
             gap="2rem"
             justifyContent="center"

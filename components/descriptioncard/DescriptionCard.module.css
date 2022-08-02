@@ -1,9 +1,10 @@
-.container img{
+.container img {
     height: 20rem;
     left: -0.7rem;
 }
 
-.container{
+.container {
     backface-visibility: hidden;
+
 }
 

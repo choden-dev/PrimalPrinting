@@ -19,6 +19,7 @@ export default function WhatNextDiv() {
             justifyContent="center"
             gap="2rem"
             minHeight="20rem">
+                
             <SunIcon w={20} h={20}
                 color="brown.200" />
             <Heading
