@@ -15,7 +15,7 @@ const descriptions: infoStructure[] =
 export default function DescriptionDiv({ }: Props) {
     return (
         <Box
-            maxWidth="1500px"
+            maxWidth="1100px"
             flexWrap="wrap"
             gap={{ base: '2rem', lg: '3rem' }}
             display="flex"

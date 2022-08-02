@@ -7,7 +7,7 @@ import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
 import { connectToDatabase } from "../lib/mongo"
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
     try {
         let { db } = await connectToDatabase();
         let posts = await db
@@ -18,7 +18,8 @@ export async function getServerSideProps() {
         return {
             props:
             {
-                message: JSON.parse(JSON.stringify(posts))
+                message: JSON.parse(JSON.stringify(posts)),
+                revalidate: 60 * 60 * 12
             }
         };
     } catch (error) {
