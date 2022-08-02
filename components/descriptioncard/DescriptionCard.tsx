@@ -20,7 +20,6 @@ export default function DescriptionCard({ name, description }: Props) {
             padding="2rem"
             display="flex"
             flexDir="column"
-            boxShadow="4px 0 15px rgb(33,33,33)"
             borderLeft="none"
             borderColor="brown.200"
             borderRadius="sm"
@@ -30,10 +29,12 @@ export default function DescriptionCard({ name, description }: Props) {
             backgroundColor="white"
             gap="0.5rem"
             position="relative"
-            transition="transform 0.5s"
+            boxShadow="0 0 2px rgb(33,33,33)"
+            transition="transform 0.5s, box-shadow 0.5s"
             zIndex="999"
             _hover={{
-                transform: "scale(1.01) translateZ(0)",
+                transform: "translateY(-10px) translateZ(0)",
+                boxShadow: "4px 0 15px rgb(33,33,33)"
             }}
         >
             <Image
