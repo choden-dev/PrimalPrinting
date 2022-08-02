@@ -19,15 +19,14 @@ export default function WhatNextDiv() {
             alignItems="center"
             justifyContent="center"
             gap="2rem"
-            bgRepeat="no-repeat"
-            bgSize="100vw"
             margin="2rem 0"
-            minHeight="20rem"
+            marginTop="0"
+            padding="2rem"
+            width="100vw"
+            transform="translateX(-7%)"
             overflow="hidden"
             position="relative">
 
-            <SunIcon w={20} h={20}
-                color="brown.200" />
             <Heading
                 textAlign="center"
                 size="4xl"

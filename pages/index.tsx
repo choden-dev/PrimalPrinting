@@ -117,7 +117,6 @@ const Home: NextPage = () => {
         </Box>
         <Box display="flex"
           alignItems="center"
-          margin="auto"
           padding="3rem 0">
           <TestimonialDiv />
         </Box>
