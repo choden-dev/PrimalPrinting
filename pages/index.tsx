@@ -53,7 +53,7 @@ const Home: NextPage = () => {
             We Print <br /> Anything!
           </Heading>
           <Button
-            colorScheme="whiteAlpha"
+            variant="browned"
             marginTop="5rem"
             fontWeight="300"
             size="lg">Explore our Products</Button>
@@ -89,7 +89,7 @@ const Home: NextPage = () => {
         marginTop="2rem"
       >
         <Box
-        marginTop="3rem"
+          marginTop="3rem"
           className="secheading"
         >
           <SectionHeading text={"Popular Products"} />
@@ -108,7 +108,7 @@ const Home: NextPage = () => {
         alignItems="center"
       >
         <Box className="secheading"
-        marginTop="3rem">
+          marginTop="3rem">
           <SectionHeading text={"Testimonials"} />
         </Box>
         <Box display="flex"
