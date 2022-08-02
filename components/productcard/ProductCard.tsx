@@ -28,10 +28,10 @@ export default function ProductCard({ productName, productPrice, productDescript
             height="fit-content"
             backgroundColor="white"
             zIndex="999"
-            transition="transform 0.5s"
-            boxShadow="0 0 10px rgb(33,33,33)"
+            transition="transform 0.5s, box-shadow 0.5s"
             _hover={
                 {
+                    boxShadow: "0 0 10px rgb(33,33,33)",
                     transform: "scale(1.1)"
                 }}>
             <Box
