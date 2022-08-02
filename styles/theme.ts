@@ -28,6 +28,7 @@ const theme = extendTheme({
                 'browned': {
                     bg: 'brown.200',
                     color: 'white',
+                    borderRadius: 'sm',
                     _hover: {
                         bg: 'brown.700'
                     }

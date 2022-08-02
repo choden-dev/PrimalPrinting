@@ -31,7 +31,7 @@ const About: NextPage = () => {
                         color="brown.900"
                         size="4xl"
                         fontWeight="400">
-                        Do you need Printing?
+                        Our Story
                     </Heading>
                     <Heading
                         fontWeight="300">
