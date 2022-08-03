@@ -3,7 +3,7 @@ import {
   Box,
   Image,
   Heading,
-
+  Text,
   Button,
 
 } from '@chakra-ui/react'
@@ -63,7 +63,23 @@ const Home: NextPage = () => {
           </Link>
         </Box>
       </Box>
-
+      <Box
+        marginTop="8rem"
+        display="flex"
+        alignItems="center"
+        flexDir="column"
+        textAlign="center">
+        <Box className="secheading">
+          <SectionHeading text={"Anything Printing"} />
+        </Box>
+        <Box marginTop="4rem">
+          <Text maxWidth="1100px"
+            fontSize="lg"
+            fontWeight="300">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore eius possimus aperiam temporibus voluptatum unde repellendus tempora praesentium blanditiis! Est facere consequatur odit minima dignissimos? Id, consequuntur sequi dignissimos quod optio voluptate corporis molestias possimus, ducimus repellat a ut. Sint?
+          </Text>
+        </Box>
+      </Box>
       <Box
 
         alignSelf="center"

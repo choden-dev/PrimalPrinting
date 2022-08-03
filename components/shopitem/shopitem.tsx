@@ -1,10 +1,51 @@
 import React from 'react'
+import {
+  Box,
+  Heading,
+  Button,
+  Divider,
+  Image
+} from '@chakra-ui/react'
 
-type Props = {}
+type Props = {
+  name: string;
+  price: string;
+  imageUrl: string;
+}
 
 
-export default function shopitem({}: Props) {
+export default function shopitem({ name, price, imageUrl }: Props) {
   return (
-    <div>shopitem</div>
+    <Box minW="20rem"
+      maxW="20rem"
+      border="1px solid rgb(33,33,33)"
+      padding="2rem"
+      borderRadius="sm"
+      display="flex"
+      flexDir="column"
+      gap="1rem">
+
+      <Box
+        height="15rem"
+        overflow="hidden"
+        width="20rem"
+        margin="-2rem -2rem 0 -2rem">
+        <Image
+
+          src={imageUrl}
+          alt={name} />
+      </Box>
+
+      <Heading>
+        {name}
+      </Heading>
+
+      <Heading fontWeight="300">
+        {price}
+      </Heading>
+      <Button marginTop="auto">
+        Enquire
+      </Button>
+    </Box>
   )
 }

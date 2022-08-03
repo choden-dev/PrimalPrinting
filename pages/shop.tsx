@@ -6,7 +6,7 @@ import {
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
 import { connectToDatabase } from "../lib/mongo"
-
+import ShopItem from '../components/shopitem/ShopItem'
 export async function getStaticProps() {
     try {
         let { db } = await connectToDatabase();
@@ -30,6 +30,7 @@ export async function getStaticProps() {
 type ShopItem = {
     name: string;
     price: string;
+    imageUrl: string;
 }
 
 type PageProps = {
@@ -45,9 +46,13 @@ const Shop: NextPage<PageProps> = (message) => {
     return (
         <Box className='container'>
             <NavBar />
-            <Box marginTop="20rem">
+            <Box
+                marginTop="5rem"
+                display="flex"
+                gap="2rem"
+                flexWrap="wrap">
                 {items.map((item, index) => {
-                    return <Box key={index}>{item.name} is {item.price}</Box>
+                    return <ShopItem name={item.name} price={item.price} imageUrl={item.image} />
                 })}
             </Box>
             <Footer />

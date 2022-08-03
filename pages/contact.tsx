@@ -8,7 +8,8 @@ import {
     Textarea,
     Text,
     Button,
-    Image
+    Image,
+    Stack
 } from '@chakra-ui/react'
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
@@ -47,6 +48,11 @@ const Contact: NextPage = () => {
                 <Heading fontWeight="500">
                     Get in Touch
                 </Heading>
+                <Stack spacing="0">
+                    <Text fontSize="xl" fontWeight="500">Email: primalprinting@email.com</Text>
+                    <Text fontSize="xl" fontWeight="500">Phone: 0000000000</Text>
+                </Stack>
+
                 <Text>If you have any questions or queries, ask away!</Text>
                 <FormControl isRequired
                 >
