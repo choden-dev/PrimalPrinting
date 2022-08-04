@@ -3,7 +3,6 @@ import {
   Box,
   Heading,
   Button,
-  Divider,
   Image
 } from '@chakra-ui/react'
 
@@ -14,7 +13,7 @@ type Props = {
 }
 
 
-export default function shopitem({ name, price, imageUrl }: Props) {
+export default function ShopItem({ name, price, imageUrl }: Props) {
   return (
     <Box minW="20rem"
       maxW="20rem"

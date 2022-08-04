@@ -40,7 +40,7 @@ type PageProps = {
 const Shop: NextPage<PageProps> = (message) => {
     const [items, setItems] = React.useState<any[]>([])
     useEffect(() => {
-        setItems(message.message)
+        setItems(message.message);
     }, [])
 
     return (
