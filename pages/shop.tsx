@@ -6,7 +6,7 @@ import {
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
 import { connectToDatabase } from "../lib/mongo"
-import ShopItem from '../components/shopitem/ShopItem'
+import ShopItem from "../components/shopitem/ShopItem"
 export async function getStaticProps() {
     try {
         let { db } = await connectToDatabase();
