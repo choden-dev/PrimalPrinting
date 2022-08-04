@@ -22,6 +22,13 @@ const theme = extendTheme({
             100: '#F3EBE3'
         }
     },
+    styles: {
+        global: {
+            body: {
+                bg: 'rgb(250,250,250)'
+            }
+        }
+    },
     components: {
         Button: {
             variants: {

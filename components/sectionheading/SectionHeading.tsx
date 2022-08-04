@@ -12,7 +12,7 @@ export default function SectionHeading({ text }: Props) {
             size="xl"
 
             z-index="998"
-            fontWeight="300"
+            fontWeight="400"
             color="brown.900"
             position="relative"
 

@@ -52,7 +52,7 @@ const Shop: NextPage<PageProps> = (message) => {
                 gap="2rem"
                 flexWrap="wrap">
                 {items.map((item, index) => {
-                    return <ShopItem name={item.name} price={item.price} imageUrl={item.image} />
+                    return <ShopItem key={item.name} name={item.name} price={item.price} imageUrl={item.image} />
                 })}
             </Box>
             <Footer />

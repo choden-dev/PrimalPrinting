@@ -18,11 +18,11 @@ export default function shopitem({ name, price, imageUrl }: Props) {
   return (
     <Box minW="20rem"
       maxW="20rem"
-      border="1px solid rgb(33,33,33)"
       padding="2rem"
       borderRadius="sm"
       display="flex"
       flexDir="column"
+      bg="white"
       gap="1rem">
 
       <Box

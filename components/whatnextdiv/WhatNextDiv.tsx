@@ -3,7 +3,6 @@ import {
     Box,
     Heading,
     Link,
-    Image
 } from '@chakra-ui/react'
 import {
     SunIcon
@@ -15,37 +14,41 @@ export default function WhatNextDiv() {
         <Box
 
             display="flex"
-            flexDir="column"
+            textAlign={{ sm: "center", md: "left"}}
             alignItems="center"
             justifyContent="center"
             gap="2rem"
-            margin="2rem 0"
-            marginTop="0"
+            flexWrap="wrap"
             padding="2rem"
+            bg="white"
             width="100vw"
             transform="translateX(-7%)"
             overflow="hidden"
             position="relative">
+            <SunIcon w={"5rem"} h={"5rem"} color="brown.800" />
 
-            <Heading
-                textAlign="center"
-                size="4xl"
-                fontWeight="400">
-                Like what you see?
-            </Heading>
-            <Heading
-                fontWeight="300"
-                textAlign="center"
-            >
-                Get in touch or&nbsp;
-                <NextLink href="/shop" passHref>
-                    <Link
-                        as="a"
-                        color="brown.700"
-                        fontWeight="400">browse our shop
-                    </Link>
-                </NextLink>
-            </Heading>
+            <Box display="flex"
+                flexDir="column"
+                gap="0.5rem">
+                <Heading
+                    size="4xl"
+                    fontWeight="400">
+                    Like what you see?
+                </Heading>
+                <Heading
+                    fontWeight="300"
+                >
+                    Get in touch or&nbsp;
+                    <NextLink href="/shop" passHref>
+                        <Link
+                            as="a"
+                            color="brown.700"
+                            fontWeight="400">browse our shop
+                        </Link>
+                    </NextLink>
+                </Heading>
+            </Box>
+
         </Box>
     )
 }

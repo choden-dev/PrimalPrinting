@@ -25,10 +25,8 @@ export default function TestimonialCard({ toDisplay }: Props) {
             bg="white"
             position="relative"
             zIndex="999"
-            border="1px solid"
-            borderColor="brown.200"
-            padding="2rem"
             borderRadius="sm"
+            padding="2rem"
             boxShadow="0 0 4px rgb(33,33,33)"
         >
             <Box

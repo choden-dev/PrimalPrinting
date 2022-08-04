@@ -20,8 +20,6 @@ export default function DescriptionCard({ name, description }: Props) {
             padding="2rem"
             display="flex"
             flexDir="column"
-            borderLeft="none"
-            borderColor="brown.200"
             borderRadius="sm"
             textAlign="left"
             minHeight="20rem"
