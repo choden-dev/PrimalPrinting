@@ -34,7 +34,7 @@ export async function getStaticProps() {
 type ShopItem = {
     name: string;
     price: string;
-    imageUrl: string;
+    image: string;
 }
 
 type PageProps = {
@@ -69,13 +69,14 @@ const Shop: NextPage<PageProps> = (message) => {
                 >
                     {items.map((item, index) => {
 
-                        return <ProductCard
+                        return (<ProductCard
                             key={item.name}
                             productName={item.name}
                             productPrice={item.price}
                             productDescription={""}
-                            image={item.imageUrl}
-                        />
+                            image={item.image}
+                            hasButton={false}
+                        />)
                     })}
                 </Box>
             </Box>

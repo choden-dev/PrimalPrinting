@@ -13,10 +13,11 @@ type Props = {
     productPrice: string;
     productDescription: any;
     image: string;
+    hasButton: boolean;
 
 }
 
-export default function ProductCard({ productName, productPrice, productDescription, image }: Props) {
+export default function ProductCard({ productName, productPrice, productDescription, image, hasButton }: Props) {
     return (
         <Box
             className={styles.productimage}
@@ -38,14 +39,13 @@ export default function ProductCard({ productName, productPrice, productDescript
                 }}>
             <Box className={styles.innersection}
                 transition="transform 0.5s"
-
             >
                 <Box
                     maxH="15rem"
                     overflow="hidden">
                     <img
                         src={image}
-                        alt=""
+                        alt={productName}
                     />
                 </Box>
                 <Box
@@ -68,15 +68,15 @@ export default function ProductCard({ productName, productPrice, productDescript
                         alignItems="center">
                         <Text
                             color="brown.900"
-                            fontSize="3xl"
+                            fontSize={hasButton ? "3xl" : "4xl"}
                             fontWeight="500">
                             {productPrice}
                         </Text>
-                        <Button
+                        {hasButton && <Button
                             marginLeft="auto"
                             variant="outline">
                             Find out More
-                        </Button>
+                        </Button>}
                     </Box>
                 </Box>
             </Box>

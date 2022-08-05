@@ -10,10 +10,11 @@ type Props = {
   name: string;
   price: string;
   imageUrl: string;
+  hasButton: boolean;
 }
 
 
-export default function ShopItem({ name, price, imageUrl }: Props) {
+export default function ShopItem({ name, price, imageUrl, hasButton }: Props) {
   return (
     <Box minW="20rem"
       maxW="20rem"
@@ -43,9 +44,9 @@ export default function ShopItem({ name, price, imageUrl }: Props) {
       <Heading fontWeight="300">
         {price}
       </Heading>
-      <Button marginTop="auto">
+      {hasButton && <Button marginTop="auto">
         Enquire
-      </Button>
+      </Button>}
     </Box>
   )
 }
