@@ -1,12 +1,16 @@
 import React, { useEffect } from 'react'
 import { NextPage } from "next"
 import {
-    Box
+    Box,
+    Heading,
+    Image
 } from '@chakra-ui/react'
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
 import { connectToDatabase } from "../lib/mongo"
 import ShopItem from "../components/shopitem/ShopItem"
+import ProductCard from "../components/productcard/ProductCard"
+
 export async function getStaticProps() {
     try {
         let { db } = await connectToDatabase();
@@ -45,15 +49,34 @@ const Shop: NextPage<PageProps> = (message) => {
 
     return (
         <Box className='container'>
+
             <NavBar />
             <Box
-                marginTop="5rem"
+                alignSelf="center"
+                marginTop="3rem"
                 display="flex"
-                gap="2rem"
-                flexWrap="wrap">
-                {items.map((item, index) => {
-                    return <ShopItem key={item.name} name={item.name} price={item.price} imageUrl={item.image} />
-                })}
+                flexDir="column"
+
+                gap="2rem">
+                <Heading
+                    textAlign="center">Our Products</Heading>
+
+                <Box
+                    justifyContent="center"
+                    display="flex"
+                    gap="2rem"
+                    flexWrap="wrap"
+                >
+                    {items.map((item, index) => {
+
+                        return <ProductCard
+                            productName={item.name}
+                            productPrice={item.price}
+                            productDescription={""}
+                            image={item.imageUrl}
+                        />
+                    })}
+                </Box>
             </Box>
             <Footer />
 

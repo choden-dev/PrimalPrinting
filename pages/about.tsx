@@ -21,13 +21,17 @@ const About: NextPage = () => {
                 display="flex"
                 flexDir="column"
                 maxWidth="800px"
-                margin="3rem 0">
+                margin="3rem 0"
+                bg="white"
+                padding="2rem"
+                boxShadow="0 0 3px rgb(33,33,33)">
                 <Box textAlign="center"
                     display="flex"
                     flexDir="column"
                     gap="1.5rem"
                     position="relative">
                     <Heading
+                        zIndex="1"
                         color="brown.900"
                         size="4xl"
                         fontWeight="400">
@@ -42,7 +46,7 @@ const About: NextPage = () => {
                         width="100%"
                         height="3rem"
                         bg="brown.100"
-                        zIndex="-1" />
+                        zIndex="0" />
                     <Text
                         marginTop="2rem"
                         textAlign="left"

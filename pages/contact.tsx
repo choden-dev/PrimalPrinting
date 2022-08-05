@@ -27,7 +27,11 @@ const Contact: NextPage = () => {
                 width="100%"
                 maxW="800px"
                 gap="1rem"
+                padding="2rem"
                 position="relative"
+                bg="white"
+                borderRadius="sm"
+                boxShadow="0 0 3px rgb(33,33,33)"
             >
                 <Box width="100%"
                     height="15rem"
@@ -38,12 +42,6 @@ const Contact: NextPage = () => {
                         filter="brightness(0.5)" />
 
                 </Box>
-                <Box position="absolute"
-                    width="60%"
-                    height="2rem"
-                    bg="brown.100"
-                    top="16rem"
-                    zIndex="-1" />
 
                 <Heading fontWeight="500">
                     Get in Touch

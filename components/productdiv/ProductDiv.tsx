@@ -9,9 +9,9 @@ type Props = {}
 type product = infoStructure & { image: any, price: string }
 
 const products: product[] = [
-    { title: "Coursebook", image: <Image src='placeholder.png' />, description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" },
-    { title: "Print", image: <Image src='placeholder.png' />, description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" },
-    { title: "Love", image: <Image src='placeholder.png' />, description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" }
+    { title: "Coursebook", image: 'placeholder.png' , description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" },
+    { title: "Print", image: 'placeholder.png' , description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" },
+    { title: "Love", image: 'placeholder.png', description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" }
 ]
 export default function ProductDiv({ }: Props) {
     return (

@@ -4,14 +4,15 @@ import {
     Box,
     Heading,
     Button,
-    Text
+    Text,
+    Image
 } from "@chakra-ui/react"
 import styles from './ProductCard.module.css'
 type Props = {
     productName: string;
     productPrice: string;
     productDescription: any;
-    image: any;
+    image: string;
 
 }
 
@@ -37,12 +38,15 @@ export default function ProductCard({ productName, productPrice, productDescript
                 }}>
             <Box className={styles.innersection}
                 transition="transform 0.5s"
-                
+
             >
                 <Box
                     maxH="15rem"
                     overflow="hidden">
-                    {image}
+                    <img
+                        src={image}
+                        alt=""
+                    />
                 </Box>
                 <Box
                     gap="1rem"

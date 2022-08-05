@@ -22,7 +22,8 @@ export default function ShopItem({ name, price, imageUrl }: Props) {
       display="flex"
       flexDir="column"
       bg="white"
-      gap="1rem">
+      gap="1rem"
+      boxShadow="0 0 3px rgb(33,33,33)">
 
       <Box
         height="15rem"
