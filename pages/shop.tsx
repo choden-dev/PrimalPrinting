@@ -70,6 +70,7 @@ const Shop: NextPage<PageProps> = (message) => {
                     {items.map((item, index) => {
 
                         return <ProductCard
+                            key={item.name}
                             productName={item.name}
                             productPrice={item.price}
                             productDescription={""}
