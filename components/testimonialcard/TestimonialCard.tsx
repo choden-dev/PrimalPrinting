@@ -61,12 +61,16 @@ export default function TestimonialCard({ toDisplay }: Props) {
                 </Text>
                 <Box display="flex"
                     alignItems="center">
-                    <Button
-                        leftIcon={<ExternalLinkIcon />}
-                        width="8rem"
-                        variant="browned">
-                        See More
-                    </Button>
+                    <a href="https://www.instagram.com/stories/highlights/17860217396773029/"
+                        rel="noopener noreferrer"
+                        target="_blank">
+                        <Button
+                            leftIcon={<ExternalLinkIcon />}
+                            width="8rem"
+                            variant="browned">
+                            See More
+                        </Button>
+                    </a>
                     <Heading
                         marginLeft="auto"
                         fontWeight="400"

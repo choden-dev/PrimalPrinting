@@ -30,8 +30,9 @@ export default function NavBar({ }: Props) {
             top="0"
             zIndex="9999"
             left="0"
-            boxShadow="0 0 10px black"
             padding="0 7%"
+            borderBottom="1px"
+            borderColor="brown.200"
             alignItems="center">
             <Link href="/" >
                 <Image
@@ -81,7 +82,7 @@ export default function NavBar({ }: Props) {
                             color="brown.900"
                             size="lg"
                             _hover={{
-                                color: "brown.200"
+                                color: "brown.700"
                             }}
                         />
                     </a>
@@ -98,7 +99,7 @@ export default function NavBar({ }: Props) {
                             color="brown.900"
                             size="lg"
                             _hover={{
-                                color: "brown.200"
+                                color: "brown.700"
                             }}
                         />
                     </a>

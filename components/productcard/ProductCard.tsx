@@ -33,6 +33,7 @@ export default function ProductCard({ productName, productPrice, productDescript
             height="fit-content"
             backgroundColor="white"
             zIndex="999"
+            cursor={!hasButton ? "pointer" : ""}
             transition="transform 0.5s, box-shadow 0.5s"
             _hover={
                 {
