@@ -20,11 +20,11 @@ const Contact: NextPage = () => {
         <Box className='container'>
             <NavBar />
             <Box
-                margin="5rem 0"
+                margin="5rem -7%"
                 display="flex"
                 flexDir="column"
                 alignSelf="center"
-                width="100%"
+
                 maxW="800px"
                 gap="1rem"
                 padding="2rem"
@@ -74,7 +74,7 @@ const Contact: NextPage = () => {
                 </Button>
             </Box>
             <Footer />
-        </Box>
+        </Box >
 
     )
 }

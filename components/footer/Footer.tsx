@@ -1,11 +1,12 @@
 import React from 'react'
 import {
     Box,
-    Heading,
+    Link,
     UnorderedList,
     ListItem,
     Text
 } from '@chakra-ui/react'
+
 type Props = {}
 
 export default function Footer({ }: Props) {
@@ -25,11 +26,12 @@ export default function Footer({ }: Props) {
                 margin="auto"
                 padding="2rem"
                 gap="5rem"
+                fontWeight="400"
             >
                 <UnorderedList
                     styleType="none">
                     <ListItem><Text fontWeight="500">Site</Text></ListItem>
-                    <ListItem>About Primal Printing</ListItem>
+                    <ListItem><Link href='/about'>About Primal Printing</Link></ListItem>
                     <ListItem>Get in touch</ListItem>
                     <ListItem>Products</ListItem>
 

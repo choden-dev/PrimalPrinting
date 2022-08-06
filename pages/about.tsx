@@ -17,11 +17,11 @@ const About: NextPage = () => {
             className='container'>
             <NavBar />
             <Box
+                margin="3rem -7%"
                 alignSelf="center"
                 display="flex"
                 flexDir="column"
                 maxWidth="800px"
-                margin="3rem 0"
                 bg="white"
                 padding="2rem"
                 boxShadow="0 0 3px rgb(33,33,33)">

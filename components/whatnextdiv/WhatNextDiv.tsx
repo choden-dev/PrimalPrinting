@@ -14,7 +14,7 @@ export default function WhatNextDiv() {
         <Box
 
             display="flex"
-            textAlign={{ sm: "center", md: "left"}}
+            textAlign={{ base: "center", md: "left" }}
             alignItems="center"
             justifyContent="center"
             gap="2rem"
