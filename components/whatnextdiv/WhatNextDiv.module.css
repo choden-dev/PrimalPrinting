@@ -1,0 +1,20 @@
+.endlink {
+    position: relative;
+
+}
+
+.endlink::after {
+    height: 2px;
+    width: 0;
+    content: "";
+    background-color: #ebb0a0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transition: width 0.5s;
+}
+
+
+.endlink:hover::after {
+    width: 100%;
+}

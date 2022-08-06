@@ -56,9 +56,8 @@ export default function ProductCard({ productName, productPrice, productDescript
                     flexDir="column"
                     padding="1.5rem">
                     <Heading
-                        fontWeight="300"
-                        color="brown.900"
-                        as="u">
+                        fontWeight="400"
+                        color="brown.900">
                         {productName}
                     </Heading>
                     <Text
@@ -78,6 +77,7 @@ export default function ProductCard({ productName, productPrice, productDescript
                             borderRadius="sm"
                             marginLeft="auto"
                             variant="outline"
+                            transition="background-color 0.4s"
                             _hover={{
                                 color: "white",
                                 bg: "brown.800"

@@ -8,6 +8,7 @@ import {
     SunIcon
 } from '@chakra-ui/icons'
 import NextLink from 'next/link'
+import styles from './WhatNextDiv.module.css'
 
 export default function WhatNextDiv() {
     return (
@@ -37,10 +38,27 @@ export default function WhatNextDiv() {
                 </Heading>
                 <Heading
                     fontWeight="300"
+
                 >
-                    Get in touch or&nbsp;
+                    <NextLink href="/contact" passHref>
+                        <Link
+                            _hover={{
+                                textDecor: "none"
+                            }}
+                            className={styles.endlink}
+                            as="a"
+                            color="brown.700"
+                            fontWeight="400">Contact us
+                        </Link>
+                    </NextLink>
+
+                    &nbsp;or&nbsp;
                     <NextLink href="/shop" passHref>
                         <Link
+                            _hover={{
+                                textDecor: "none"
+                            }}
+                            className={styles.endlink}
                             as="a"
                             color="brown.700"
                             fontWeight="400">browse our shop

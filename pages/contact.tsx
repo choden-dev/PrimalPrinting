@@ -31,7 +31,9 @@ const Contact: NextPage = () => {
                 position="relative"
                 bg="white"
                 borderRadius="sm"
-                boxShadow="0 0 3px rgb(33,33,33)"
+                border="1px"
+                borderColor="brown.200"
+                boxShadow="0.2rem 0.2rem 0 #672212"
             >
                 <Box width="100%"
                     height="15rem"
