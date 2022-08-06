@@ -31,7 +31,7 @@ const About: NextPage = () => {
                 <Box textAlign="center"
                     display="flex"
                     flexDir="column"
-                    gap="1.5rem"
+                    gap="1.2rem"
                     position="relative">
                     <Heading
                         zIndex="1"
@@ -40,13 +40,12 @@ const About: NextPage = () => {
                         fontWeight="400">
                         Our Story
                     </Heading>
-                    <Box height="5px" bg="brown.700" width="160px" alignSelf="center" margin="-0.5rem 0"></Box>
+                    <Box height="5px" bg="brown.700" width="160px" alignSelf="center" marginTop="-0.7rem"></Box>
                     <Heading
                         fontWeight="300">
                         Helping all your printing needs
                     </Heading>
                     <Text
-                        marginTop="2rem"
                         textAlign="left"
                         fontWeight="300"
                     >
