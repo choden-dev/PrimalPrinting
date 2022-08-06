@@ -24,7 +24,10 @@ const About: NextPage = () => {
                 maxWidth="800px"
                 bg="white"
                 padding="2rem"
-                boxShadow="0 0 3px rgb(33,33,33)">
+                border="1px"
+                borderRadius="sm"
+                borderColor="brown.200"
+                boxShadow="0.2rem 0.2rem 0 #672212">
                 <Box textAlign="center"
                     display="flex"
                     flexDir="column"
@@ -37,16 +40,11 @@ const About: NextPage = () => {
                         fontWeight="400">
                         Our Story
                     </Heading>
+                    <Box height="5px" bg="brown.700" width="160px" alignSelf="center" margin="-0.5rem 0"></Box>
                     <Heading
                         fontWeight="300">
                         Helping all your printing needs
                     </Heading>
-                    <Box
-                        position="absolute"
-                        width="100%"
-                        height="3rem"
-                        bg="brown.100"
-                        zIndex="0" />
                     <Text
                         marginTop="2rem"
                         textAlign="left"
