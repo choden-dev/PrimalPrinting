@@ -17,8 +17,8 @@ export default function SectionHeading({ text }: Props) {
             position="relative"
 
         >
-            <Box justifyContent="center" display="flex" width="100%" height="3px" bottom="-10px" position="absolute" >
-                <Box bg="brown.200" width="40%"></Box>
+            <Box justifyContent="center" display="flex" width="100%" height="5px" bottom="-12px" position="absolute" >
+                <Box bg="brown.700" width="40%"></Box>
             </Box>
             {text}
         </Heading>

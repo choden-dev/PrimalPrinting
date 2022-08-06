@@ -27,12 +27,12 @@ export default function DescriptionCard({ name, description }: Props) {
             backgroundColor="white"
             gap="0.5rem"
             position="relative"
-            boxShadow="0 0 4px rgb(33,33,33)"
+            boxShadow="0.2rem 0.2rem 0 #672212"
             transition="transform 0.5s, box-shadow 0.5s"
             zIndex="999"
             _hover={{
                 transform: "translateY(-10px) translateZ(0)",
-                boxShadow: "4px 0 15px rgb(33,33,33)"
+                boxShadow: "0.3rem 0.3rem 0 #672212"
             }}
         >
             <Image

@@ -33,11 +33,11 @@ const theme = extendTheme({
         Button: {
             variants: {
                 'browned': {
-                    bg: 'brown.200',
+                    bg: 'brown.700',
                     color: 'white',
                     borderRadius: 'sm',
                     _hover: {
-                        bg: 'brown.700'
+                        bg: 'brown.800'
                     }
                 }
             }

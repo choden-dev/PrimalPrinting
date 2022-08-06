@@ -26,7 +26,7 @@ export default function ProductCard({ productName, productPrice, productDescript
             minW="15rem"
             maxW="20rem"
             overflow="hidden"
-            boxShadow="0 0 4px rgb(33,33,33)"
+            boxShadow="0.2rem 0.2rem 0 #672212"
             borderRadius="sm"
             height="fit-content"
             backgroundColor="white"
@@ -34,7 +34,7 @@ export default function ProductCard({ productName, productPrice, productDescript
             transition="transform 0.5s, box-shadow 0.5s"
             _hover={
                 {
-                    boxShadow: "0 0 10px rgb(33,33,33)",
+                    boxShadow: "0.3rem 0.3rem 0 #672212",
                     transform: "scale(1.1)"
                 }}>
             <Box className={styles.innersection}

@@ -96,7 +96,7 @@ const Home: NextPage = () => {
           padding="4rem 7%"
           position="relative"
         >
-          <Box position="absolute" bg="brown.100" width="100%" height="50%" bottom="0" />
+          <Box position="absolute" bg="brown.700" width="100%" height="50%" bottom="0" />
 
           <DescriptionDiv />
         </Box>
