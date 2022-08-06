@@ -26,7 +26,7 @@ export default function ProductDiv({ }: Props) {
             position="relative"
             padding="2rem"
             flexWrap="wrap" >
-            <Box position="absolute" width="100%" bg="brown.100" height="50%" bottom="0" />
+            <Box position="absolute" width="100%" bg="brown.700" height="50%" bottom="0" />
             {products.map((item, index) => {
                 return <ProductCard key={item.title} productName={item.title} productPrice={item.price} productDescription={item.description} image={item.image} hasButton />
             })}

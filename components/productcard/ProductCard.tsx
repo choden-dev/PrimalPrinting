@@ -25,8 +25,10 @@ export default function ProductCard({ productName, productPrice, productDescript
             flexDir="column"
             minW="15rem"
             maxW="20rem"
+            border="1px"
+            borderColor="brown.200"
             overflow="hidden"
-            boxShadow="0.2rem 0.2rem 0 #672212"
+            boxShadow="0.2rem 0.2rem  #672212"
             borderRadius="sm"
             height="fit-content"
             backgroundColor="white"
@@ -55,7 +57,7 @@ export default function ProductCard({ productName, productPrice, productDescript
                     padding="1.5rem">
                     <Heading
                         fontWeight="300"
-                        color="brown.800"
+                        color="brown.900"
                         as="u">
                         {productName}
                     </Heading>
@@ -73,8 +75,13 @@ export default function ProductCard({ productName, productPrice, productDescript
                             {productPrice}
                         </Text>
                         {hasButton && <Button
+                            borderRadius="sm"
                             marginLeft="auto"
-                            variant="outline">
+                            variant="outline"
+                            _hover={{
+                                color: "white",
+                                bg: "brown.800"
+                            }}>
                             Find out More
                         </Button>}
                     </Box>
