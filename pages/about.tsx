@@ -23,7 +23,7 @@ const About: NextPage = () => {
                 flexDir="column"
                 maxWidth="800px"
                 bg="white"
-                padding="2rem"
+                padding="3rem 2rem"
                 border="1px"
                 borderRadius="sm"
                 borderColor="brown.200"

@@ -24,8 +24,7 @@ const Contact: NextPage = () => {
                 display="flex"
                 flexDir="column"
                 alignSelf="center"
-
-                maxW="800px"
+                width="800px"
                 gap="1rem"
                 padding="2rem"
                 position="relative"
