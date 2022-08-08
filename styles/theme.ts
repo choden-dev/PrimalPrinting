@@ -47,6 +47,7 @@ const theme = extendTheme({
                 container: {
                     borderColor: "brown.100",
                 }
+
             }
         }
     }
