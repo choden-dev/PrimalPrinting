@@ -4,8 +4,7 @@ import {
     Box,
     Heading,
     Button,
-    Text,
-    Image
+    Text
 } from "@chakra-ui/react"
 import styles from './ProductCard.module.css'
 type Props = {
@@ -39,7 +38,13 @@ export default function ProductCard({ productName, productPrice, productDescript
                 {
                     boxShadow: "0.3rem 0.3rem 0 #672212",
                     transform: "scale(1.1)"
-                }}>
+                }}
+            sx={{
+                "@media screen and (max-width:750px)": {
+                    maxWidth: "90%"
+                }
+            }}>
+
             <Box className={styles.innersection}
                 transition="transform 0.5s"
             >

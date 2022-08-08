@@ -1,6 +1,7 @@
 .productimage img {
     transition: all 1s;
     filter: brightness(0.7);
+    width: 100%;
 }
 
 .productimage:hover img {
