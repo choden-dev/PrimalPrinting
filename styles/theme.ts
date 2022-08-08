@@ -41,6 +41,13 @@ const theme = extendTheme({
                     }
                 }
             }
+        },
+        Accordion: {
+            baseStyle: {
+                container: {
+                    borderColor: "brown.100",
+                }
+            }
         }
     }
 })
