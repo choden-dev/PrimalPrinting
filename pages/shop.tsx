@@ -2,8 +2,7 @@ import React, { useEffect } from 'react'
 import { NextPage } from "next"
 import {
     Box,
-    Heading,
-    Image
+    Heading
 } from '@chakra-ui/react'
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
@@ -53,7 +52,7 @@ const Shop: NextPage<PageProps> = (message) => {
             <NavBar />
             <Box
                 alignSelf="center"
-                marginTop="3rem"
+                margin="3rem 0"
                 display="flex"
                 flexDir="column"
 

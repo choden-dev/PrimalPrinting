@@ -32,15 +32,14 @@ export default function Footer({ }: Props) {
                     styleType="none">
                     <ListItem><Text fontWeight="500">Site</Text></ListItem>
                     <ListItem><Link href='/about'>About Primal Printing</Link></ListItem>
-                    <ListItem>Get in touch</ListItem>
-                    <ListItem>Products</ListItem>
+                    <ListItem><Link href='/contact'>Get in touch</Link></ListItem>
+                    <ListItem><Link href='/shop'>Products</Link></ListItem>
 
                 </UnorderedList>
                 <UnorderedList
                     styleType="none">
                     <ListItem><Text fontWeight="500">Support</Text></ListItem>
-                    <ListItem>Contact</ListItem>
-                    <ListItem>Make a Query</ListItem>
+                    <ListItem><Link href='/contact'>Make a Query</Link></ListItem>
                 </UnorderedList>
 
             </Box>

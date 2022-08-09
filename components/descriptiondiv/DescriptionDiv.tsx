@@ -7,7 +7,7 @@ type Props = {}
 
 const descriptions: infoStructure[] =
     [
-        { title: 'Low Prices', description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.' },
+        { title: 'Low Prices', description: 'We are a student run company, and as such we know how important affordability is for students' },
         { title: 'Reliable', description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.' },
         { title: 'Faster', description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.' }
     ]
