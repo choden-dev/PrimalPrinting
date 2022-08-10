@@ -1,11 +1,11 @@
 import React from 'react'
 import {
-
     Box,
     Heading,
     Button,
     Text
 } from "@chakra-ui/react"
+import Link from 'next/link'
 import styles from './ProductCard.module.css'
 import ItemModal from '../itemmodal/ItemModal'
 type Props = {
@@ -87,17 +87,21 @@ export default function ProductCard({ productName, productPrice, productDescript
                                 fontWeight="500">
                                 {productPrice}
                             </Text>
-                            {hasButton && <Button
-                                borderRadius="sm"
-                                marginLeft="auto"
-                                variant="outline"
-                                transition="background-color 0.4s"
-                                _hover={{
-                                    color: "white",
-                                    bg: "brown.800"
-                                }}>
-                                Find out More
-                            </Button>}
+                            {hasButton &&
+                                <Link href="/shop" passHref>
+                                    <Button
+                                        as="a"
+                                        borderRadius="sm"
+                                        marginLeft="auto"
+                                        variant="outline"
+                                        transition="background-color 0.4s"
+                                        _hover={{
+                                            color: "white",
+                                            bg: "brown.800"
+                                        }}>
+                                        Find out More
+                                    </Button>
+                                </Link>}
                         </Box>
                     </Box>
                 </Box>
