@@ -51,7 +51,12 @@ export default function ProductCard({ productName, productPrice, productDescript
                         maxWidth: "100%"
                     }
                 }}>
-                {!hasButton && <ItemModal close={closeInfo} isOpen={infoOpen} imageUrl={image}/>}
+                {!hasButton && <ItemModal
+                    close={closeInfo}
+                    isOpen={infoOpen}
+                    imageUrl={image}
+                    description={productDescription}
+                    name={productName} />}
 
                 <Box className={styles.innersection}
                     transition="transform 0.5s"
@@ -76,7 +81,7 @@ export default function ProductCard({ productName, productPrice, productDescript
                         </Heading>
                         <Text
                             fontWeight="300">
-                            {productDescription}
+                            {hasButton && productDescription}
                         </Text>
 
                         <Box display="flex"
