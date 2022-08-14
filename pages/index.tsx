@@ -20,133 +20,139 @@ import Link from 'next/link'
 
 const Home: NextPage = () => {
   return (
-    <Box
-      className="container">
-      <NavBar />
-
+    <>
       <Box
-        zIndex="999"
-        className={styles.mainimage}>
-        <Image
+        className="container">
+        <NavBar />
 
-          src='/banner.png'
-          alt="books"
-          minH="628px"
-          minW="1200px"
-          maxH="100vh"
-          width="100%"
-          filter="brightness(0.5)"
-        />
         <Box
+          zIndex="999"
+          className={styles.mainimage}>
+          <Image
 
-          position="absolute"
-          justifyContent="center"
-          alignItems="center"
-          textAlign="center"
-          width="80%">
-          <Heading
-            className={styles.titletext}
-            color="white"
-            fontFamily="coffeematcha"
-            fontSize={{ base: "5rem", lg: "7rem", xl: "10rem" }}
-            fontWeight="400"
-          >
-            We Print <br /> Anything!
-          </Heading>
-          <Link href="/shop" passHref>
-            <Button
-              variant="browned"
-              marginTop="5rem"
-              fontWeight="300"
-              size="lg">Explore our Products</Button>
+            src='/banner.png'
+            alt="books"
+            minH="628px"
+            minW="1200px"
+            maxH="100vh"
+            width="100%"
+            filter="brightness(0.5)"
+          />
+          <Box
 
-          </Link>
-        </Box>
-      </Box>
-      <Box
-        marginTop="8rem"
-        display="flex"
-        alignItems="center"
-        flexDir="column"
-        textAlign="center">
-        <Box className="secheading">
-          <SectionHeading text={"Anything Printing"} />
-        </Box>
-        <Box marginTop="4rem">
-          <Text maxWidth="1100px"
-            fontSize="lg"
-            fontWeight="300">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore eius possimus aperiam temporibus voluptatum unde repellendus tempora praesentium blanditiis! Est facere consequatur odit minima dignissimos? Id, consequuntur sequi dignissimos quod optio voluptate corporis molestias possimus, ducimus repellat a ut. Sint?
-          </Text>
-        </Box>
-      </Box>
-      <Box
+            position="absolute"
+            justifyContent="center"
+            alignItems="center"
+            textAlign="center"
+            width="80%">
+            <Heading
+              className={styles.titletext}
+              color="white"
+              fontFamily="coffeematcha"
+              fontSize={{ base: "5rem", lg: "7rem", xl: "10rem" }}
+              fontWeight="400"
+              sx={{
+                "@media only screen and (max-width: 420px)": {
+                  fontSize: "4.5rem",
+                }
+              }}
+            >
+              We Print <br /> Anything!
+            </Heading>
+            <Link href="/shop" passHref>
+              <Button
+                variant="browned"
+                marginTop="5rem"
+                fontWeight="300"
+                size="lg">Explore our Products</Button>
 
-        alignSelf="center"
-        textAlign="center"
-        marginTop="8rem"
-      >
-        <Box className="secheading">
-          <SectionHeading text={"Why Primal Printing?"} />
+            </Link>
+          </Box>
         </Box>
         <Box
-          width="100vw"
+          marginTop="8rem"
           display="flex"
-          justifyContent="center"
-          padding="4rem 7%"
-          position="relative"
-        >
-          <Box position="absolute" bg="brown.700" width="100%" height="50%" bottom="0" />
-
-          <DescriptionDiv />
-        </Box>
-      </Box>
-      <Box
-        display="flex"
-        width="100%"
-        flexDir="column"
-
-        marginTop="2rem"
-      >
-        <Box
-          marginTop="3rem"
-          className="secheading"
-        >
-          <SectionHeading text={"Popular Products"} />
-        </Box>
-        <ProductDiv />
-
-      </Box>
-
-      <Box
-        minHeight="16rem"
-        marginTop="3rem"
-        display="flex"
-        flexDir="column"
-        position="relative"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Box className="secheading"
-          marginTop="3rem">
-          <SectionHeading text={"Testimonials"} />
-        </Box>
-        <Box display="flex"
           alignItems="center"
-          padding="3rem 0">
-          <TestimonialDiv />
+          flexDir="column"
+          textAlign="center">
+          <Box className="secheading">
+            <SectionHeading text={"Anything Printing"} />
+          </Box>
+          <Box marginTop="4rem">
+            <Text maxWidth="1100px"
+              fontSize="lg"
+              fontWeight="300">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore eius possimus aperiam temporibus voluptatum unde repellendus tempora praesentium blanditiis! Est facere consequatur odit minima dignissimos? Id, consequuntur sequi dignissimos quod optio voluptate corporis molestias possimus, ducimus repellat a ut. Sint?
+            </Text>
+          </Box>
         </Box>
-        <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
+        <Box
 
-      </Box>
+          alignSelf="center"
+          textAlign="center"
+          marginTop="8rem"
+        >
+          <Box className="secheading">
+            <SectionHeading text={"Why Primal Printing?"} />
+          </Box>
+          <Box
+            width="100vw"
+            display="flex"
+            justifyContent="center"
+            padding="4rem 7%"
+            position="relative"
+          >
+            <Box position="absolute" bg="brown.700" width="100%" height="50%" bottom="0" />
 
-      <Box>
+            <DescriptionDiv />
+          </Box>
+        </Box>
+        <Box
+          display="flex"
+          width="100%"
+          flexDir="column"
 
-        <WhatNextDiv />
-      </Box>
-      <Footer />
-    </Box >
+          marginTop="2rem"
+        >
+          <Box
+            marginTop="3rem"
+            className="secheading"
+          >
+            <SectionHeading text={"Popular Products"} />
+          </Box>
+          <ProductDiv />
 
+        </Box>
+
+        <Box
+          minHeight="16rem"
+          marginTop="3rem"
+          display="flex"
+          flexDir="column"
+          position="relative"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Box className="secheading"
+            marginTop="3rem">
+            <SectionHeading text={"Testimonials"} />
+          </Box>
+          <Box display="flex"
+            alignItems="center"
+            padding="3rem 0">
+            <TestimonialDiv />
+          </Box>
+          <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
+
+        </Box>
+
+        <Box>
+
+          <WhatNextDiv />
+        </Box>
+        <Footer />
+      </Box >
+    </>
   )
 }
 

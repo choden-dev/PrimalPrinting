@@ -15,7 +15,26 @@ import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
 
 
+
+
 const Contact: NextPage = () => {
+    const submit = async (event: any) => {
+        event.preventDefault();
+        const message = event.target.message.value;
+        const email = event.target.email.value;
+        const res = await fetch('/api/form', {
+            body: JSON.stringify({
+                email: email,
+                message: message
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+        })
+        const result = await res.json();
+        alert(`${result.message}`);
+    }
     return (
         <Box className='container'>
             <NavBar />
@@ -54,26 +73,31 @@ const Contact: NextPage = () => {
                 </Stack>
 
                 <Text>If you have any questions or queries, ask away!</Text>
-                <FormControl isRequired
-                >
-                    <FormLabel>
-                        Name
-                    </FormLabel>
-                    <Input borderRadius="sm" type='text' />
-                    <FormLabel>
-                        Email
-                    </FormLabel>
-                    <Input borderRadius="sm" type='email' />
-                    <FormLabel>
-                        Message
-                    </FormLabel>
-                    <Textarea borderRadius="sm" size="lg" />
-                </FormControl>
-                <Button
-                    variant="browned"
-                    size="md" >
-                    Send
-                </Button>
+                <form onSubmit={submit}>
+                    <FormControl isRequired
+                    >
+                        <FormLabel>
+                            Name
+                        </FormLabel>
+                        <Input borderRadius="sm" type='text' />
+                        <FormLabel>
+                            Email
+                        </FormLabel>
+                        <Input name="email" borderRadius="sm" type='email' />
+                        <FormLabel>
+                            Message
+                        </FormLabel>
+                        <Textarea name="message" borderRadius="sm" size="lg" />
+                    </FormControl>
+                    <Button
+                        marginTop="1.5rem"
+                        width="100%"
+                        type="submit"
+                        variant="browned"
+                        size="md" >
+                        Send
+                    </Button>
+                </form>
             </Box>
             <Footer />
         </Box >
