@@ -60,6 +60,7 @@ type PageProps = {
 const Home: NextPage<PageProps> = (text) => {
   const [content, setContent] = React.useState<any[]>([]);
   React.useEffect(() => {
+    console.log(text.text)
     setContent(text.text);
   }, [])
   return (

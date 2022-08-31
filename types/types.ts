@@ -14,3 +14,5 @@ export type infoStructure = {
 }
 
 export type product = infoStructure & { image: any, price: string }
+
+export type testimonial = infoStructure & { author: string }

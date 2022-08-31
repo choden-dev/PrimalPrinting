@@ -8,9 +8,9 @@ import {
 import {
     ExternalLinkIcon
 } from '@chakra-ui/icons'
-import { infoStructure } from '../../types/types'
+import { testimonial } from '../../types/types'
 type Props = {
-    toDisplay: infoStructure;
+    toDisplay: testimonial;
 }
 
 export default function TestimonialCard({ toDisplay }: Props) {
@@ -76,7 +76,7 @@ export default function TestimonialCard({ toDisplay }: Props) {
                         fontWeight="400"
                         size="sm"
                         textAlign="right">
-                        -Yeddy yang
+                        {toDisplay.author.trim() !== "" && toDisplay.author}
                     </Heading>
 
                 </Box>

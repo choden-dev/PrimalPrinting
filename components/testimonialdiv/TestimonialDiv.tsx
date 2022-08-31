@@ -13,9 +13,10 @@ import {
     AnimatePresence,
     motion
 } from 'framer-motion'
-import { infoStructure } from "../../types/types"
+import { testimonial } from "../../types/types"
+
 type Props = {
-    testimonials: infoStructure[];
+    testimonials: testimonial[];
 }
 
 export default function TestimonialDiv({ testimonials }: Props) {
