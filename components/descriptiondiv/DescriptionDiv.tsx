@@ -1,18 +1,14 @@
 import DescriptionCard from '../descriptioncard/DescriptionCard'
-import { infoStructure } from '../../contexts/types'
+import { infoStructure } from '../../types/types'
 import {
     Box
 } from '@chakra-ui/react'
-type Props = {}
+type Props = {
+    descriptions: infoStructure[];
+}
 
-const descriptions: infoStructure[] =
-    [
-        { title: 'Low Prices', description: 'We are a student run company, and as such we know how important affordability is for students' },
-        { title: 'Reliable', description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.' },
-        { title: 'Faster', description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo iste exercitationem odit quos, voluptatum nisi adipisci veniam maxime quasi vero ad unde ullam doloremque neque nesciunt consequatur quod vitae tempore.' }
-    ]
 
-export default function DescriptionDiv({ }: Props) {
+export default function DescriptionDiv({ descriptions }: Props) {
     return (
         <Box
             maxWidth="1100px"

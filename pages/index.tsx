@@ -16,9 +16,52 @@ import DescriptionDiv from '../components/descriptiondiv/DescriptionDiv'
 import WhatNextDiv from '../components/whatnextdiv/WhatNextDiv'
 import Footer from '../components/footer/Footer'
 import Link from 'next/link'
+import { connectToDatabase } from '../lib/mongo'
+import React from 'react'
+export async function getStaticProps() {
+  try {
+    let { db } = await connectToDatabase('WebsiteText');
+    let aboutText = await db
+      .collection('Home1')
+      .find({})
+      .toArray();
+    let whyText = await db
+      .collection('WhyPrimal')
+      .find({})
+      .toArray();
+    let popular = await db
+      .collection('PopularProducts')
+      .find({})
+      .toArray();
+    let testimonials = await db
+      .collection('Testimonials')
+      .find({})
+      .toArray();
+    let final = aboutText
+      .concat(whyText)
+      .concat(popular)
+      .concat(testimonials);
+    return {
+      props:
+      {
+        text: JSON.parse(JSON.stringify(final)),
+        revalidate: 60 * 60
+      }
+    };
+  } catch (error) {
+    console.log("couldn't fetch data");
+  }
+}
 
+type PageProps = {
+  text: any[];
+}
 
-const Home: NextPage = () => {
+const Home: NextPage<PageProps> = (text) => {
+  const [content, setContent] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    setContent(text.text);
+  }, [])
   return (
     <>
       <Box
@@ -82,7 +125,7 @@ const Home: NextPage = () => {
             <Text maxWidth="1100px"
               fontSize="lg"
               fontWeight="300">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore eius possimus aperiam temporibus voluptatum unde repellendus tempora praesentium blanditiis! Est facere consequatur odit minima dignissimos? Id, consequuntur sequi dignissimos quod optio voluptate corporis molestias possimus, ducimus repellat a ut. Sint?
+              {content.length > 0 && content[0].text}
             </Text>
           </Box>
         </Box>
@@ -104,7 +147,7 @@ const Home: NextPage = () => {
           >
             <Box position="absolute" bg="brown.700" width="100%" height="50%" bottom="0" />
 
-            <DescriptionDiv />
+            <DescriptionDiv descriptions={content.slice(1, 4)} />
           </Box>
         </Box>
         <Box
@@ -120,7 +163,7 @@ const Home: NextPage = () => {
           >
             <SectionHeading text={"Popular Products"} />
           </Box>
-          <ProductDiv />
+          <ProductDiv products={content.slice(4, 7)} />
 
         </Box>
 
@@ -140,7 +183,7 @@ const Home: NextPage = () => {
           <Box display="flex"
             alignItems="center"
             padding="3rem 0">
-            <TestimonialDiv />
+            {content.length > 8 && <TestimonialDiv testimonials={content.slice(7, 12)} />}
           </Box>
           <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
 

@@ -8,7 +8,7 @@ import {
 import {
     ExternalLinkIcon
 } from '@chakra-ui/icons'
-import { infoStructure } from '../../contexts/types'
+import { infoStructure } from '../../types/types'
 type Props = {
     toDisplay: infoStructure;
 }

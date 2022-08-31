@@ -7,12 +7,12 @@ import {
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
 import { connectToDatabase } from "../lib/mongo"
-import ShopItem from "../components/shopitem/ShopItem"
+import { ShopItem } from '../types/types'
 import ProductCard from "../components/productcard/ProductCard"
 
 export async function getStaticProps() {
     try {
-        let { db } = await connectToDatabase();
+        let { db } = await connectToDatabase('Shop');
         let posts = await db
             .collection('Items')
             .find({})
@@ -30,11 +30,6 @@ export async function getStaticProps() {
     }
 }
 
-type ShopItem = {
-    name: string;
-    price: string;
-    image: string;
-}
 
 type PageProps = {
     message: ShopItem[];

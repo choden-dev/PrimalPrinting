@@ -1,3 +1,4 @@
+import React from "react"
 import { NextPage } from "next"
 import {
     Box,
@@ -13,11 +14,35 @@ import {
 } from '@chakra-ui/react'
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
+import { connectToDatabase } from "../lib/mongo"
 
+export async function getStaticProps() {
+    try {
+        let { db } = await connectToDatabase('WebsiteInfo');
+        let details = await db
+            .collection('Contacts')
+            .find({})
+            .toArray();
+        return {
+            props: {
+                details: JSON.parse(JSON.stringify(details)),
+                revalidate: 24 * 60 * 60
+            }
+        }
+    } catch (error) {
+        console.log('could not fetch data');
+    }
+}
 
+type PageProps = {
+    details: any[];
+}
 
-
-const Contact: NextPage = () => {
+const Contact: NextPage<PageProps> = (details) => {
+    const [contacts, setContacts] = React.useState<any | undefined>(undefined);
+    React.useEffect(() => {
+        setContacts(details.details[0]);
+    })
     const submit = async (event: any) => {
         event.preventDefault();
         const message = event.target.message.value;
@@ -68,8 +93,8 @@ const Contact: NextPage = () => {
                     Get in Touch
                 </Heading>
                 <Stack spacing="0">
-                    <Text fontSize="xl" fontWeight="500">Email: primalprinting@email.com</Text>
-                    <Text fontSize="xl" fontWeight="500">Phone: 0000000000</Text>
+                    <Text fontSize="xl" fontWeight="500">Email: {contacts && contacts.email}</Text>
+                    <Text fontSize="xl" fontWeight="500">Phone: {contacts && contacts.phone}</Text>
                 </Stack>
 
                 <Text>If you have any questions or queries, ask away!</Text>

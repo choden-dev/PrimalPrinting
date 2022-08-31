@@ -3,17 +3,12 @@ import {
     Image
 } from '@chakra-ui/react'
 import ProductCard from '../productcard/ProductCard'
-import { infoStructure } from '../../contexts/types'
-type Props = {}
+import { product } from '../../types/types'
+type Props = {
+    products: product[];
+}
 
-type product = infoStructure & { image: any, price: string }
-
-const products: product[] = [
-    { title: "Coursebook", image: 'placeholder.png', description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" },
-    { title: "Print", image: 'placeholder.png', description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" },
-    { title: "Love", image: 'placeholder.png', description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae delectus corporis eos quod consequatur sapiente iusto quibusdam impedit quas ex!", price: "$69" }
-]
-export default function ProductDiv({ }: Props) {
+export default function ProductDiv({ products }: Props) {
     return (
         <Box
 

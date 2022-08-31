@@ -1,3 +1,4 @@
+import React from "react"
 import { NextPage } from "next"
 import {
     Box,
@@ -8,20 +9,47 @@ import {
 } from '@chakra-ui/react'
 import NavBar from "../components/navbar/NavBar"
 import Footer from "../components/footer/Footer"
+import { connectToDatabase } from "../lib/mongo"
+export async function getStaticProps() {
+    try {
+        let { db } = await connectToDatabase('WebsiteText');
+        let sections = await db
+            .collection('AboutPage')
+            .find({})
+            .sort({ 'Order': 1 })
+            .toArray();
+        return {
+            props: {
+                content: JSON.parse(JSON.stringify(sections)),
+                revalidate: 60 * 60
+            }
+        }
 
+    } catch (error) {
+        console.log("failed to fetch data");
+    }
+}
 
-const About: NextPage = () => {
+type PageProps = {
+    content: any[];
+}
+
+const About: NextPage<PageProps> = (content) => {
+    const [sections, setSections] = React.useState<any[]>([]);
+    React.useEffect(() => {
+        setSections(content.content);
+    })
+
     return (
         <Box
-
             className='container'>
             <NavBar />
             <Box
-                margin="3rem -7%"
+                margin="3rem 0"
                 alignSelf="center"
                 display="flex"
                 flexDir="column"
-                maxWidth="800px"
+                maxWidth="1100px"
                 bg="white"
                 padding="3rem 2rem"
                 border="1px"
@@ -41,48 +69,25 @@ const About: NextPage = () => {
                         Our Story
                     </Heading>
                     <Box height="5px" bg="brown.700" width="160px" alignSelf="center" marginTop="-0.7rem"></Box>
-                    <Heading
-                        fontWeight="300">
-                        Helping all your printing needs
-                    </Heading>
-                    <Text
-                        textAlign="left"
-                        fontWeight="300"
-                    >
-                        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quo vel, facilis rem tempore commodi aliquid molestiae esse accusantium inventore dolor perferendis cupiditate aperiam deserunt ad sapiente praesentium delectus! Doloremque, temporibus?
-                    </Text>
-                    <Stack direction="row"
-                        alignSelf="center"
-                        overflow="hidden"
-                        borderRadius="sm"
-
-                    >
-                        <Box
-                            display="flex"
-                            overflowX="auto">
-                            <Image
-                                height="20rem"
-                                src="placeholder.png" />
-                            <Image
-                                height="20rem"
-                                src="placeholder.png" />
-                            <Image
-                                height="20rem"
-                                src="placeholder.png" />
-                        </Box>
-                    </Stack>
-                    <Text
-                        textAlign="left"
-                        fontWeight="300">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta soluta itaque possimus sint saepe! Dolorum, assumenda perferendis? Impedit, consectetur ab.
-                    </Text>
+                    {sections.length > 0 && sections.map((item, index) => {
+                        switch (item.Section) {
+                            case "Heading":
+                                return <Heading key={item._id} fontWeight="300">{item.Text}</Heading>
+                            case "Text":
+                                return <Text key={item._id} textAlign="left" fontWeight="300">{item.Text}</Text>
+                            case "Image":
+                                return <Box key={item._id} display="flex" maxWidth="1100px"><Image src={item.Text} alt="about page image" /></Box>
+                            default:
+                                return null;
+                        }
+                    })}
                 </Box>
 
 
             </Box>
 
             <Footer />
-        </Box>
+        </Box >
 
     )
 }

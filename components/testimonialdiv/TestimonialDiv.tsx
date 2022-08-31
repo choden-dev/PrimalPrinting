@@ -13,18 +13,16 @@ import {
     AnimatePresence,
     motion
 } from 'framer-motion'
-import { infoStructure } from "../../contexts/types"
-type Props = {}
+import { infoStructure } from "../../types/types"
+type Props = {
+    testimonials: infoStructure[];
+}
 
-const testimonials: infoStructure[] = [{ title: "Yeddyyang", description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt alias quae similique fuga. Repellat debitis voluptatem dolores eos sit! Quos." },
-{ title: "1233233", description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt alias quae similique fuga. Repellat debitis voluptatem dolores eos sit! Quos." },
-{ title: "dffdsfdsdsf", description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt alias quae similique fuga. Repellat debitis voluptatem dolores eos sit! Quos." }]
-export default function TestimonialDiv({ }: Props) {
+export default function TestimonialDiv({ testimonials }: Props) {
     const [index, setTest] = React.useState<number>(0);
     const [isForward, setIsForward] = React.useState<boolean>(true);
     const [isAutoChange, setIsAutoChange] = React.useState<boolean>(true);
     const [smallScreen] = useMediaQuery('(max-width: 600px)');
-
     React.useEffect(() => {
         if (!isAutoChange) return;
         setTimeout(() => {
@@ -43,7 +41,6 @@ export default function TestimonialDiv({ }: Props) {
         setIsAutoChange(false);
         index + 1 < testimonials.length ? setTest(index + 1) : setTest(0);
     }
-
     return (
         <>
             <IconButton
