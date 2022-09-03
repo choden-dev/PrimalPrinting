@@ -124,7 +124,7 @@ const Home: NextPage<PageProps> = (text) => {
           </Box>
           <Box marginTop="4rem">
             <Text maxWidth="1100px"
-              fontSize="lg"
+              fontSize="2xl"
               fontWeight="300">
               {content.length > 0 && content[0].text}
             </Text>

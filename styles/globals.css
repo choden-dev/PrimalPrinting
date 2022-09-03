@@ -27,7 +27,6 @@ body {
 
 .secheading {
   z-index: 999;
-
   height: 0.5rem;
   display: flex;
   position: relative;

@@ -74,7 +74,7 @@ const About: NextPage<PageProps> = (content) => {
                             case "Heading":
                                 return <Heading key={item._id} fontWeight="300">{item.Text}</Heading>
                             case "Text":
-                                return <Text key={item._id} textAlign="left" fontWeight="300">{item.Text}</Text>
+                                return <Text key={item._id} fontSize="xl" textAlign="left" fontWeight="300">{item.Text}</Text>
                             case "Image":
                                 return <Box key={item._id} display="flex" maxWidth="1100px"><Image src={item.Text} alt="about page image" /></Box>
                             default:
