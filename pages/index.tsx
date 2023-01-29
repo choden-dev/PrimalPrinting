@@ -1,4 +1,5 @@
 import type { NextPage } from 'next'
+import Head from 'next/head'
 import {
   Box,
   Image,
@@ -49,7 +50,12 @@ export async function getStaticProps() {
       }
     };
   } catch (error) {
-    console.log("couldn't fetch data");
+    console.log(error);
+    return {
+      props: {
+        text: {}
+      }
+    }
   }
 }
 
@@ -65,6 +71,13 @@ const Home: NextPage<PageProps> = (text) => {
   }, [])
   return (
     <>
+      <Head>
+        <title>Primal Printing - All your printing needs</title>
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Primal Printing - All your printing needs" />
+        <meta property="og:url" content="https://primalprinting.co.nz" />
+        <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png"/>
+      </Head>
       <Box
         className="container">
         <NavBar />
