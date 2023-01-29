@@ -74,9 +74,10 @@ const Home: NextPage<PageProps> = (text) => {
       <Head>
         <title>Primal Printing - All your printing needs</title>
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Primal Printing - All your printing needs" />
+        <meta property="og:title" content="Primal Printing New Zealand - All your printing needs" />
+        <meta property="og:description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, buisness cards, and more" />
         <meta property="og:url" content="https://primalprinting.co.nz" />
-        <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png"/>
+        <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png" />
       </Head>
       <Box
         className="container">

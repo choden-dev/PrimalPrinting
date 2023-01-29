@@ -44,7 +44,7 @@ export default function Footer({ }: Props) {
 
             </Box>
             <Text
-                textAlign="center">Copyright Primal Printing 2022</Text>
+                textAlign="center">Copyright Primal Printing 2023</Text>
         </Box >
     )
 }
