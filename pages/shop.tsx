@@ -1,3 +1,4 @@
+import Head from "next/head"
 import React, { useEffect } from 'react'
 import { NextPage } from "next"
 import {
@@ -42,42 +43,51 @@ const Shop: NextPage<PageProps> = (message) => {
     }, [])
 
     return (
-        <Box className='container'>
+        <>
+            <Head>
+                <title>Primal Printing - All your printing needs | Shop</title>
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Primal Printing New Zealand - All your printing needs | Shop" />
+                <meta property="og:description" content="Browse some examples of the affordable printing services we offer." />
+                <meta property="og:url" content="https://primalprinting.co.nz/shop" />
+                <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png" />
+            </Head>
+            <Box className='container'>
 
-            <NavBar />
-            <Box
-                alignSelf="center"
-                margin="3rem 0"
-                display="flex"
-                flexDir="column"
-
-                gap="2rem">
-                <Heading
-                    textAlign="center">Our Products</Heading>
-
+                <NavBar />
                 <Box
-                    justifyContent="center"
+                    alignSelf="center"
+                    margin="3rem 0"
                     display="flex"
-                    gap="2rem"
-                    flexWrap="wrap"
-                >
-                    {items.map((item, index) => {
+                    flexDir="column"
 
-                        return (<ProductCard
-                            key={item.name}
-                            productName={item.name}
-                            productPrice={item.price}
-                            productDescription={""}
-                            image={item.image}
-                            hasButton={false}
-                        />)
-                    })}
+                    gap="2rem">
+                    <Heading
+                        textAlign="center">Our Products</Heading>
+
+                    <Box
+                        justifyContent="center"
+                        display="flex"
+                        gap="2rem"
+                        flexWrap="wrap"
+                    >
+                        {items.map((item, index) => {
+
+                            return (<ProductCard
+                                key={item.name}
+                                productName={item.name}
+                                productPrice={item.price}
+                                productDescription={""}
+                                image={item.image}
+                                hasButton={false}
+                            />)
+                        })}
+                    </Box>
                 </Box>
+                <Footer />
+
             </Box>
-            <Footer />
-
-        </Box>
-
+        </>
     )
 }
 export default Shop

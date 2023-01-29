@@ -1,3 +1,4 @@
+import Head from "next/head"
 import React from "react"
 import { NextPage } from "next"
 import {
@@ -61,72 +62,81 @@ const Contact: NextPage<PageProps> = (details) => {
         alert(`${result.message}`);
     }
     return (
-        <Box className='container'>
-            <NavBar />
-            <Box
-                margin="5rem -7%"
-                display="flex"
-                flexDir="column"
-                alignSelf="center"
-                maxW="800px"
-                width="100%"
-                gap="1rem"
-                padding="2rem"
-                position="relative"
-                bg="white"
-                borderRadius="sm"
-                border="1px"
-                borderColor="brown.200"
-                boxShadow="0.2rem 0.2rem 0 #672212"
-            >
-                <Box width="100%"
-                    height="15rem"
+        <>
+            <Head>
+                <title>Primal Printing - All your printing needs | Contact</title>
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Primal Printing New Zealand - All your printing needs | Contact" />
+                <meta property="og:description" content="We are always happy to help! Feel free to consult us for support or queries about your printing needs." />
+                <meta property="og:url" content="https://primalprinting.co.nz/contact" />
+                <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png" />
+            </Head>
+            <Box className='container'>
+                <NavBar />
+                <Box
+                    margin="5rem -7%"
+                    display="flex"
+                    flexDir="column"
+                    alignSelf="center"
+                    maxW="800px"
+                    width="100%"
+                    gap="1rem"
+                    padding="2rem"
+                    position="relative"
+                    bg="white"
                     borderRadius="sm"
-                    overflow="hidden">
-                    <Image src="photo.png"
-                        alt=''
-                        filter="brightness(0.5)" />
+                    border="1px"
+                    borderColor="brown.200"
+                    boxShadow="0.2rem 0.2rem 0 #672212"
+                >
+                    <Box width="100%"
+                        height="15rem"
+                        borderRadius="sm"
+                        overflow="hidden">
+                        <Image src="photo.png"
+                            alt=''
+                            filter="brightness(0.5)" />
 
+                    </Box>
+
+                    <Heading fontWeight="500">
+                        Get in Touch
+                    </Heading>
+                    <Stack spacing="0">
+                        <Text fontSize="xl" fontWeight="500">Email: {contacts && contacts.email}</Text>
+                        <Text fontSize="xl" fontWeight="500">Phone: {contacts && contacts.phone}</Text>
+                    </Stack>
+
+                    <Text>If you have any questions or queries, ask away!</Text>
+                    <form onSubmit={submit}>
+                        <FormControl isRequired
+                        >
+                            <FormLabel>
+                                Name
+                            </FormLabel>
+                            <Input borderRadius="sm" type='text' />
+                            <FormLabel>
+                                Email
+                            </FormLabel>
+                            <Input name="email" borderRadius="sm" type='email' />
+                            <FormLabel>
+                                Message
+                            </FormLabel>
+                            <Textarea name="message" borderRadius="sm" size="lg" />
+                        </FormControl>
+                        <Button
+                            marginTop="1.5rem"
+                            width="100%"
+                            type="submit"
+                            variant="browned"
+                            size="md" >
+                            Send
+                        </Button>
+                    </form>
                 </Box>
-
-                <Heading fontWeight="500">
-                    Get in Touch
-                </Heading>
-                <Stack spacing="0">
-                    <Text fontSize="xl" fontWeight="500">Email: {contacts && contacts.email}</Text>
-                    <Text fontSize="xl" fontWeight="500">Phone: {contacts && contacts.phone}</Text>
-                </Stack>
-
-                <Text>If you have any questions or queries, ask away!</Text>
-                <form onSubmit={submit}>
-                    <FormControl isRequired
-                    >
-                        <FormLabel>
-                            Name
-                        </FormLabel>
-                        <Input borderRadius="sm" type='text' />
-                        <FormLabel>
-                            Email
-                        </FormLabel>
-                        <Input name="email" borderRadius="sm" type='email' />
-                        <FormLabel>
-                            Message
-                        </FormLabel>
-                        <Textarea name="message" borderRadius="sm" size="lg" />
-                    </FormControl>
-                    <Button
-                        marginTop="1.5rem"
-                        width="100%"
-                        type="submit"
-                        variant="browned"
-                        size="md" >
-                        Send
-                    </Button>
-                </form>
-            </Box>
-            <Footer />
-        </Box >
-
+                <Footer />
+            </Box >
+        </>
     )
 }
 export default Contact
