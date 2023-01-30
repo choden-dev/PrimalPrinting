@@ -68,10 +68,10 @@ const Home: NextPage<PageProps> = (text) => {
       <Head>
         <title>Primal Printing - All your printing needs</title>
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Primal Printing New Zealand - All your printing needs" />
+        <meta property="og:title" content="Primal Printing New Zealand - Affordable printing services!" />
         <meta property="og:description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, buisness cards, and more" />
         <meta property="og:url" content="https://primalprinting.co.nz" />
-        <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png" />
+        <meta property="og:image" content="https://drive.google.com/uc?export=view&id=1Qz_2nuEozFbUypf4jcYApyF2KSkyiTnk" />
       </Head>
 
       <Box
@@ -206,28 +206,33 @@ const Home: NextPage<PageProps> = (text) => {
             })}
           </Box>
         </Box>
-        < Box
-          minHeight="16rem"
-          marginTop="3rem"
-          display="flex"
-          flexDir="column"
-          position="relative"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Box className="secheading"
-            marginTop="3rem">
-            <SectionHeading text={"Testimonials"} />
-          </Box>
-          <Box display="flex"
-            alignItems="center"
-            padding="3rem 0">
-            {content.length > 1 && <TestimonialDiv testimonials={content[1]} />}
-          </Box>
-          <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
+        {false &&
+          <>
+            < Box
+              minHeight="16rem"
+              marginTop="3rem"
+              display="flex"
+              flexDir="column"
+              position="relative"
+              justifyContent="center"
+              alignItems="center"
+            >
 
-        </Box >
+              <Box className="secheading"
+                marginTop="3rem">
+                <SectionHeading text={"Testimonials"} />
+              </Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                padding="3rem 0">
+                {content.length > 1 && <TestimonialDiv testimonials={content[1]} />}
+              </Box>
+              <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
 
+            </Box >
+          </>
+        }
         <Box>
 
           <WhatNextDiv />
