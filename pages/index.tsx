@@ -57,12 +57,8 @@ type PageProps = {
 }
 
 const Home: NextPage<PageProps> = (text) => {
-  const [content, setContent] = React.useState<any[][]>([]);
-  const [images, setImages] = React.useState<{ src: string, id: string }[]>([]);
   const [smallScreen] = useMediaQuery('(max-width: 800px)')
-  React.useEffect(() => {
-    setContent(text.text);
-  }, [])
+
   return (
     <>
       <Head>
@@ -185,7 +181,7 @@ const Home: NextPage<PageProps> = (text) => {
               Our Story
             </Heading>
             <Box height="5px" bg="brown.700" width="160px" alignSelf="center" marginTop="-0.7rem"></Box>
-            {content[0] && content[0].map((item: any) => {
+            {text.text[0] && text.text[0].map((item: any) => {
               switch (item.Section) {
                 case "Heading":
                   return <Heading key={item._id} fontWeight="300">{item.Text}</Heading>
@@ -228,7 +224,7 @@ const Home: NextPage<PageProps> = (text) => {
                 display="flex"
                 alignItems="center"
                 padding="3rem 0">
-                {content.length > 1 && <TestimonialDiv testimonials={content[1]} />}
+                {text.text.length > 1 && <TestimonialDiv testimonials={text.text[1]} />}
               </Box>
               <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
 

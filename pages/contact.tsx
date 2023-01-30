@@ -40,10 +40,7 @@ type PageProps = {
 }
 
 const Contact: NextPage<PageProps> = (details) => {
-    const [contacts, setContacts] = React.useState<any | undefined>(undefined);
-    React.useEffect(() => {
-        setContacts(details.details[0]);
-    })
+
     const submit = async (event: any) => {
         event.preventDefault();
         const name = event.target.name.value;
@@ -109,8 +106,8 @@ const Contact: NextPage<PageProps> = (details) => {
                         Get in Touch
                     </Heading>
                     <Stack spacing="0">
-                        <Text fontSize="xl" fontWeight="500">Email: {contacts && contacts.email}</Text>
-                        <Text fontSize="xl" fontWeight="500">Phone: {contacts && contacts.phone}</Text>
+                        <Text fontSize="xl" fontWeight="500">Email: {details.details[0] && details.details[0].email}</Text>
+                        <Text fontSize="xl" fontWeight="500">Phone: {details.details[0] && details.details[0].phone}</Text>
                     </Stack>
 
                     <Text>If you have any questions or queries, ask away!</Text>
