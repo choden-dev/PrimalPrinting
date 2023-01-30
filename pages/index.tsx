@@ -5,43 +5,36 @@ import {
   Image,
   Heading,
   Text,
-  Button,
+  useMediaQuery
 
 } from '@chakra-ui/react'
 import NavBar from '../components/navbar/NavBar'
-import styles from '../styles/index.module.css'
-import ProductDiv from '../components/productdiv/ProductDiv'
+
 import TestimonialDiv from '../components/testimonialdiv/TestimonialDiv'
 import SectionHeading from '../components/sectionheading/SectionHeading'
-import DescriptionDiv from '../components/descriptiondiv/DescriptionDiv'
+import { formatText } from '../types/helper'
 import WhatNextDiv from '../components/whatnextdiv/WhatNextDiv'
 import Footer from '../components/footer/Footer'
-import Link from 'next/link'
+
 import { connectToDatabase } from '../lib/mongo'
 import React from 'react'
 export async function getStaticProps() {
   try {
     let { db } = await connectToDatabase('WebsiteText');
-    let aboutText = await db
-      .collection('Home1')
+
+    let sections = await db
+      .collection('AboutPage')
       .find({})
+      .sort({ 'Order': 1 })
       .toArray();
-    let whyText = await db
-      .collection('WhyPrimal')
-      .find({})
-      .toArray();
-    let popular = await db
-      .collection('PopularProducts')
-      .find({})
-      .toArray();
+
     let testimonials = await db
       .collection('Testimonials')
       .find({})
       .toArray();
-    let final = aboutText
-      .concat(whyText)
-      .concat(popular)
-      .concat(testimonials);
+
+    let final = [sections]
+      .concat([testimonials]);
     return {
       props:
       {
@@ -64,7 +57,9 @@ type PageProps = {
 }
 
 const Home: NextPage<PageProps> = (text) => {
-  const [content, setContent] = React.useState<any[]>([]);
+  const [content, setContent] = React.useState<any[][]>([]);
+  const [images, setImages] = React.useState<{ src: string, id: string }[]>([]);
+  const [smallScreen] = useMediaQuery('(max-width: 800px)')
   React.useEffect(() => {
     console.log(text.text)
     setContent(text.text);
@@ -79,11 +74,12 @@ const Home: NextPage<PageProps> = (text) => {
         <meta property="og:url" content="https://primalprinting.co.nz" />
         <meta property="og:image" content="https://primalprinting.co.nz/primallogo.png" />
       </Head>
+
       <Box
         className="container">
         <NavBar />
 
-        <Box
+        {  /*   <Box
           zIndex="999"
           className={styles.mainimage}>
           <Image
@@ -126,26 +122,9 @@ const Home: NextPage<PageProps> = (text) => {
 
             </Link>
           </Box>
-        </Box>
-        <Box
-          marginTop="8rem"
-          display="flex"
-          alignItems="center"
-          flexDir="column"
-          textAlign="center">
-          <Box className="secheading">
-            <SectionHeading text={"Anything Printing"} />
-          </Box>
-          <Box marginTop="4rem">
-            <Text maxWidth="1100px"
-              fontSize="2xl"
-              fontWeight="300">
-              {content.length > 0 && content[0].text}
-            </Text>
-          </Box>
-        </Box>
-        <Box
+        </Box> */}
 
+        {       /* <Box
           alignSelf="center"
           textAlign="center"
           marginTop="8rem"
@@ -162,10 +141,9 @@ const Home: NextPage<PageProps> = (text) => {
           >
             <Box position="absolute" bg="brown.700" width="100%" height="50%" bottom="0" />
 
-            <DescriptionDiv descriptions={content.slice(1, 4)} />
           </Box>
-        </Box>
-        <Box
+            </Box> */}
+        {      /* <Box
           display="flex"
           width="100%"
           flexDir="column"
@@ -178,11 +156,75 @@ const Home: NextPage<PageProps> = (text) => {
           >
             <SectionHeading text={"Popular Products"} />
           </Box>
-          <ProductDiv products={content.slice(4, 7)} />
 
-        </Box>
 
+            </Box> */}
         <Box
+          margin="3rem 0"
+          alignSelf="center"
+          display="flex"
+          flexDir="column"
+          maxWidth="1100px"
+          bg="white"
+          padding="3rem 2rem"
+          border="1px"
+          borderRadius="sm"
+          borderColor="brown.200"
+          boxShadow="0.2rem 0.2rem 0 #672212">
+          <Box textAlign="center"
+            display="flex"
+            flexDir="column"
+            gap="1.2rem"
+            position="relative">
+            <Heading
+              zIndex="1"
+              color="brown.900"
+              size="4xl"
+              fontWeight="400">
+              Our Story
+            </Heading>
+            <Box height="5px" bg="brown.700" width="160px" alignSelf="center" marginTop="-0.7rem"></Box>
+            {content[0] && content[0].map((item: any) => {
+              switch (item.Section) {
+                case "Heading":
+                  return <Heading key={item._id} fontWeight="300">{item.Text}</Heading>
+                case "Text":
+                  return (
+                    <>
+
+                      <Text key={item._id}
+                        dangerouslySetInnerHTML={{ __html: item.Text }
+                        } fontSize="xl"
+                        textAlign="left"
+                        fontWeight="300"
+                        whiteSpace="pre-line" />
+                    </>
+                  )
+                case "Image":
+                  if (images.includes(item)) {
+                    console.log("found")
+                    return
+                  }
+                  else {
+                    images.push({ src: item.Text, id: item._id });
+                    return
+                  }
+                default:
+                  return null;
+              }
+            })}
+            <Box display="grid" gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"} alignItems={"center"}>
+              {images.map((text: { src: string, id: string }) => {
+                return (
+                  <div key={text.id}>
+                    <Image src={text.src}  alt={"about page image"} width="100%" objectFit="cover" />
+                  </div>
+                )
+              })}
+            </Box>
+          </Box>
+        </Box>
+        < Box
           minHeight="16rem"
           marginTop="3rem"
           display="flex"
@@ -198,11 +240,11 @@ const Home: NextPage<PageProps> = (text) => {
           <Box display="flex"
             alignItems="center"
             padding="3rem 0">
-            {content.length > 8 && <TestimonialDiv testimonials={content.slice(7, 12)} />}
+            {content.length > 1 && <TestimonialDiv testimonials={content[1]} />}
           </Box>
           <Box position="absolute" bottom="5rem" zIndex="-1" width="70%" height="10%" bg="brown.700" />
 
-        </Box>
+        </Box >
 
         <Box>
 

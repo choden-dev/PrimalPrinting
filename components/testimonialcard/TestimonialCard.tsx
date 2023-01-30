@@ -55,6 +55,7 @@ export default function TestimonialCard({ toDisplay }: Props) {
                     {toDisplay.title}
                 </Heading>
                 <Text
+                    whiteSpace="pre-line"
                     fontSize="lg"
                     fontWeight="300">
                     {toDisplay.description}

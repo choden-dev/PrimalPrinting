@@ -31,9 +31,8 @@ export default function Footer({ }: Props) {
                 <UnorderedList
                     styleType="none">
                     <ListItem><Text fontWeight="500">Site</Text></ListItem>
-                    <ListItem><Link href='/about'>About Primal Printing</Link></ListItem>
+                    <ListItem><Link href='/'>About Primal Printing</Link></ListItem>
                     <ListItem><Link href='/contact'>Get in touch</Link></ListItem>
-                    <ListItem><Link href='/shop'>Products</Link></ListItem>
 
                 </UnorderedList>
                 <UnorderedList

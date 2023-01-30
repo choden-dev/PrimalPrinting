@@ -57,13 +57,9 @@ export default function NavBar({ }: Props) {
             </span>
             <Box marginLeft="auto" display="flex">
                 <ul className={`${styles.navigationitems} ${menuOpened && styles.opened}`}>
+        
                     <li>
-                        <Link href="/shop">
-                            <Heading size="sm" fontWeight="500">Shop</Heading>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="/about">
+                        <Link href="/">
                             <Heading size="sm" fontWeight="500">About</Heading>
                         </Link>
                     </li>

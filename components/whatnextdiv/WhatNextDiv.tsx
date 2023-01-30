@@ -40,6 +40,7 @@ export default function WhatNextDiv() {
                     fontWeight="300"
 
                 >
+                    Feel free to&nbsp;
                     <NextLink href="/contact" passHref>
                         <Link
                             _hover={{
@@ -48,22 +49,11 @@ export default function WhatNextDiv() {
                             className={styles.endlink}
                             as="a"
                             color="brown.700"
-                            fontWeight="400">Contact us
+                            fontWeight="400">Contact me
                         </Link>
                     </NextLink>
 
-                    &nbsp;or&nbsp;
-                    <NextLink href="/shop" passHref>
-                        <Link
-                            _hover={{
-                                textDecor: "none"
-                            }}
-                            className={styles.endlink}
-                            as="a"
-                            color="brown.700"
-                            fontWeight="400">browse our shop
-                        </Link>
-                    </NextLink>
+    
                 </Heading>
             </Box>
 
