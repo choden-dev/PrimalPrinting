@@ -46,10 +46,12 @@ const Contact: NextPage<PageProps> = (details) => {
     })
     const submit = async (event: any) => {
         event.preventDefault();
+        const name = event.target.name.value;
         const message = event.target.message.value;
         const email = event.target.email.value;
-        const res = await fetch('/api/form', {
+        const res = await fetch('https://formspree.io/f/mqkoebvo', {
             body: JSON.stringify({
+                name: name,
                 email: email,
                 message: message
             }),
@@ -58,8 +60,12 @@ const Contact: NextPage<PageProps> = (details) => {
             },
             method: 'POST',
         })
-        const result = await res.json();
-        alert(`${result.message}`);
+        if (res.ok) {
+            alert(`submitted!`);
+        } else {
+            console.warn("Something went wrong");
+        }
+    
     }
     return (
         <>
@@ -114,7 +120,7 @@ const Contact: NextPage<PageProps> = (details) => {
                             <FormLabel>
                                 Name
                             </FormLabel>
-                            <Input borderRadius="sm" type='text' />
+                            <Input name="name" borderRadius="sm" type='text' />
                             <FormLabel>
                                 Email
                             </FormLabel>
