@@ -67,6 +67,7 @@ const Home: NextPage<PageProps> = (text) => {
     <>
       <Head>
         <title>Primal Printing - All your printing needs</title>
+        <meta name="description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, buisness cards, and more" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Primal Printing New Zealand - Affordable printing services!" />
         <meta property="og:description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, buisness cards, and more" />
@@ -176,6 +177,7 @@ const Home: NextPage<PageProps> = (text) => {
             gap="1.2rem"
             position="relative">
             <Heading
+              as="h1"
               zIndex="1"
               color="brown.900"
               size="4xl"
