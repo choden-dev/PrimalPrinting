@@ -61,7 +61,6 @@ const Home: NextPage<PageProps> = (text) => {
   const [images, setImages] = React.useState<{ src: string, id: string }[]>([]);
   const [smallScreen] = useMediaQuery('(max-width: 800px)')
   React.useEffect(() => {
-    console.log(text.text)
     setContent(text.text);
   }, [])
   return (
@@ -191,7 +190,6 @@ const Home: NextPage<PageProps> = (text) => {
                 case "Text":
                   return (
                     <>
-
                       <Text key={item._id}
                         dangerouslySetInnerHTML={{ __html: item.Text }
                         } fontSize="xl"
@@ -201,27 +199,11 @@ const Home: NextPage<PageProps> = (text) => {
                     </>
                   )
                 case "Image":
-                  if (images.includes(item)) {
-                    console.log("found")
-                    return
-                  }
-                  else {
-                    images.push({ src: item.Text, id: item._id });
-                    return
-                  }
+                  return <Image src={item.Text} key={item._id} alt={"about page image"} width="100%" objectFit="cover" />
                 default:
                   return null;
               }
             })}
-            <Box display="grid" gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"} alignItems={"center"}>
-              {images.map((text: { src: string, id: string }) => {
-                return (
-                  <div key={text.id}>
-                    <Image src={text.src}  alt={"about page image"} width="100%" objectFit="cover" />
-                  </div>
-                )
-              })}
-            </Box>
           </Box>
         </Box>
         < Box
