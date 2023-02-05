@@ -30,7 +30,7 @@ export default function Footer({ }: Props) {
                     display="flex"
                     padding="1rem 0"
                     justifyContent="center"
-                    gap="5rem"
+                    gap={smallScreen ? "1rem" :"5rem"}
                     fontWeight="400"
                 >
                     <UnorderedList

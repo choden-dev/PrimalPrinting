@@ -131,6 +131,8 @@ const Home: NextPage<PageProps> = (text) => {
           <Box
             width="100vw"
             display="flex"
+  
+            
             justifyContent="center"
             padding="4rem 7%"
             position="relative"
