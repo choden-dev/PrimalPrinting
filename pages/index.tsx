@@ -9,7 +9,7 @@ import {
 
 } from '@chakra-ui/react'
 import NavBar from '../components/navbar/NavBar'
-
+import NoSsr from '../components/NoSsr'
 import TestimonialDiv from '../components/testimonialdiv/TestimonialDiv'
 import SectionHeading from '../components/sectionheading/SectionHeading'
 import { formatText } from '../types/helper'
@@ -18,6 +18,7 @@ import Footer from '../components/footer/Footer'
 
 import { connectToDatabase } from '../lib/mongo'
 import React from 'react'
+import { MessengerChat } from 'react-messenger-chat-plugin'
 export async function getStaticProps() {
   try {
     let { db } = await connectToDatabase('WebsiteText');
@@ -157,6 +158,7 @@ const Home: NextPage<PageProps> = (text) => {
 
 
             </Box> */}
+
         <Box
           margin="3rem 0"
           alignSelf="center"
@@ -239,6 +241,9 @@ const Home: NextPage<PageProps> = (text) => {
         </Box>
         <Footer />
       </Box >
+
+      <NoSsr><MessengerChat pageId={process.env.PAGE_ID!} /></NoSsr>
+
     </>
   )
 }
