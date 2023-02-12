@@ -242,7 +242,7 @@ const Home: NextPage<PageProps> = (text) => {
         <Footer />
       </Box >
 
-      <NoSsr><MessengerChat pageId={process.env.PAGE_ID!} /></NoSsr>
+      <NoSsr><MessengerChat pageId={process.env.PAGE_ID!} themeColor={''} loggedInGreeting={''} loggedOutGreeting={''} /></NoSsr>
 
     </>
   )
