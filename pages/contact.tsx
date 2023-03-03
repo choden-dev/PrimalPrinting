@@ -1,5 +1,5 @@
 import Head from "next/head"
-import React from "react"
+import React, { useState } from "react"
 import { NextPage } from "next"
 import {
     Box,
@@ -41,8 +41,12 @@ type PageProps = {
 
 const Contact: NextPage<PageProps> = (details) => {
 
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [isDone, setIsDone] = useState<boolean>(false);
+
     const submit = async (event: any) => {
         event.preventDefault();
+        setIsProcessing(true);
         const name = event.target.name.value;
         const message = event.target.message.value;
         const email = event.target.email.value;
@@ -58,12 +62,26 @@ const Contact: NextPage<PageProps> = (details) => {
             method: 'POST',
         })
         if (res.ok) {
-            alert(`submitted!`);
+            alert(`Submitted!`);
+            setIsProcessing(false);
+            setIsDone(true);
         } else {
+            alert(`something went wrong`)
             console.warn("Something went wrong");
+            setIsProcessing(false);
         }
-    
+
     }
+
+    const submitted = (
+        <>
+            <Heading fontWeight="400" textAlign="center">
+                Thank You!<br /> We will get back to you soon.
+            </Heading>
+            <Button variant="browned" onClick={() => setIsDone(false)}>Submit Another</Button>
+        </>
+    )
+
     return (
         <>
             <Head>
@@ -109,33 +127,44 @@ const Contact: NextPage<PageProps> = (details) => {
                         <Text fontSize="xl" fontWeight="500">Email: {details.details[0] && details.details[0].email}</Text>
                         <Text fontSize="xl" fontWeight="500">Phone: {details.details[0] && details.details[0].phone}</Text>
                     </Stack>
-
-                    <Text>If you have any questions or queries, ask away!</Text>
-                    <form onSubmit={submit}>
-                        <FormControl isRequired
-                        >
-                            <FormLabel>
-                                Name
-                            </FormLabel>
-                            <Input name="name" borderRadius="sm" type='text' />
-                            <FormLabel>
-                                Email
-                            </FormLabel>
-                            <Input name="email" borderRadius="sm" type='email' />
-                            <FormLabel>
-                                Message
-                            </FormLabel>
-                            <Textarea name="message" borderRadius="sm" size="lg" />
-                        </FormControl>
-                        <Button
-                            marginTop="1.5rem"
-                            width="100%"
-                            type="submit"
-                            variant="browned"
-                            size="md" >
-                            Send
-                        </Button>
-                    </form>
+                    {
+                        isDone ? submitted :
+                            <>
+                                <Text>If you have any questions or queries, ask away!</Text>
+                                <form onSubmit={submit}
+                                    style={isProcessing ?
+                                        {
+                                            pointerEvents: 'none',
+                                            filter: 'blur(1rem)',
+                                        } :
+                                        {
+                                        }}>
+                                    <FormControl isRequired
+                                    >
+                                        <FormLabel>
+                                            Name
+                                        </FormLabel>
+                                        <Input name="name" borderRadius="sm" type='text' />
+                                        <FormLabel>
+                                            Email
+                                        </FormLabel>
+                                        <Input name="email" borderRadius="sm" type='email' />
+                                        <FormLabel>
+                                            Message
+                                        </FormLabel>
+                                        <Textarea name="message" borderRadius="sm" size="lg" />
+                                    </FormControl>
+                                    <Button
+                                        marginTop="1.5rem"
+                                        width="100%"
+                                        type="submit"
+                                        variant="browned"
+                                        size="md" >
+                                        Send
+                                    </Button>
+                                </form>
+                            </>
+                    }
                 </Box>
                 <Footer />
             </Box >
