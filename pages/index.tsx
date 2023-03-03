@@ -64,10 +64,10 @@ const Home: NextPage<PageProps> = (text) => {
     <>
       <Head>
         <title>Primal Printing - All your printing needs</title>
-        <meta name="description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, buisness cards, and more" />
+        <meta name="description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, business cards, and more" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Primal Printing New Zealand - Affordable printing services!" />
-        <meta property="og:description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, buisness cards, and more" />
+        <meta property="og:description" content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, business cards, and more" />
         <meta property="og:url" content="https://primalprinting.co.nz" />
         <meta property="og:image" content="https://drive.google.com/uc?export=view&id=1Qz_2nuEozFbUypf4jcYApyF2KSkyiTnk" />
       </Head>
