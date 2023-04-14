@@ -22,10 +22,14 @@ const theme = extendTheme({
             100: '#F3EBE3'
         }
     },
+	fonts: {
+		heading: `'Raleway', sans-serif`,
+		body: `'Open Sans', sans-serif`,
+	},
     styles: {
         global: {
             body: {
-                bg: 'rgb(251,251,251)'
+				bg: 'rgb(251,251,251)',
             }
         }
     },

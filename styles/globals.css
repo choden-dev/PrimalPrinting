@@ -2,12 +2,15 @@
   color-scheme: only light;
 }
 
+html {
+	font-family: 'Raleway', 'Helvetica Neue',  sans-serif;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, Quicksand, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: 'Raleway', 'Helvetica Neue',  sans-serif;
   background: rgb(249, 249, 249);
 
 }

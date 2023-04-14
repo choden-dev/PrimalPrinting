@@ -66,7 +66,7 @@ export default function Footer({ }: Props) {
 
             <Text
                 fontWeight="500"
-                textAlign="center"
+                textAlign="left"
                 paddingBottom="0.5rem">&copy; Copyright Primal Printing 2023</Text>
         </Box >
     )
