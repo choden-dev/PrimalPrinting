@@ -1,7 +1,7 @@
 import React from 'react'
 import {
     Box,
-    Heading,
+Heading,
     Button,
     Text
 } from "@chakra-ui/react"
@@ -9,7 +9,7 @@ import Link from 'next/link'
 import styles from './ProductCard.module.css'
 import ItemModal from '../itemmodal/ItemModal'
 type Props = {
-    productName: string;
+	productName: string;
     productPrice: string;
     productDescription: any;
     image: string;
