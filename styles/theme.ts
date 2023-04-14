@@ -24,7 +24,7 @@ const theme = extendTheme({
     },
 	fonts: {
 		heading: `'Raleway', sans-serif`,
-		body: `'Open Sans', sans-serif`,
+		body: `'Raleway', sans-serif`,
 	},
     styles: {
         global: {

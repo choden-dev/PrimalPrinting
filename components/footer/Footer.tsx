@@ -1,6 +1,7 @@
 import React from 'react'
 import {
     Box,
+	Divider,
     Link,
     UnorderedList,
     ListItem,
@@ -24,50 +25,35 @@ export default function Footer({ }: Props) {
             justifyContent="center"
             alignItems="center"
         >
-
-            <Box maxWidth="1100px" margin="auto" alignItems={"center"} display="grid" gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}>
+			<Box maxWidth="1100px" margin="1rem" display="flex" flexDir="column">
+            <Box maxWidth="1100px"  display="grid" gridTemplateColumns={smallScreen ? "1fr" : "5fr 3fr"}>
+			<Image src="/primallogo.png" maxH="10rem"></Image>
                 <Box
                     display="flex"
                     padding="1rem 0"
                     justifyContent="center"
-                    gap={smallScreen ? "1rem" :"5rem"}
+                    gap={smallScreen ? "1rem" :"1rem"}
                     fontWeight="400"
                 >
                     <UnorderedList
                         styleType="none">
-                        <ListItem><Text fontWeight="500">Site</Text></ListItem>
+                        <ListItem><Text fontWeight="800">Site</Text></ListItem>
                         <ListItem><Link href='/'>About Primal Printing</Link></ListItem>
                         <ListItem><Link href='/contact'>Get in touch</Link></ListItem>
+						<ListItem><Link href='/contact'>Make a Query</Link></ListItem>
                     </UnorderedList>
                     <UnorderedList
                         styleType="none">
-                        <ListItem><Text fontWeight="500">Support</Text></ListItem>
-                        <ListItem><Link href='/contact'>Make a Query</Link></ListItem>
+                        <ListItem><Text fontWeight="800">Social Media</Text></ListItem>
                     </UnorderedList>
-
-                </Box>
-                <Box display="flex"
-                    flexDir={smallScreen ? "column" : "row"}
-                    alignItems="center"
-                    justifyContent="center"
-                    justifySelf="center"
-                    textAlign={smallScreen ? "center" : "right"}
-                    paddingTop="1rem 0">
-                    <UnorderedList styleType="none">
-                        <ListItem><Text fontWeight="500">Get in Touch</Text></ListItem>
-                        <ListItem>02108678038</ListItem>
-                        <ListItem>primalprintingnz@gmail.com</ListItem>
-                    </UnorderedList>
-
-                    <Image src="/primallogo.png" maxH="10rem"></Image>
 
                 </Box>
             </Box>
-
+			<Divider borderColor="brown.900" width="70%" marginBottom="10px"/>
             <Text
                 fontWeight="500"
                 textAlign="left"
-                paddingBottom="0.5rem">&copy; Copyright Primal Printing 2023</Text>
+                paddingBottom="0.5rem"><strong>&copy; Copyright Primal Printing 2023</strong>	|	02108678038	|	primalprintingnz@gmail.com</Text>
         </Box >
-    )
+    </Box>)
 }
