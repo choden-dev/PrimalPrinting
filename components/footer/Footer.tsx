@@ -21,12 +21,13 @@ export default function Footer({ }: Props) {
             transform="translateX(-7%)"
             marginTop="auto"
             flexDir="column"
+			display="flex"
             zIndex="999"
             justifyContent="center"
             alignItems="center"
         >
-			<Box maxWidth="1100px" margin="1rem" display="flex" flexDir="column">
-            <Box maxWidth="1100px"  display="grid" gridTemplateColumns={smallScreen ? "1fr" : "5fr 3fr"}>
+			<Box maxWidth="900px" width="100%" margin="1rem" display="flex" flexDir="column">
+            <Box maxWidth="100%"  display="grid" gridTemplateColumns={smallScreen ? "1fr" : "5fr 3fr"}>
 			<Image justifySelf={smallScreen ? "center" : "flex-start"} src="/primallogo.png" maxH="10rem"></Image>
                 <Box
                     display="flex"
