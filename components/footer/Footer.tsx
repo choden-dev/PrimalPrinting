@@ -27,7 +27,7 @@ export default function Footer({ }: Props) {
         >
 			<Box maxWidth="1100px" margin="1rem" display="flex" flexDir="column">
             <Box maxWidth="1100px"  display="grid" gridTemplateColumns={smallScreen ? "1fr" : "5fr 3fr"}>
-			<Image src="/primallogo.png" maxH="10rem"></Image>
+			<Image justifySelf={smallScreen ? "center" : "flex-start"} src="/primallogo.png" maxH="10rem"></Image>
                 <Box
                     display="flex"
                     padding="1rem 0"
