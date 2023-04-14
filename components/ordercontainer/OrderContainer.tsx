@@ -1,4 +1,4 @@
-import { Box, Image, Input, FormControl } from "@chakra-ui/react";
+import { Box, Image, Input, FormControl, Textarea } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import Footer from "../footer/Footer";
 
@@ -16,8 +16,9 @@ const OrderContainer = () => {
                     top="0"
                     left="-2rem"
                     height="100%"
-                    maxW="2.8rem"
+                    w="2.8rem"
                     overflowY="hidden"
+                    backgroundImage="/binder.png"
                 >
                     <Image src="/binder.png" alt="" />
                 </Box>
@@ -38,13 +39,16 @@ const OrderContainer = () => {
                         borderRadius="2px"
                     ></Box>
                     <FormControl>
-                        <Box
-                            display="grid"
-                            gridTemplateColumns="1fr 1fr"
-                            columnGap="1rem"
-                        >
-                            <Input type="text" />
-                            <Input type="email" />
+                        <Box display="flex" flexDir="column" gap="1rem">
+                            <Box
+                                display="grid"
+                                gridTemplateColumns="1fr 1fr"
+                                columnGap="1rem"
+                            >
+                                <Input type="text" />
+                                <Input type="email" />
+                            </Box>
+                            <Textarea />
                         </Box>
                     </FormControl>
                 </Box>
