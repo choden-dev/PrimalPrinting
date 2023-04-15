@@ -56,13 +56,15 @@ const OrderContainer = () => {
                                 hasButton={true}
                             />
                         </Box>
-                        <Box
-                            w="100%"
-                            h="10rem"
-                            bg="brown.100"
-                            borderRadius="2px"
-                        ></Box>
                         <FormControl>
+                            <Box
+                                w="100%"
+                                h="10rem"
+                                bg="brown.100"
+                                borderRadius="2px"
+                            >
+                                <Input type="file" />
+                            </Box>
                             <Box display="flex" flexDir="column" gap="1rem">
                                 <Box
                                     display="grid"
@@ -86,12 +88,16 @@ const OrderContainer = () => {
                     top={smallScreen ? "0" : "5rem"}
                 >
                     <Box display="flex" flexDir="column">
-                        <Heading as="p">Total Price</Heading>
+                        <Heading fontSize="1.5rem" as="p">
+                            Total Price
+                        </Heading>
                         <List>
                             <ListItem>
                                 Coursebook (Upload, 100-200 pages)
                             </ListItem>
-                            <ListItem>Estimated Price</ListItem>
+                            <ListItem>
+                                <strong>Estimated Price:</strong>
+                            </ListItem>
                             <Button variant="browned">Order Now</Button>
                         </List>
                     </Box>
