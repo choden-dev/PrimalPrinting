@@ -15,13 +15,11 @@ const OrderContainer = () => {
                     position="absolute"
                     top="0"
                     left="-2rem"
-                    height="100%"
+                    h="100%"
                     w="2.8rem"
                     overflowY="hidden"
                     backgroundImage="/binder.png"
-                >
-                    <Image src="/binder.png" alt="" />
-                </Box>
+                ></Box>
                 <Box display="flex" flexDir="column" gap="1rem">
                     <Box>
                         <ProductCard
