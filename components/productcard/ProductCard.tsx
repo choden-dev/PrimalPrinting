@@ -42,16 +42,6 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                     },
                 }}
             >
-                {!hasButton && (
-                    <ItemModal
-                        close={closeInfo}
-                        isOpen={infoOpen}
-                        imageUrl={image}
-                        description={productDescription}
-                        name={productName}
-                    />
-                )}
-
                 <Box
                     className={styles.innersection}
                     transition="transform 0.5s"

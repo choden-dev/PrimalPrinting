@@ -8,18 +8,21 @@ import {
     List,
     ListItem,
     Button,
+    useMediaQuery,
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import Footer from "../footer/Footer";
 
 const OrderContainer = () => {
+    const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
     return (
         <>
             <Box
                 paddingTop="1rem"
                 display="grid"
                 columnGap="1rem"
-                gridTemplateColumns="3fr 1.5fr"
+                rowGap="1rem"
+                gridTemplateColumns={smallScreen ? "1fr" : "3fr 1.5fr"}
             >
                 <Box
                     bg="white"
@@ -37,7 +40,12 @@ const OrderContainer = () => {
                         backgroundImage="/binder.png"
                     ></Box>
                     <Box display="flex" flexDir="column" gap="1rem">
-                        <Box display="grid" gridTemplateColumns="1fr 1fr">
+                        <Box
+                            display="grid"
+                            gridTemplateColumns={
+                                smallScreen ? "1fr" : "1fr 1fr"
+                            }
+                        >
                             <ProductCard
                                 orderPackage={{
                                     title: "test",
@@ -61,10 +69,10 @@ const OrderContainer = () => {
                                     gridTemplateColumns="1fr 1fr"
                                     columnGap="1rem"
                                 >
-                                    <Input type="text" />
-                                    <Input type="email" />
+                                    <Input type="text" borderRadius="sm" />
+                                    <Input type="email" borderRadius="sm" />
                                 </Box>
-                                <Textarea />
+                                <Textarea borderRadius="sm" />
                             </Box>
                         </FormControl>
                     </Box>
