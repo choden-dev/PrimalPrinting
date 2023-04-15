@@ -16,6 +16,7 @@ export type infoStructure = {
 export type OrderPackage = {
     title: string;
     included: string[];
+    price: number;
 };
 
 export type product = infoStructure & { image: any; price: string };

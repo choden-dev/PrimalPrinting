@@ -37,11 +37,13 @@ const OrderContainer = () => {
                         backgroundImage="/binder.png"
                     ></Box>
                     <Box display="flex" flexDir="column" gap="1rem">
-                        <Box>
+                        <Box display="grid" gridTemplateColumns="1fr 1fr">
                             <ProductCard
-                                productName=""
-                                productPrice=""
-                                productDescription=""
+                                orderPackage={{
+                                    title: "test",
+                                    included: ["1sdasd", "2dssd"],
+                                    price: 20,
+                                }}
                                 image=""
                                 hasButton={true}
                             />
