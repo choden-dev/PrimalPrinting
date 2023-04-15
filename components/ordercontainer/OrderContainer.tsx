@@ -1,4 +1,14 @@
-import { Box, Image, Input, FormControl, Textarea } from "@chakra-ui/react";
+import {
+    Box,
+    Image,
+    Input,
+    Heading,
+    FormControl,
+    Textarea,
+    List,
+    ListItem,
+    Button,
+} from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import Footer from "../footer/Footer";
 
@@ -6,6 +16,7 @@ const OrderContainer = () => {
     return (
         <>
             <Box
+                paddingTop="1rem"
                 display="grid"
                 columnGap="1rem"
                 gridTemplateColumns="3fr 1.5fr"
@@ -56,7 +67,18 @@ const OrderContainer = () => {
                         </FormControl>
                     </Box>
                 </Box>
-                <Box w="100%" bg="white" h="13rem"></Box>
+                <Box w="100%" bg="white" h="fit-content" padding="1rem .5rem">
+                    <Box display="flex" flexDir="column">
+                        <Heading as="p">Total Price</Heading>
+                        <List>
+                            <ListItem>
+                                Coursebook (Upload, 100-200 pages)
+                            </ListItem>
+                            <ListItem>Estimated Price</ListItem>
+                            <Button variant="browned">Order Now</Button>
+                        </List>
+                    </Box>
+                </Box>
             </Box>
             <Footer />
         </>

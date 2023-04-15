@@ -1,5 +1,3 @@
-// theme.js
-
 // 1. import `extendTheme` function
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
 
@@ -38,6 +36,7 @@ const theme = extendTheme({
                 browned: {
                     bg: "brown.700",
                     color: "white",
+                    fontWeight: "400",
                     borderRadius: "sm",
                     _hover: {
                         bg: "brown.800",
