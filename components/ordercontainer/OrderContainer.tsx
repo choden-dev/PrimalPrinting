@@ -77,7 +77,14 @@ const OrderContainer = () => {
                         </FormControl>
                     </Box>
                 </Box>
-                <Box w="100%" bg="white" h="fit-content" padding="1rem .5rem">
+                <Box
+                    w="100%"
+                    bg="white"
+                    h="fit-content"
+                    position={smallScreen ? "relative" : "sticky"}
+                    padding="1rem .5rem"
+                    top={smallScreen ? "0" : "5rem"}
+                >
                     <Box display="flex" flexDir="column">
                         <Heading as="p">Total Price</Heading>
                         <List>

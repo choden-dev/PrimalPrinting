@@ -21,7 +21,6 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                 className={styles.productimage}
                 display="flex"
                 flexDir="column"
-                maxW="20rem"
                 border="1px"
                 borderColor="brown.200"
                 overflow="hidden"
@@ -31,16 +30,6 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                 zIndex="999"
                 onClick={openInfo}
                 cursor={!hasButton ? "pointer" : ""}
-                transition="transform 0.5s, box-shadow 0.5s"
-                _hover={{
-                    boxShadow: "0.3rem 0.3rem 0 #672212",
-                    transform: "scale(1.1)",
-                }}
-                sx={{
-                    "@media screen and (max-width:750px)": {
-                        maxWidth: "100%",
-                    },
-                }}
             >
                 <Box
                     className={styles.innersection}
