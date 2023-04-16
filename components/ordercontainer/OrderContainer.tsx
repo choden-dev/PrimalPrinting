@@ -36,12 +36,12 @@ const OrderContainer = () => {
                     .promise.then((doc) => {
                         pages = doc.numPages;
                         uploaded.push({ name: file.name, pageCount: pages });
+                        setUploadedPdfs(uploaded);
+                        console.log(uploadedPdfs);
                     })
                     .catch(() => console.error("invalid file type"));
             }
         });
-        console.log(uploaded);
-        setUploadedPdfs(uploaded);
     };
     const handleFileEvent = (e) => {
         const files = Array.prototype.slice.call(e.target.files);
@@ -97,7 +97,6 @@ const OrderContainer = () => {
                             >
                                 <Input
                                     type="file"
-                                    multiple
                                     accept="application/pdf"
                                     onChange={handleFileEvent}
                                 />
