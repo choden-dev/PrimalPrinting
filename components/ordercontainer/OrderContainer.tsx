@@ -19,19 +19,23 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const OrderContainer = () => {
     const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
-    const [uploadedPdfs, setUploadedPdfs] = useState([]);
+    const [uploadedPdfs, setUploadedPdfs] = useState<
+        { name: string; pageCount: number }[]
+    >([]);
     const handlePdfUpload = (files) => {
         const uploaded = [...uploadedPdfs];
-        files.some((file) => {
+        files.some((file: File) => {
             //file doesn't exist
             if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-                uploaded.push(file);
                 const src = URL.createObjectURL(file);
-                console.log(src);
-                pdfjs.getDocument(src).promise.then((doc) => {
-                    const pages = doc.numPages;
-                    console.log(pages);
-                });
+                let pages: number = -1;
+                pdfjs
+                    .getDocument(src)
+                    .promise.then((doc) => {
+                        pages = doc.numPages;
+                        uploaded.push({ name: file.name, pageCount: pages });
+                    })
+                    .catch(() => console.error("invalid file type"));
             }
         });
         console.log(uploaded);
