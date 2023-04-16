@@ -1,6 +1,8 @@
+import { useState } from "react";
 import {
     Box,
     Image,
+    FormLabel,
     Input,
     Heading,
     FormControl,
@@ -11,10 +13,40 @@ import {
     useMediaQuery,
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
+import UploadCard from "../uploadcard/UploadCard";
+import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
+// solution from https://github.com/wojtekmaj/react-pdf/issues/321
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
     const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
+    const [uploadedPdfs, setUploadedPdfs] = useState<
+        { name: string; pageCount: number }[]
+    >([]);
+    const handlePdfUpload = (files) => {
+        const uploaded = [...uploadedPdfs];
+        files.some((file: File) => {
+            //file doesn't exist
+            if (uploaded.findIndex((f) => f.name === file.name) === -1) {
+                const src = URL.createObjectURL(file);
+                let pages: number = -1;
+                pdfjs
+                    .getDocument(src)
+                    .promise.then((doc) => {
+                        pages = doc.numPages;
+                        uploaded.push({ name: file.name, pageCount: pages });
+                    })
+                    .catch(() => console.error("invalid file type"));
+            }
+        });
+        console.log(uploaded);
+        setUploadedPdfs(uploaded);
+    };
+    const handleFileEvent = (e) => {
+        const files = Array.prototype.slice.call(e.target.files);
+        handlePdfUpload(files);
+    };
     return (
         <>
             <Box
@@ -58,12 +90,27 @@ const OrderContainer = () => {
                         </Box>
                         <FormControl>
                             <Box
+                                padding="0.5rem"
                                 w="100%"
-                                h="10rem"
                                 bg="brown.100"
                                 borderRadius="2px"
                             >
-                                <Input type="file" />
+                                <Input
+                                    type="file"
+                                    multiple
+                                    accept="application/pdf"
+                                    onChange={handleFileEvent}
+                                />
+                                {uploadedPdfs.map((pdf) => {
+                                    return (
+                                        <Box key={pdf.name} marginBottom="1rem">
+                                            <UploadCard
+                                                name={pdf.name}
+                                                pages={pdf.pageCount}
+                                            />
+                                        </Box>
+                                    );
+                                })}
                             </Box>
                             <Box display="flex" flexDir="column" gap="1rem">
                                 <Box
@@ -71,9 +118,12 @@ const OrderContainer = () => {
                                     gridTemplateColumns="1fr 1fr"
                                     columnGap="1rem"
                                 >
+                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Email</FormLabel>
                                     <Input type="text" borderRadius="sm" />
                                     <Input type="email" borderRadius="sm" />
                                 </Box>
+                                <FormLabel>Extra requests</FormLabel>
                                 <Textarea borderRadius="sm" />
                             </Box>
                         </FormControl>
