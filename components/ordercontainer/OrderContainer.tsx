@@ -12,6 +12,7 @@ import {
     useMediaQuery,
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
+import UploadCard from "../uploadcard/UploadCard";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
@@ -88,6 +89,7 @@ const OrderContainer = () => {
                         </Box>
                         <FormControl>
                             <Box
+                                padding="0.5rem"
                                 w="100%"
                                 h="10rem"
                                 bg="brown.100"
@@ -99,6 +101,16 @@ const OrderContainer = () => {
                                     accept="application/pdf"
                                     onChange={handleFileEvent}
                                 />
+                                {uploadedPdfs.map((pdf) => {
+                                    return (
+                                        <Box key={pdf.name} marginBottom="1rem">
+                                            <UploadCard
+                                                name={pdf.name}
+                                                pages={pdf.pageCount}
+                                            />
+                                        </Box>
+                                    );
+                                })}
                             </Box>
                             <Box display="flex" flexDir="column" gap="1rem">
                                 <Box
