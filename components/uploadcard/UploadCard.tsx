@@ -8,11 +8,13 @@ const UploadCard = ({ name, pages }: { name: string; pages: number }) => {
             padding="0 1rem"
             borderRadius="sm"
             display="flex"
+            gap="1rem"
         >
             <Box>
-                <strong>{name}</strong> | {pages}
+                Filename: <strong>{name}</strong> | {pages} Pages
             </Box>
             <Box marginLeft="auto">Price:</Box>
+            <Box>Quantity:</Box>
         </Box>
     );
 };

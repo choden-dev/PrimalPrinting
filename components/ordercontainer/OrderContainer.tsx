@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
     Box,
     Image,
+    FormLabel,
     Input,
     Heading,
     FormControl,
@@ -91,7 +92,6 @@ const OrderContainer = () => {
                             <Box
                                 padding="0.5rem"
                                 w="100%"
-                                h="10rem"
                                 bg="brown.100"
                                 borderRadius="2px"
                             >
@@ -118,9 +118,12 @@ const OrderContainer = () => {
                                     gridTemplateColumns="1fr 1fr"
                                     columnGap="1rem"
                                 >
+                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Email</FormLabel>
                                     <Input type="text" borderRadius="sm" />
                                     <Input type="email" borderRadius="sm" />
                                 </Box>
+                                <FormLabel>Extra requests</FormLabel>
                                 <Textarea borderRadius="sm" />
                             </Box>
                         </FormControl>
