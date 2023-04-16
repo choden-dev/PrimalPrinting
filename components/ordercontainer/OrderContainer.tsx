@@ -59,9 +59,9 @@ const OrderContainer = () => {
         }
     };
     const [uploadedPdfs, setUploadedPdfs] = useState<
-        { name: string; pageCount: number }[]
+        { name: string; pageCount: number; price: string }[]
     >([]);
-    const handlePdfUpload = (files) => {
+    const handlePdfUpload = (files: File[]) => {
         const uploaded = [...uploadedPdfs];
         files.some((file: File) => {
             //file doesn't exist
@@ -72,14 +72,23 @@ const OrderContainer = () => {
                     .getDocument(src)
                     .promise.then((doc) => {
                         pages = doc.numPages;
-                        uploaded.push({ name: file.name, pageCount: pages });
-                        setUploadedPdfs(uploaded);
-                        console.log(uploaded);
+                        fetch(`/api/shop?pages=${pages}`).then((res) =>
+                            res.json().then((data) => {
+                                uploaded.push({
+                                    name: file.name,
+                                    pageCount: pages,
+                                    price: data.price,
+                                });
+                                setUploadedPdfs(uploaded);
+                                console.log(uploaded);
+                            })
+                        ); // missing closing parenthesis here
                     })
                     .catch(() => console.error("invalid file type"));
             }
         });
     };
+
     const handleFileEvent = (e) => {
         console.log(e.target.files);
         const files = Array.prototype.slice.call(e.target.files);
@@ -158,6 +167,7 @@ const OrderContainer = () => {
                                             <UploadCard
                                                 name={pdf.name}
                                                 pages={pdf.pageCount}
+                                                price={pdf.price}
                                             />
                                         </Box>
                                     );

@@ -1,6 +1,14 @@
 import { Box } from "@chakra-ui/react";
 
-const UploadCard = ({ name, pages }: { name: string; pages: number }) => {
+const UploadCard = ({
+    name,
+    pages,
+    price,
+}: {
+    name: string;
+    pages: number;
+    price: string;
+}) => {
     return (
         <Box
             bg="white"
@@ -13,7 +21,7 @@ const UploadCard = ({ name, pages }: { name: string; pages: number }) => {
             <Box>
                 Filename: <strong>{name}</strong> | {pages} Pages
             </Box>
-            <Box marginLeft="auto">Price:</Box>
+            <Box marginLeft="auto">Price: {price}</Box>
             <Box>Colour:</Box>
             <Box>Quantity:</Box>
         </Box>
