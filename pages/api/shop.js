@@ -1,17 +1,12 @@
+import { connectToDatabase } from "../../lib/mongo";
+import { getProducts } from "../../lib/stripe";
 
-import { connectToDatabase } from "../../lib/mongo"
 export default async function handler(req, res) {
     try {
-        // connect to the database
-        let { db } = await connectToDatabase();
-        // fetch the posts
-        let posts = await db
-            .collection('Items')
-            .find({})
-            .toArray();
+        let test = await getProducts();
         // return the posts
         return res.json({
-            message: JSON.parse(JSON.stringify(posts)),
+            message: test,
             success: true,
         });
     } catch (error) {
