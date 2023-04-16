@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
     Box,
     Image,
@@ -11,16 +11,48 @@ import {
     ListItem,
     Button,
     useMediaQuery,
+    Text,
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import UploadCard from "../uploadcard/UploadCard";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
+import { AddIcon } from "@chakra-ui/icons";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
     const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
+    const uploadZone = useRef(null);
+    const defaultUploadZone = useRef(null);
+    useEffect(() => {
+        uploadZone.current.addEventListener("dragover", handleDragOver);
+        uploadZone.current.addEventListener("drop", handleDrop);
+
+        return () => {
+            uploadZone.current.removeEventListener("dragover", handleDragOver);
+            uploadZone.current.removeEventListener("drop", handleDrop);
+        };
+    }, []);
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let { files } = e.dataTransfer;
+
+        if (files && files.length) {
+            const temp = {
+                target: {
+                    files: files,
+                },
+            };
+            handleFileEvent(temp);
+        }
+    };
     const [uploadedPdfs, setUploadedPdfs] = useState<
         { name: string; pageCount: number }[]
     >([]);
@@ -37,13 +69,14 @@ const OrderContainer = () => {
                         pages = doc.numPages;
                         uploaded.push({ name: file.name, pageCount: pages });
                         setUploadedPdfs(uploaded);
-                        console.log(uploadedPdfs);
+                        console.log(uploaded);
                     })
                     .catch(() => console.error("invalid file type"));
             }
         });
     };
     const handleFileEvent = (e) => {
+        console.log(e.target.files);
         const files = Array.prototype.slice.call(e.target.files);
         handlePdfUpload(files);
     };
@@ -90,19 +123,33 @@ const OrderContainer = () => {
                         </Box>
                         <FormControl>
                             <Box
+                                display="flex"
+                                flexDir="column"
+                                cursor="pointer"
+                                minH="5rem"
                                 padding="0.5rem"
                                 w="100%"
                                 bg="brown.100"
                                 borderRadius="2px"
+                                ref={uploadZone}
+                                onClick={() =>
+                                    defaultUploadZone.current.click()
+                                }
                             >
                                 <Input
+                                    ref={defaultUploadZone}
+                                    display="none"
                                     type="file"
                                     accept="application/pdf"
                                     onChange={handleFileEvent}
                                 />
                                 {uploadedPdfs.map((pdf) => {
                                     return (
-                                        <Box key={pdf.name} marginBottom="1rem">
+                                        <Box
+                                            zIndex="77"
+                                            key={pdf.name}
+                                            marginBottom="1rem"
+                                        >
                                             <UploadCard
                                                 name={pdf.name}
                                                 pages={pdf.pageCount}
@@ -110,6 +157,10 @@ const OrderContainer = () => {
                                         </Box>
                                     );
                                 })}
+                                <Text textAlign="center">
+                                    Click or drag *.pdf file to upload
+                                </Text>
+                                <AddIcon alignSelf="center" />
                             </Box>
                             <Box display="flex" flexDir="column" gap="1rem">
                                 <Box
