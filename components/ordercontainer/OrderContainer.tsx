@@ -30,8 +30,13 @@ const OrderContainer = () => {
         uploadZone.current.addEventListener("drop", handleDrop);
 
         return () => {
-            uploadZone.current.removeEventListener("dragover", handleDragOver);
-            uploadZone.current.removeEventListener("drop", handleDrop);
+            if (uploadZone.current) {
+                uploadZone.current.removeEventListener(
+                    "dragover",
+                    handleDragOver
+                );
+                uploadZone.current.removeEventListener("drop", handleDrop);
+            }
         };
     }, []);
     const handleDragOver = (e) => {

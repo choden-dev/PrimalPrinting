@@ -14,6 +14,7 @@ const UploadCard = ({ name, pages }: { name: string; pages: number }) => {
                 Filename: <strong>{name}</strong> | {pages} Pages
             </Box>
             <Box marginLeft="auto">Price:</Box>
+            <Box>Colour:</Box>
             <Box>Quantity:</Box>
         </Box>
     );
