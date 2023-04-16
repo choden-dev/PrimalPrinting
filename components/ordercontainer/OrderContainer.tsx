@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Box,
     Image,
@@ -11,10 +12,35 @@ import {
     useMediaQuery,
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
+import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
+// solution from https://github.com/wojtekmaj/react-pdf/issues/321
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
     const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
+    const [uploadedPdfs, setUploadedPdfs] = useState([]);
+    const handlePdfUpload = (files) => {
+        const uploaded = [...uploadedPdfs];
+        files.some((file) => {
+            //file doesn't exist
+            if (uploaded.findIndex((f) => f.name === file.name) === -1) {
+                uploaded.push(file);
+                const src = URL.createObjectURL(file);
+                console.log(src);
+                pdfjs.getDocument(src).promise.then((doc) => {
+                    const pages = doc.numPages;
+                    console.log(pages);
+                });
+            }
+        });
+        console.log(uploaded);
+        setUploadedPdfs(uploaded);
+    };
+    const handleFileEvent = (e) => {
+        const files = Array.prototype.slice.call(e.target.files);
+        handlePdfUpload(files);
+    };
     return (
         <>
             <Box
@@ -63,7 +89,12 @@ const OrderContainer = () => {
                                 bg="brown.100"
                                 borderRadius="2px"
                             >
-                                <Input type="file" />
+                                <Input
+                                    type="file"
+                                    multiple
+                                    accept="application/pdf"
+                                    onChange={handleFileEvent}
+                                />
                             </Box>
                             <Box display="flex" flexDir="column" gap="1rem">
                                 <Box
