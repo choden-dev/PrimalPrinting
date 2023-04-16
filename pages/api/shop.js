@@ -1,9 +1,10 @@
 import { connectToDatabase } from "../../lib/mongo";
-import { getProducts } from "../../lib/stripe";
+import { getProducts, getPriceForPages } from "../../lib/stripe";
 
 export default async function handler(req, res) {
     try {
-        let test = await getProducts();
+        //let test = await getProducts();
+        let test = await getPriceForPages(5, true);
         // return the posts
         return res.json({
             message: test,
