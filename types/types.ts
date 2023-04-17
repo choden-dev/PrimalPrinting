@@ -15,11 +15,10 @@ export type infoStructure = {
 
 export type OrderPackage = {
     title: string;
-    included: string[];
+    description: string;
     price: number;
 };
 
 export type product = infoStructure & { image: any; price: string };
 
 export type testimonial = infoStructure & { author: string };
-

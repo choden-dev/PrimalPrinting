@@ -22,9 +22,19 @@ import { AddIcon } from "@chakra-ui/icons";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
+    const [packages, setPackages] = useState(undefined);
     const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
+
+    useEffect(() => {
+        fetch(`/api/products`).then((res) =>
+            res.json().then((data) => {
+                setPackages(data.packages.data);
+            })
+        );
+    }, []);
+
     useEffect(() => {
         uploadZone.current.addEventListener("dragover", handleDragOver);
         uploadZone.current.addEventListener("drop", handleDrop);
@@ -125,15 +135,21 @@ const OrderContainer = () => {
                                 smallScreen ? "1fr" : "1fr 1fr"
                             }
                         >
-                            <ProductCard
-                                orderPackage={{
-                                    title: "test",
-                                    included: ["1sdasd", "2dssd"],
-                                    price: 20,
-                                }}
-                                image=""
-                                hasButton={true}
-                            />
+                            {packages &&
+                                packages.map((item) => {
+                                    return (
+                                        <ProductCard
+                                            key={item.updated}
+                                            orderPackage={{
+                                                title: item.name,
+                                                description: item.description,
+                                                price: 69,
+                                            }}
+                                            image=""
+                                            hasButton={true}
+                                        />
+                                    );
+                                })}
                         </Box>
                         <FormControl>
                             <Box

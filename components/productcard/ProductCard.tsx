@@ -45,14 +45,7 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                         <Heading fontWeight="400" color="brown.900">
                             {orderPackage.title}
                         </Heading>
-                        {orderPackage.included.map((item) => {
-                            return (
-                                <Text key={item} fontWeight="300">
-                                    {item}
-                                </Text>
-                            );
-                        })}
-
+                        <Text>{orderPackage.description}</Text>
                         <Box display="flex" alignItems="center">
                             <Text
                                 color="brown.900"

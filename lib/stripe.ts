@@ -16,6 +16,14 @@ export const getProducts = async () => {
     return products;
 };
 
+export const getPackages = async () => {
+    const stripe: Stripe = await makeStripeConnection();
+    const packages = await stripe.products.search({
+        query: `metadata["type"]: 'package'`,
+    });
+    return packages;
+};
+
 export const getPriceForPages = async (pages: number, isColor: boolean) => {
     const stripe: Stripe = await makeStripeConnection();
     let pageRange = { maxPages: -1, minPages: -1 };
