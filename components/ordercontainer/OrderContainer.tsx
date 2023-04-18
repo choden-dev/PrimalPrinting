@@ -49,6 +49,10 @@ const OrderContainer = () => {
             }
         };
     }, []);
+    const removeFromCart = (name: string): any => {
+        const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
+        setUploadedPdfs(newUploads);
+    };
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -69,7 +73,13 @@ const OrderContainer = () => {
         }
     };
     const [uploadedPdfs, setUploadedPdfs] = useState<
-        { name: string; pageCount: number; price: string; priceId: string }[]
+        {
+            name: string;
+            pageCount: number;
+            price: number;
+            priceId: string;
+            quantity: number;
+        }[]
     >([]);
     const handlePdfUpload = (files: File[]) => {
         const uploaded = [...uploadedPdfs];
@@ -89,6 +99,7 @@ const OrderContainer = () => {
                                     pageCount: pages,
                                     price: data.price,
                                     priceId: data.priceId,
+                                    quantity: 1,
                                 });
                                 setUploadedPdfs(uploaded);
                                 console.log(uploaded);
@@ -185,6 +196,8 @@ const OrderContainer = () => {
                                                 name={pdf.name}
                                                 pages={pdf.pageCount}
                                                 price={pdf.price}
+                                                quantity={pdf.quantity}
+                                                removeFunction={removeFromCart}
                                             />
                                         </Box>
                                     );

@@ -1,13 +1,18 @@
-import { Box } from "@chakra-ui/react";
+import { CloseIcon } from "@chakra-ui/icons";
+import { Box, IconButton } from "@chakra-ui/react";
 
 const UploadCard = ({
     name,
     pages,
     price,
+    quantity,
+    removeFunction,
 }: {
     name: string;
     pages: number;
-    price: string;
+    price: number;
+    quantity: number;
+    removeFunction: (name: string) => any;
 }) => {
     return (
         <Box
@@ -21,9 +26,15 @@ const UploadCard = ({
             <Box>
                 Filename: <strong>{name}</strong> | {pages} Pages
             </Box>
-            <Box marginLeft="auto">Price: {price}</Box>
+            <Box marginLeft="auto">Price: {price * quantity}</Box>
             <Box>Colour:</Box>
-            <Box>Quantity:</Box>
+            <Box>Quantity: {quantity}</Box>
+            <IconButton
+                aria-label="remove from uploads"
+                icon={<CloseIcon />}
+                variant={"unstyled"}
+                onClick={() => removeFunction(name)}
+            />
         </Box>
     );
 };
