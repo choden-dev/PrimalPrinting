@@ -86,6 +86,7 @@ const OrderContainer = () => {
             price: number;
             priceId: string;
             quantity: number;
+            isColor: boolean;
         }[]
     >([]);
     const handlePdfUpload = (files: File[]) => {
@@ -99,18 +100,20 @@ const OrderContainer = () => {
                     .getDocument(src)
                     .promise.then((doc) => {
                         pages = doc.numPages;
-                        fetch(`/api/shop?pages=${pages}`).then((res) =>
-                            res.json().then((data) => {
-                                uploaded.push({
-                                    name: file.name,
-                                    pageCount: pages,
-                                    price: data.price / 100,
-                                    priceId: data.priceId,
-                                    quantity: 1,
-                                });
-                                setUploadedPdfs(uploaded);
-                                console.log(uploaded);
-                            })
+                        fetch(`/api/shop?pages=${pages}&isColor=false`).then(
+                            (res) =>
+                                res.json().then((data) => {
+                                    uploaded.push({
+                                        name: file.name,
+                                        pageCount: pages,
+                                        price: data.price / 100,
+                                        priceId: data.priceId,
+                                        quantity: 1,
+                                        isColor: false,
+                                    });
+                                    setUploadedPdfs(uploaded);
+                                    console.log(uploaded);
+                                })
                         ); // missing closing parenthesis here
                     })
                     .catch(() => console.error("invalid file type"));
