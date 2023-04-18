@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 let stripeCached: any = null;
 
+// caches the connection or starts a new one
 const makeStripeConnection = async () => {
     if (stripeCached) return stripeCached;
     stripeCached = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`, {
@@ -58,6 +59,10 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
             pageRange.minPages
         }' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
     });
-    const price = await stripe.prices.retrieve(products.data[0].default_price);
-    return price.unit_amount;
+    const priceId = products.data[0].default_price;
+    const price = await stripe.prices.retrieve(priceId);
+    return {
+        price: price.unit_amount,
+        priceId: priceId,
+    };
 };

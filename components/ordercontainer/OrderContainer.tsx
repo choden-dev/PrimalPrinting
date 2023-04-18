@@ -69,7 +69,7 @@ const OrderContainer = () => {
         }
     };
     const [uploadedPdfs, setUploadedPdfs] = useState<
-        { name: string; pageCount: number; price: string }[]
+        { name: string; pageCount: number; price: string; priceId: string }[]
     >([]);
     const handlePdfUpload = (files: File[]) => {
         const uploaded = [...uploadedPdfs];
@@ -88,6 +88,7 @@ const OrderContainer = () => {
                                     name: file.name,
                                     pageCount: pages,
                                     price: data.price,
+                                    priceId: data.priceId,
                                 });
                                 setUploadedPdfs(uploaded);
                                 console.log(uploaded);

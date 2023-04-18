@@ -11,7 +11,8 @@ export default async function handler(
         let price = await getPriceForPages(req.query.pages, true);
         // return the posts
         return res.json({
-            price: price,
+            price: price.price,
+            priceId: price.priceId,
             success: true,
         });
     } catch (error) {
