@@ -30,6 +30,7 @@ const OrderContainer = () => {
     useEffect(() => {
         fetch(`/api/products`).then((res) =>
             res.json().then((data) => {
+                console.log(data.packages.data);
                 setPackages(data.packages.data);
             })
         );
@@ -52,6 +53,12 @@ const OrderContainer = () => {
     const removeFromCart = (name: string): any => {
         const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
         setUploadedPdfs(newUploads);
+    };
+    const changeQuantity = (name: string, newQuantity: number): any => {
+        const idx = uploadedPdfs.findIndex((pdf) => pdf.name === name);
+        let temp = [...uploadedPdfs];
+        temp[idx].quantity = newQuantity;
+        setUploadedPdfs(temp);
     };
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -97,7 +104,7 @@ const OrderContainer = () => {
                                 uploaded.push({
                                     name: file.name,
                                     pageCount: pages,
-                                    price: data.price,
+                                    price: data.price / 100,
                                     priceId: data.priceId,
                                     quantity: 1,
                                 });
@@ -155,7 +162,7 @@ const OrderContainer = () => {
                                             orderPackage={{
                                                 title: item.name,
                                                 description: item.description,
-                                                price: 69,
+                                                price: item.price / 100,
                                             }}
                                             image=""
                                             hasButton={true}
@@ -196,7 +203,6 @@ const OrderContainer = () => {
                                                 name={pdf.name}
                                                 pages={pdf.pageCount}
                                                 price={pdf.price}
-                                                quantity={pdf.quantity}
                                                 removeFunction={removeFromCart}
                                             />
                                         </Box>
@@ -237,9 +243,66 @@ const OrderContainer = () => {
                             Total Price
                         </Heading>
                         <List>
-                            <ListItem>
-                                Coursebook (Upload, 100-200 pages)
-                            </ListItem>
+                            {uploadedPdfs && (
+                                <>
+                                    <Heading as="span" fontSize="1rem">
+                                        Uploaded Files
+                                    </Heading>
+                                    {uploadedPdfs.map((pdf) => {
+                                        return (
+                                            <ListItem key={pdf.name}>
+                                                <Box display="flex">
+                                                    <Text>
+                                                        {pdf.name} |{" "}
+                                                        {pdf.price *
+                                                            pdf.quantity}
+                                                    </Text>
+                                                    <Input
+                                                        min="1"
+                                                        max="5"
+                                                        marginLeft="auto"
+                                                        borderRadius="sm"
+                                                        type="number"
+                                                        placeholder={
+                                                            pdf.quantity
+                                                        }
+                                                        onChange={(e) => {
+                                                            const num =
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                            const min =
+                                                                parseInt(
+                                                                    e.target.min
+                                                                );
+                                                            const max =
+                                                                parseInt(
+                                                                    e.target.max
+                                                                );
+                                                            if (
+                                                                num > max ||
+                                                                num < min
+                                                            ) {
+                                                                e.target.value =
+                                                                    pdf.quantity;
+                                                                return;
+                                                            }
+                                                            changeQuantity(
+                                                                pdf.name,
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </Box>
+                                            </ListItem>
+                                        );
+                                    })}
+                                </>
+                            )}
                             <ListItem>
                                 <strong>Estimated Price:</strong>
                             </ListItem>

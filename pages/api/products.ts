@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getPackages } from "../../lib/stripe";
+import { findPrice, getPackages } from "../../lib/stripe";
 
 export default async function handler(
     req: NextApiRequest,
@@ -8,6 +8,12 @@ export default async function handler(
     try {
         let packages = await getPackages();
         // return the posts
+        await Promise.all(
+            packages.data.map(async (pack) => {
+                const price = await findPrice(pack.default_price!.toString());
+                pack.price = price;
+            })
+        );
         return res.json({
             packages: packages,
             success: true,

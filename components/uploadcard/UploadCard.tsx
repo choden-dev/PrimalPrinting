@@ -5,13 +5,11 @@ const UploadCard = ({
     name,
     pages,
     price,
-    quantity,
     removeFunction,
 }: {
     name: string;
     pages: number;
     price: number;
-    quantity: number;
     removeFunction: (name: string) => any;
 }) => {
     return (
@@ -26,9 +24,8 @@ const UploadCard = ({
             <Box>
                 Filename: <strong>{name}</strong> | {pages} Pages
             </Box>
-            <Box marginLeft="auto">Price: {price * quantity}</Box>
+            <Box marginLeft="auto">Price: {price}</Box>
             <Box>Colour:</Box>
-            <Box>Quantity: {quantity}</Box>
             <IconButton
                 aria-label="remove from uploads"
                 icon={<CloseIcon />}

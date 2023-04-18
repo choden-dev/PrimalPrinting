@@ -17,6 +17,12 @@ export const getProducts = async () => {
     return products;
 };
 
+export const findPrice = async (priceId: string) => {
+    const stripe: Stripe = await makeStripeConnection();
+    const price = await stripe.prices.retrieve(priceId);
+    return price.unit_amount;
+};
+
 export const getPackages = async () => {
     const stripe: Stripe = await makeStripeConnection();
     const packages = await stripe.products.search({
@@ -59,10 +65,10 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
             pageRange.minPages
         }' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
     });
-    const priceId = products.data[0].default_price;
-    const price = await stripe.prices.retrieve(priceId);
+    const priceId = products.data[0].default_price!.toString();
+    const price = await findPrice(priceId);
     return {
-        price: price.unit_amount,
+        price: price,
         priceId: priceId,
     };
 };
