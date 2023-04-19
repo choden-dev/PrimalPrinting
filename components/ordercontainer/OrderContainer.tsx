@@ -50,6 +50,14 @@ const OrderContainer = () => {
             }
         };
     }, []);
+    const startOrder = () => {};
+    const handleColorChange = () => {};
+    const addPackage = (
+        id: string,
+        name: string,
+        priceId: string,
+        price: number
+    ) => {};
     const removeFromCart = (name: string): any => {
         const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
         setUploadedPdfs(newUploads);

@@ -8,6 +8,12 @@ type Props = {
     orderPackage: OrderPackage;
     image: string;
     hasButton: boolean;
+    addFunction: (
+        id: string,
+        name: string,
+        priceId: string,
+        price: number
+    ) => any;
 };
 
 export default function ProductCard({ orderPackage, image, hasButton }: Props) {
