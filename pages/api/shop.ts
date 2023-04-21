@@ -8,7 +8,10 @@ export default async function handler(
 ) {
     try {
         //let test = await getProducts();
-        let price = await getPriceForPages(req.query.pages, req.query.isColor);
+        let isColor = req.query.isColor;
+        let param = false;
+        if (isColor === "true") param = true;
+        let price = await getPriceForPages(req.query.pages, param);
         // return the posts
         return res.json({
             price: price.price,

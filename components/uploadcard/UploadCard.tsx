@@ -6,11 +6,13 @@ const UploadCard = ({
     pages,
     price,
     removeFunction,
+    changeFunction,
 }: {
     name: string;
     pages: number;
     price: number;
     removeFunction: (name: string) => any;
+    changeFunction: (option: boolean, name: string) => any;
 }) => {
     return (
         <Box
@@ -25,8 +27,15 @@ const UploadCard = ({
                 Filename: <strong>{name}</strong> | {pages} Pages
             </Box>
             <Box marginLeft="auto">Price: {price}</Box>
-            <Box>Colour:</Box>
-            <Select>
+            <Select
+                defaultValue="B/W"
+                onChange={(e) => {
+                    if (e.target.value === "B/W") changeFunction(false, name);
+                    else changeFunction(true, name);
+                }}
+                borderRadius="sm"
+                maxW="6.2rem"
+            >
                 <option value="Colour">Colour</option>
                 <option value="B/W">B/W</option>
             </Select>

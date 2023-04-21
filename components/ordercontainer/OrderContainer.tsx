@@ -23,7 +23,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const OrderContainer = () => {
     const [packages, setPackages] = useState(undefined);
-    const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
+    const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
 
@@ -51,7 +51,27 @@ const OrderContainer = () => {
         };
     }, []);
     const startOrder = () => {};
-    const handleColorChange = () => {};
+    const handleColorChange = async (option: boolean, name: string) => {
+        const idx = uploadedPdfs.findIndex((pdf) => pdf.name === name);
+        let temp = [...uploadedPdfs];
+        const toChange = temp[idx];
+        console.log(option);
+        fetch(`/api/shop?pages=${toChange.pageCount}&isColor=${option}`).then(
+            (res) =>
+                res.json().then((data) => {
+                    console.log(data);
+                    temp[idx] = {
+                        name: toChange.name,
+                        pageCount: toChange.pageCount,
+                        price: data.price / 100,
+                        priceId: data.priceId,
+                        quantity: 1,
+                        isColor: option,
+                    };
+                    setUploadedPdfs(temp);
+                })
+        );
+    };
     const addPackage = (
         id: string,
         name: string,
@@ -213,6 +233,9 @@ const OrderContainer = () => {
                                                 pages={pdf.pageCount}
                                                 price={pdf.price}
                                                 removeFunction={removeFromCart}
+                                                changeFunction={
+                                                    handleColorChange
+                                                }
                                             />
                                         </Box>
                                     );

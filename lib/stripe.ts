@@ -57,7 +57,6 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
         default:
             throw new Error("Invalid Page Range!");
     }
-    const type = isColor ? "Colour" : "B/W";
     const products = await stripe.products.search({
         query: `metadata["maxPages"]:'${
             pageRange.maxPages
