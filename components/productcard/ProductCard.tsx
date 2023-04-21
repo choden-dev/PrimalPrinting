@@ -16,7 +16,12 @@ type Props = {
     ) => any;
 };
 
-export default function ProductCard({ orderPackage, image, hasButton }: Props) {
+export default function ProductCard({
+    orderPackage,
+    image,
+    hasButton,
+    addFunction,
+}: Props) {
     const [infoOpen, setInfoOpen] = React.useState<boolean>(false);
     const openInfo = () => setInfoOpen(true);
     const closeInfo = () => setInfoOpen(false);
@@ -64,6 +69,7 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                                 <Link href="/shop" passHref>
                                     <Button
                                         as="a"
+                                        onClick={() => addFunction}
                                         borderRadius="sm"
                                         marginLeft="auto"
                                         variant="browned"

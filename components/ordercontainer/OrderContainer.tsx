@@ -183,6 +183,7 @@ const OrderContainer = () => {
                         </Box>
                         <FormControl>
                             <Box
+                                zIndex="76"
                                 display="flex"
                                 flexDir="column"
                                 cursor="pointer"
@@ -192,9 +193,6 @@ const OrderContainer = () => {
                                 bg="brown.100"
                                 borderRadius="2px"
                                 ref={uploadZone}
-                                onClick={() =>
-                                    defaultUploadZone.current.click()
-                                }
                             >
                                 <Input
                                     ref={defaultUploadZone}
@@ -219,7 +217,12 @@ const OrderContainer = () => {
                                         </Box>
                                     );
                                 })}
-                                <Text textAlign="center">
+                                <Text
+                                    onClick={(e) => {
+                                        defaultUploadZone.current.click();
+                                    }}
+                                    textAlign="center"
+                                >
                                     Click or drag *.pdf file to upload
                                 </Text>
                                 <AddIcon alignSelf="center" />

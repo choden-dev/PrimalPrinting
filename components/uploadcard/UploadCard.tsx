@@ -1,5 +1,5 @@
 import { CloseIcon } from "@chakra-ui/icons";
-import { Box, IconButton } from "@chakra-ui/react";
+import { Box, IconButton, Input, Select } from "@chakra-ui/react";
 
 const UploadCard = ({
     name,
@@ -26,11 +26,18 @@ const UploadCard = ({
             </Box>
             <Box marginLeft="auto">Price: {price}</Box>
             <Box>Colour:</Box>
+            <Select>
+                <option value="Colour">Colour</option>
+                <option value="B/W">B/W</option>
+            </Select>
             <IconButton
                 aria-label="remove from uploads"
                 icon={<CloseIcon />}
                 variant={"unstyled"}
-                onClick={() => removeFunction(name)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    removeFunction(name);
+                }}
             />
         </Box>
     );
