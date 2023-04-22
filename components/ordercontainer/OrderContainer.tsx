@@ -40,7 +40,7 @@ const OrderContainer = () => {
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
-
+    const formRef = useRef(null);
     useEffect(() => {
         fetch(`/api/products`).then((res) =>
             res.json().then((data) => {
@@ -67,6 +67,12 @@ const OrderContainer = () => {
     const closeModal = () => {
         setModalOpen(false);
     };
+
+    const checkFormValidity = () => {
+        const form = formRef.current;
+        return form.checkValidity();
+    };
+
     const payWithBankTransfer = () => {
         console.log("called");
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
@@ -282,70 +288,78 @@ const OrderContainer = () => {
                                     );
                                 })}
                         </Box>
-                        <FormControl>
-                            <Box
-                                zIndex="76"
-                                display="flex"
-                                flexDir="column"
-                                cursor="pointer"
-                                minH="5rem"
-                                padding="0.5rem"
-                                w="100%"
-                                bg="brown.100"
-                                borderRadius="2px"
-                                ref={uploadZone}
-                            >
-                                <Input
-                                    ref={defaultUploadZone}
-                                    display="none"
-                                    type="file"
-                                    accept="application/pdf"
-                                    onChange={handleFileEvent}
-                                />
-                                {uploadedPdfs.map((pdf) => {
-                                    return (
-                                        <Box
-                                            zIndex="77"
-                                            key={pdf.name}
-                                            marginBottom="1rem"
-                                        >
-                                            <UploadCard
-                                                name={pdf.name}
-                                                pages={pdf.pageCount}
-                                                price={pdf.price}
-                                                removeFunction={removeFromCart}
-                                                changeFunction={
-                                                    handleColorChange
-                                                }
-                                            />
-                                        </Box>
-                                    );
-                                })}
-                                <Text
-                                    onClick={(e) => {
-                                        defaultUploadZone.current.click();
-                                    }}
-                                    textAlign="center"
-                                >
-                                    Click or drag *.pdf file to upload
-                                </Text>
-                                <AddIcon alignSelf="center" />
-                            </Box>
-                            <Box display="flex" flexDir="column" gap="1rem">
+                        <Input
+                            ref={defaultUploadZone}
+                            display="none"
+                            type="file"
+                            accept="application/pdf"
+                            onChange={handleFileEvent}
+                        />
+                        <form ref={formRef}>
+                            <FormControl isRequired>
                                 <Box
-                                    display="grid"
-                                    gridTemplateColumns="1fr 1fr"
-                                    columnGap="1rem"
+                                    zIndex="76"
+                                    display="flex"
+                                    flexDir="column"
+                                    cursor="pointer"
+                                    minH="5rem"
+                                    padding="0.5rem"
+                                    w="100%"
+                                    bg="brown.100"
+                                    borderRadius="2px"
+                                    ref={uploadZone}
                                 >
-                                    <FormLabel>Name</FormLabel>
-                                    <FormLabel>Email</FormLabel>
-                                    <Input type="text" borderRadius="sm" />
-                                    <Input type="email" borderRadius="sm" />
+                                    {uploadedPdfs.map((pdf) => {
+                                        return (
+                                            <Box
+                                                zIndex="77"
+                                                key={pdf.name}
+                                                marginBottom="1rem"
+                                            >
+                                                <UploadCard
+                                                    name={pdf.name}
+                                                    pages={pdf.pageCount}
+                                                    price={pdf.price}
+                                                    removeFunction={
+                                                        removeFromCart
+                                                    }
+                                                    changeFunction={
+                                                        handleColorChange
+                                                    }
+                                                />
+                                            </Box>
+                                        );
+                                    })}
+                                    <Text
+                                        onClick={(e) => {
+                                            defaultUploadZone.current.click();
+                                        }}
+                                        textAlign="center"
+                                    >
+                                        Click or drag *.pdf file to upload
+                                    </Text>
+                                    <AddIcon alignSelf="center" />
                                 </Box>
-                                <FormLabel>Extra requests</FormLabel>
-                                <Textarea borderRadius="sm" />
-                            </Box>
-                        </FormControl>
+                                <Box display="flex" flexDir="column" gap="1rem">
+                                    <Box
+                                        display="grid"
+                                        gridTemplateColumns="1fr 1fr"
+                                        columnGap="1rem"
+                                    >
+                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>Email</FormLabel>
+                                        <Input
+                                            minLength={2}
+                                            type="text"
+                                            borderRadius="sm"
+                                        />
+                                        <Input type="email" borderRadius="sm" />
+                                    </Box>
+                                    <FormLabel>Extra requests</FormLabel>
+                                    <Textarea borderRadius="sm" />
+                                </Box>
+                            </FormControl>
+                        </form>
                     </Box>
                 </Box>
                 <Box
@@ -450,7 +464,7 @@ const OrderContainer = () => {
                             <Button
                                 variant="browned"
                                 onClick={() => {
-                                    setModalOpen(true);
+                                    if (checkFormValidity()) setModalOpen(true);
                                 }}
                             >
                                 Order Now
