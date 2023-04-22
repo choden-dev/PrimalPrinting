@@ -24,6 +24,16 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 const OrderContainer = () => {
     const [packages, setPackages] = useState(undefined);
     const [cartPackages, setCartPackages] = useState([]);
+    const [uploadedPdfs, setUploadedPdfs] = useState<
+        {
+            name: string;
+            pageCount: number;
+            price: number;
+            priceId: string;
+            quantity: number;
+            isColor: boolean;
+        }[]
+    >([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
@@ -80,9 +90,14 @@ const OrderContainer = () => {
         price: number
     ) => {
         const temp = [...cartPackages];
+        if (temp.find((item) => item.id === id)) return;
         temp.push({ id: id, name: name, priceId: priceId, price: price });
         console.log(temp);
         setCartPackages(temp);
+    };
+    const removePackage = (id: string) => {
+        const newPackages = cartPackages.filter((item) => item.id !== id);
+        setCartPackages(newPackages);
     };
     const removeFromCart = (name: string): any => {
         const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
@@ -94,6 +109,18 @@ const OrderContainer = () => {
         temp[idx].quantity = newQuantity;
         setUploadedPdfs(temp);
     };
+
+    const calculateTotalPrice = () => {
+        let sum = 0;
+        uploadedPdfs.map((pdf) => {
+            sum += pdf.price;
+        });
+        cartPackages.map((cartPackage) => {
+            sum += cartPackage.price;
+        });
+        return sum.toFixed(2);
+    };
+
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -113,16 +140,6 @@ const OrderContainer = () => {
             handleFileEvent(temp);
         }
     };
-    const [uploadedPdfs, setUploadedPdfs] = useState<
-        {
-            name: string;
-            pageCount: number;
-            price: number;
-            priceId: string;
-            quantity: number;
-            isColor: boolean;
-        }[]
-    >([]);
     const handlePdfUpload = (files: File[]) => {
         const uploaded = [...uploadedPdfs];
         files.some((file: File) => {
@@ -289,6 +306,27 @@ const OrderContainer = () => {
                             Total Price
                         </Heading>
                         <List>
+                            {cartPackages.map((cartPackage) => {
+                                return (
+                                    <ListItem key={cartPackage.id}>
+                                        <Box display="flex">
+                                            <Text>{cartPackage.name}</Text>
+                                            <Text
+                                                marginLeft="auto"
+                                                fontWeight="800"
+                                                cursor="pointer"
+                                                onClick={() =>
+                                                    removePackage(
+                                                        cartPackage.id
+                                                    )
+                                                }
+                                            >
+                                                X
+                                            </Text>
+                                        </Box>
+                                    </ListItem>
+                                );
+                            })}
                             {uploadedPdfs && (
                                 <>
                                     <Heading as="span" fontSize="1rem">
@@ -350,7 +388,9 @@ const OrderContainer = () => {
                                 </>
                             )}
                             <ListItem>
-                                <strong>Estimated Price:</strong>
+                                <strong>
+                                    Estimated Price: ${calculateTotalPrice()}
+                                </strong>
                             </ListItem>
                             <Button variant="browned">Order Now</Button>
                         </List>
