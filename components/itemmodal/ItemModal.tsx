@@ -82,7 +82,11 @@ export default function ItemModal({
                             aspernatur.
                         </Text>
 
-                        <Button marginTop="auto" variant="browned">
+                        <Button
+                            onClick={() => bankTransfer()}
+                            marginTop="auto"
+                            variant="browned"
+                        >
                             Pay via bank transfer
                         </Button>
                         <Button

@@ -34,7 +34,7 @@ const OrderContainer = () => {
             priceId: string;
             quantity: number;
             isColor: boolean;
-            file: string;
+            file: File;
         }[]
     >([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
@@ -67,7 +67,32 @@ const OrderContainer = () => {
     const closeModal = () => {
         setModalOpen(false);
     };
-    const startOrder = () => {
+    const payWithBankTransfer = () => {
+        console.log("called");
+        //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
+        const file = uploadedPdfs[0].file;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function (e) {
+            var rawLog = reader.result.split(",")[1];
+            var dataSend = {
+                dataReq: { data: rawLog, name: file.name, type: file.type },
+                fname: "uploadFilesToGoogleDrive",
+            };
+            console.log(dataSend);
+            fetch(`/api/upload`, {
+                method: "POST",
+                body: JSON.stringify(dataSend),
+            })
+                .then((res) =>
+                    res.json().then((data) => {
+                        console.log(data);
+                    })
+                )
+                .catch((e) => console.log(e));
+        };
+    };
+    const payWithCreditCard = () => {
         const items: { price: string; quantity: number }[] = [];
         uploadedPdfs.map((pdf) => {
             items.push({ price: pdf.priceId, quantity: pdf.quantity });
@@ -184,7 +209,7 @@ const OrderContainer = () => {
                                         priceId: data.priceId,
                                         quantity: 1,
                                         isColor: false,
-                                        file: src,
+                                        file: file,
                                     });
                                     setUploadedPdfs(uploaded);
                                     console.log(uploaded);
@@ -203,7 +228,12 @@ const OrderContainer = () => {
     };
     return (
         <>
-            <ItemModal isOpen={modalOpen} closeFunction={closeModal} />
+            <ItemModal
+                isOpen={modalOpen}
+                closeFunction={closeModal}
+                creditCard={payWithCreditCard}
+                bankTransfer={payWithBankTransfer}
+            />
             <Box
                 paddingTop="1rem"
                 display="grid"
