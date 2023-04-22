@@ -34,6 +34,7 @@ const OrderContainer = () => {
             priceId: string;
             quantity: number;
             isColor: boolean;
+            file: string;
         }[]
     >([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
@@ -99,6 +100,7 @@ const OrderContainer = () => {
                         priceId: data.priceId,
                         quantity: 1,
                         isColor: option,
+                        file: toChange.file,
                     };
                     setUploadedPdfs(temp);
                 })
@@ -182,6 +184,7 @@ const OrderContainer = () => {
                                         priceId: data.priceId,
                                         quantity: 1,
                                         isColor: false,
+                                        file: src,
                                     });
                                     setUploadedPdfs(uploaded);
                                     console.log(uploaded);

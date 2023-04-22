@@ -81,8 +81,16 @@ export default function ItemModal({
                             totam reprehenderit quia reiciendis sint quae
                             aspernatur.
                         </Text>
+
                         <Button marginTop="auto" variant="browned">
-                            Buy
+                            Pay via bank transfer
+                        </Button>
+                        <Button
+                            onClick={() => creditCard()}
+                            marginTop="auto"
+                            variant="browned"
+                        >
+                            Pay via credit card
                         </Button>
                     </Box>
                 </Box>
@@ -90,4 +98,3 @@ export default function ItemModal({
         </Modal>
     );
 }
-
