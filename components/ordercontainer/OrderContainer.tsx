@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import {
     Box,
-    Image,
     FormLabel,
     Input,
     Heading,
@@ -19,10 +18,12 @@ import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
 import { createSession } from "../../lib/stripe";
+import ItemModal from "../itemmodal/ItemModal";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
+    const [modalOpen, setModalOpen] = useState(false);
     const [packages, setPackages] = useState(undefined);
     const [cartPackages, setCartPackages] = useState([]);
     const [uploadedPdfs, setUploadedPdfs] = useState<
@@ -62,6 +63,9 @@ const OrderContainer = () => {
             }
         };
     }, []);
+    const closeModal = () => {
+        setModalOpen(false);
+    };
     const startOrder = () => {
         const items: { price: string; quantity: number }[] = [];
         uploadedPdfs.map((pdf) => {
@@ -196,6 +200,7 @@ const OrderContainer = () => {
     };
     return (
         <>
+            <ItemModal isOpen={modalOpen} closeFunction={closeModal} />
             <Box
                 paddingTop="1rem"
                 display="grid"
@@ -411,7 +416,9 @@ const OrderContainer = () => {
                             </ListItem>
                             <Button
                                 variant="browned"
-                                onClick={() => startOrder()}
+                                onClick={() => {
+                                    setModalOpen(true);
+                                }}
                             >
                                 Order Now
                             </Button>
