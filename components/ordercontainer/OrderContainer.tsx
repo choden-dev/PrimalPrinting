@@ -18,6 +18,7 @@ import UploadCard from "../uploadcard/UploadCard";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
+import { createSession } from "../../lib/stripe";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -61,7 +62,23 @@ const OrderContainer = () => {
             }
         };
     }, []);
-    const startOrder = () => {};
+    const startOrder = () => {
+        const items: { price: string; quantity: number }[] = [];
+        uploadedPdfs.map((pdf) => {
+            items.push({ price: pdf.priceId, quantity: pdf.quantity });
+        });
+        cartPackages.map((cartPackage) => {
+            items.push({ price: cartPackage.priceId, quantity: 1 });
+        });
+        if (items.length === 0) return;
+        const arrStr = encodeURIComponent(JSON.stringify(items));
+
+        fetch(`/api/checkout?items=${arrStr}`).then((res) => {
+            res.json().then((data) => {
+                window.location.replace(data.paymentLink);
+            });
+        });
+    };
     const handleColorChange = async (option: boolean, name: string) => {
         const idx = uploadedPdfs.findIndex((pdf) => pdf.name === name);
         let temp = [...uploadedPdfs];
@@ -389,10 +406,15 @@ const OrderContainer = () => {
                             )}
                             <ListItem>
                                 <strong>
-                                    Estimated Price: ${calculateTotalPrice()}
+                                    Estimated Price: {calculateTotalPrice()}
                                 </strong>
                             </ListItem>
-                            <Button variant="browned">Order Now</Button>
+                            <Button
+                                variant="browned"
+                                onClick={() => startOrder()}
+                            >
+                                Order Now
+                            </Button>
                         </List>
                     </Box>
                 </Box>

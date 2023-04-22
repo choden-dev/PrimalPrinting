@@ -71,3 +71,16 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
         priceId: priceId,
     };
 };
+
+export const createSession = async (
+    items: { price: string; quantity: number }[]
+) => {
+    const stripe: Stripe = await makeStripeConnection();
+    const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: items,
+        success_url: process.env.STRIPE_SUCCESS_URL!,
+        cancel_url: process.env.STRIPE_CANCEL_URL!,
+    });
+    return session.url;
+};
