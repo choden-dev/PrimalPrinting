@@ -14,12 +14,13 @@ export type infoStructure = {
 };
 
 export type OrderPackage = {
+    id: string;
+    priceId: string;
     title: string;
-    included: string[];
+    description: string;
     price: number;
 };
 
 export type product = infoStructure & { image: any; price: string };
 
 export type testimonial = infoStructure & { author: string };
-

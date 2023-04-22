@@ -18,13 +18,36 @@ import UploadCard from "../uploadcard/UploadCard";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
+import { createSession } from "../../lib/stripe";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
-    const [smallScreen] = useMediaQuery(`(max-width: 800px)`);
+    const [packages, setPackages] = useState(undefined);
+    const [cartPackages, setCartPackages] = useState([]);
+    const [uploadedPdfs, setUploadedPdfs] = useState<
+        {
+            name: string;
+            pageCount: number;
+            price: number;
+            priceId: string;
+            quantity: number;
+            isColor: boolean;
+        }[]
+    >([]);
+    const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
+
+    useEffect(() => {
+        fetch(`/api/products`).then((res) =>
+            res.json().then((data) => {
+                console.log(data.packages.data);
+                setPackages(data.packages.data);
+            })
+        );
+    }, []);
+
     useEffect(() => {
         uploadZone.current.addEventListener("dragover", handleDragOver);
         uploadZone.current.addEventListener("drop", handleDrop);
@@ -39,6 +62,82 @@ const OrderContainer = () => {
             }
         };
     }, []);
+    const startOrder = () => {
+        const items: { price: string; quantity: number }[] = [];
+        uploadedPdfs.map((pdf) => {
+            items.push({ price: pdf.priceId, quantity: pdf.quantity });
+        });
+        cartPackages.map((cartPackage) => {
+            items.push({ price: cartPackage.priceId, quantity: 1 });
+        });
+        if (items.length === 0) return;
+        const arrStr = encodeURIComponent(JSON.stringify(items));
+
+        fetch(`/api/checkout?items=${arrStr}`).then((res) => {
+            res.json().then((data) => {
+                window.location.replace(data.paymentLink);
+            });
+        });
+    };
+    const handleColorChange = async (option: boolean, name: string) => {
+        const idx = uploadedPdfs.findIndex((pdf) => pdf.name === name);
+        let temp = [...uploadedPdfs];
+        const toChange = temp[idx];
+        console.log(option);
+        fetch(`/api/shop?pages=${toChange.pageCount}&isColor=${option}`).then(
+            (res) =>
+                res.json().then((data) => {
+                    console.log(data);
+                    temp[idx] = {
+                        name: toChange.name,
+                        pageCount: toChange.pageCount,
+                        price: data.price / 100,
+                        priceId: data.priceId,
+                        quantity: 1,
+                        isColor: option,
+                    };
+                    setUploadedPdfs(temp);
+                })
+        );
+    };
+    const addPackage = (
+        id: string,
+        name: string,
+        priceId: string,
+        price: number
+    ) => {
+        const temp = [...cartPackages];
+        if (temp.find((item) => item.id === id)) return;
+        temp.push({ id: id, name: name, priceId: priceId, price: price });
+        console.log(temp);
+        setCartPackages(temp);
+    };
+    const removePackage = (id: string) => {
+        const newPackages = cartPackages.filter((item) => item.id !== id);
+        setCartPackages(newPackages);
+    };
+    const removeFromCart = (name: string): any => {
+        const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
+        setUploadedPdfs(newUploads);
+    };
+    const changeQuantity = (name: string, newQuantity: number): any => {
+        const idx = uploadedPdfs.findIndex((pdf) => pdf.name === name);
+        let temp = [...uploadedPdfs];
+        temp[idx].quantity = newQuantity;
+        setUploadedPdfs(temp);
+    };
+
+    const calculateTotalPrice = () => {
+        let sum = 0;
+        uploadedPdfs.map((pdf) => {
+            sum += pdf.price;
+        });
+        cartPackages.map((cartPackage) => {
+            sum += cartPackage.price;
+        });
+        return sum.toFixed(2);
+    };
+
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -58,10 +157,7 @@ const OrderContainer = () => {
             handleFileEvent(temp);
         }
     };
-    const [uploadedPdfs, setUploadedPdfs] = useState<
-        { name: string; pageCount: number }[]
-    >([]);
-    const handlePdfUpload = (files) => {
+    const handlePdfUpload = (files: File[]) => {
         const uploaded = [...uploadedPdfs];
         files.some((file: File) => {
             //file doesn't exist
@@ -72,14 +168,27 @@ const OrderContainer = () => {
                     .getDocument(src)
                     .promise.then((doc) => {
                         pages = doc.numPages;
-                        uploaded.push({ name: file.name, pageCount: pages });
-                        setUploadedPdfs(uploaded);
-                        console.log(uploaded);
+                        fetch(`/api/shop?pages=${pages}&isColor=false`).then(
+                            (res) =>
+                                res.json().then((data) => {
+                                    uploaded.push({
+                                        name: file.name,
+                                        pageCount: pages,
+                                        price: data.price / 100,
+                                        priceId: data.priceId,
+                                        quantity: 1,
+                                        isColor: false,
+                                    });
+                                    setUploadedPdfs(uploaded);
+                                    console.log(uploaded);
+                                })
+                        ); // missing closing parenthesis here
                     })
                     .catch(() => console.error("invalid file type"));
             }
         });
     };
+
     const handleFileEvent = (e) => {
         console.log(e.target.files);
         const files = Array.prototype.slice.call(e.target.files);
@@ -116,18 +225,28 @@ const OrderContainer = () => {
                                 smallScreen ? "1fr" : "1fr 1fr"
                             }
                         >
-                            <ProductCard
-                                orderPackage={{
-                                    title: "test",
-                                    included: ["1sdasd", "2dssd"],
-                                    price: 20,
-                                }}
-                                image=""
-                                hasButton={true}
-                            />
+                            {packages &&
+                                packages.map((item) => {
+                                    return (
+                                        <ProductCard
+                                            key={item.updated}
+                                            addFunction={addPackage}
+                                            orderPackage={{
+                                                title: item.name,
+                                                id: item.id,
+                                                priceId: item.default_price,
+                                                description: item.description,
+                                                price: item.price / 100,
+                                            }}
+                                            image=""
+                                            hasButton={true}
+                                        />
+                                    );
+                                })}
                         </Box>
                         <FormControl>
                             <Box
+                                zIndex="76"
                                 display="flex"
                                 flexDir="column"
                                 cursor="pointer"
@@ -137,9 +256,6 @@ const OrderContainer = () => {
                                 bg="brown.100"
                                 borderRadius="2px"
                                 ref={uploadZone}
-                                onClick={() =>
-                                    defaultUploadZone.current.click()
-                                }
                             >
                                 <Input
                                     ref={defaultUploadZone}
@@ -158,11 +274,21 @@ const OrderContainer = () => {
                                             <UploadCard
                                                 name={pdf.name}
                                                 pages={pdf.pageCount}
+                                                price={pdf.price}
+                                                removeFunction={removeFromCart}
+                                                changeFunction={
+                                                    handleColorChange
+                                                }
                                             />
                                         </Box>
                                     );
                                 })}
-                                <Text textAlign="center">
+                                <Text
+                                    onClick={(e) => {
+                                        defaultUploadZone.current.click();
+                                    }}
+                                    textAlign="center"
+                                >
                                     Click or drag *.pdf file to upload
                                 </Text>
                                 <AddIcon alignSelf="center" />
@@ -197,13 +323,98 @@ const OrderContainer = () => {
                             Total Price
                         </Heading>
                         <List>
+                            {cartPackages.map((cartPackage) => {
+                                return (
+                                    <ListItem key={cartPackage.id}>
+                                        <Box display="flex">
+                                            <Text>{cartPackage.name}</Text>
+                                            <Text
+                                                marginLeft="auto"
+                                                fontWeight="800"
+                                                cursor="pointer"
+                                                onClick={() =>
+                                                    removePackage(
+                                                        cartPackage.id
+                                                    )
+                                                }
+                                            >
+                                                X
+                                            </Text>
+                                        </Box>
+                                    </ListItem>
+                                );
+                            })}
+                            {uploadedPdfs && (
+                                <>
+                                    <Heading as="span" fontSize="1rem">
+                                        Uploaded Files
+                                    </Heading>
+                                    {uploadedPdfs.map((pdf) => {
+                                        return (
+                                            <ListItem key={pdf.name}>
+                                                <Box display="flex">
+                                                    <Text>
+                                                        {pdf.name} |{" "}
+                                                        {pdf.price *
+                                                            pdf.quantity}
+                                                    </Text>
+                                                    <Input
+                                                        min="1"
+                                                        max="5"
+                                                        marginLeft="auto"
+                                                        borderRadius="sm"
+                                                        type="number"
+                                                        placeholder={
+                                                            pdf.quantity
+                                                        }
+                                                        onChange={(e) => {
+                                                            const num =
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                            const min =
+                                                                parseInt(
+                                                                    e.target.min
+                                                                );
+                                                            const max =
+                                                                parseInt(
+                                                                    e.target.max
+                                                                );
+                                                            if (
+                                                                num > max ||
+                                                                num < min
+                                                            ) {
+                                                                e.target.value =
+                                                                    pdf.quantity;
+                                                                return;
+                                                            }
+                                                            changeQuantity(
+                                                                pdf.name,
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </Box>
+                                            </ListItem>
+                                        );
+                                    })}
+                                </>
+                            )}
                             <ListItem>
-                                Coursebook (Upload, 100-200 pages)
+                                <strong>
+                                    Estimated Price: {calculateTotalPrice()}
+                                </strong>
                             </ListItem>
-                            <ListItem>
-                                <strong>Estimated Price:</strong>
-                            </ListItem>
-                            <Button variant="browned">Order Now</Button>
+                            <Button
+                                variant="browned"
+                                onClick={() => startOrder()}
+                            >
+                                Order Now
+                            </Button>
                         </List>
                     </Box>
                 </Box>

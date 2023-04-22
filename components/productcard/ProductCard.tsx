@@ -8,9 +8,20 @@ type Props = {
     orderPackage: OrderPackage;
     image: string;
     hasButton: boolean;
+    addFunction: (
+        id: string,
+        name: string,
+        priceId: string,
+        price: number
+    ) => any;
 };
 
-export default function ProductCard({ orderPackage, image, hasButton }: Props) {
+export default function ProductCard({
+    orderPackage,
+    image,
+    hasButton,
+    addFunction,
+}: Props) {
     const [infoOpen, setInfoOpen] = React.useState<boolean>(false);
     const openInfo = () => setInfoOpen(true);
     const closeInfo = () => setInfoOpen(false);
@@ -45,14 +56,7 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                         <Heading fontWeight="400" color="brown.900">
                             {orderPackage.title}
                         </Heading>
-                        {orderPackage.included.map((item) => {
-                            return (
-                                <Text key={item} fontWeight="300">
-                                    {item}
-                                </Text>
-                            );
-                        })}
-
+                        <Text>{orderPackage.description}</Text>
                         <Box display="flex" alignItems="center">
                             <Text
                                 color="brown.900"
@@ -62,17 +66,22 @@ export default function ProductCard({ orderPackage, image, hasButton }: Props) {
                                 {orderPackage.price.toFixed(2)}
                             </Text>
                             {hasButton && (
-                                <Link href="/shop" passHref>
-                                    <Button
-                                        as="a"
-                                        borderRadius="sm"
-                                        marginLeft="auto"
-                                        variant="browned"
-                                        transition="background-color 0.4s"
-                                    >
-                                        Add
-                                    </Button>
-                                </Link>
+                                <Button
+                                    onClick={() =>
+                                        addFunction(
+                                            orderPackage.id,
+                                            orderPackage.title,
+                                            orderPackage.priceId,
+                                            orderPackage.price
+                                        )
+                                    }
+                                    borderRadius="sm"
+                                    marginLeft="auto"
+                                    variant="browned"
+                                    transition="background-color 0.4s"
+                                >
+                                    Add
+                                </Button>
                             )}
                         </Box>
                     </Box>
