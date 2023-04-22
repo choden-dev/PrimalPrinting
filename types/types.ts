@@ -14,6 +14,8 @@ export type infoStructure = {
 };
 
 export type OrderPackage = {
+    id: string;
+    priceId: string;
     title: string;
     description: string;
     price: number;

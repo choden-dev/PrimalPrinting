@@ -23,6 +23,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const OrderContainer = () => {
     const [packages, setPackages] = useState(undefined);
+    const [cartPackages, setCartPackages] = useState([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
@@ -77,7 +78,12 @@ const OrderContainer = () => {
         name: string,
         priceId: string,
         price: number
-    ) => {};
+    ) => {
+        const temp = [...cartPackages];
+        temp.push({ id: id, name: name, priceId: priceId, price: price });
+        console.log(temp);
+        setCartPackages(temp);
+    };
     const removeFromCart = (name: string): any => {
         const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
         setUploadedPdfs(newUploads);
@@ -190,8 +196,11 @@ const OrderContainer = () => {
                                     return (
                                         <ProductCard
                                             key={item.updated}
+                                            addFunction={addPackage}
                                             orderPackage={{
                                                 title: item.name,
+                                                id: item.id,
+                                                priceId: item.default_price,
                                                 description: item.description,
                                                 price: item.price / 100,
                                             }}

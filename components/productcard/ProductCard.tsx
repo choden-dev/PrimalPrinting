@@ -66,18 +66,22 @@ export default function ProductCard({
                                 {orderPackage.price.toFixed(2)}
                             </Text>
                             {hasButton && (
-                                <Link href="/shop" passHref>
-                                    <Button
-                                        as="a"
-                                        onClick={() => addFunction}
-                                        borderRadius="sm"
-                                        marginLeft="auto"
-                                        variant="browned"
-                                        transition="background-color 0.4s"
-                                    >
-                                        Add
-                                    </Button>
-                                </Link>
+                                <Button
+                                    onClick={() =>
+                                        addFunction(
+                                            orderPackage.id,
+                                            orderPackage.title,
+                                            orderPackage.priceId,
+                                            orderPackage.price
+                                        )
+                                    }
+                                    borderRadius="sm"
+                                    marginLeft="auto"
+                                    variant="browned"
+                                    transition="background-color 0.4s"
+                                >
+                                    Add
+                                </Button>
                             )}
                         </Box>
                     </Box>
