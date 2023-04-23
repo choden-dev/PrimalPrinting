@@ -29,8 +29,8 @@ export const authenticateGoogle = () => {
     });
     return auth;
 };
-
-export const appendToSpreadSheet = () => {
+//adapted from https://gist.github.com/iaincollins/43302ea047d4a77e6605350598d160c1
+export const appendToSpreadSheet = (toAppend: any[][]) => {
     const auth = authenticateGoogle();
     const sheets = google.sheets("v4");
     sheets.spreadsheets.values.append(
@@ -40,7 +40,7 @@ export const appendToSpreadSheet = () => {
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
             resource: {
-                values: [["test"], ["test", "test"]],
+                values: toAppend,
             },
             auth: auth,
         },

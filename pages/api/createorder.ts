@@ -8,9 +8,25 @@ export default async function handler(
 ) {
     try {
         const orderId = guidGenerator();
-        const ordersToAdd: OrderRow[] = [];
-        const orderRow = JSON.parse(req.body);
-        appendToSpreadSheet();
+        const toAppend: any[][] = [];
+        const orderRows: OrderRow[] = JSON.parse(req.body);
+        orderRows.map((row) => {
+            const temp = [
+                orderId,
+                row.name,
+                row.email,
+                row.pages,
+                row.coursebookLink,
+                row.colour,
+                row.paymentMethod,
+                row.quantity,
+                row.paid,
+                row.cost,
+                row.message,
+            ];
+            toAppend.push(temp);
+        });
+        appendToSpreadSheet(toAppend);
         return res.json({
             message: orderId,
             success: true,
