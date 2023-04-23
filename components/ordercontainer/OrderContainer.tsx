@@ -132,13 +132,19 @@ const OrderContainer = () => {
             })
         );
     };
+
     const checkFormValidity = () => {
         const form = formRef.current;
         console.log(form.name.value);
-        return form.checkValidity();
+        return (
+            form.checkValidity() &&
+            ((cartPackages && cartPackages.length !== 0) ||
+                (uploadedPdfs && uploadedPdfs.length !== 0))
+        );
     };
     const handleOrderInformation = (isBankTransfer: boolean) => {
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
+        setModalOpen(false);
         setIsProcessing(true);
         const promises = [];
         for (let i = 0; i < uploadedPdfs.length; ++i) {
@@ -327,13 +333,14 @@ const OrderContainer = () => {
     };
     return (
         <>
-            <ProcessingOverlay />
+            <ProcessingOverlay show={isProcessing} />
             <ItemModal
                 isOpen={modalOpen}
                 closeFunction={closeModal}
                 creditCard={() => handleOrderInformation(false)}
                 bankTransfer={() => handleOrderInformation(true)}
             />
+
             <Box
                 paddingTop="1rem"
                 display="grid"

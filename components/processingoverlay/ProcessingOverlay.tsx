@@ -1,5 +1,8 @@
 import { Box, Spinner, Text } from "@chakra-ui/react";
-export default function ProcessingOverlay() {
+type Props = {
+    show: boolean;
+};
+export default function ProcessingOverlay({ show }: Props) {
     return (
         <>
             <Box
@@ -8,7 +11,7 @@ export default function ProcessingOverlay() {
                 left="0"
                 h="100vh"
                 w="100vw"
-                display="flex"
+                display={show ? "flex" : "none"}
                 pos="fixed"
                 justifyContent="center"
                 alignItems="center"
