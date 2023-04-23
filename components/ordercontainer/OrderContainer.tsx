@@ -68,13 +68,14 @@ const OrderContainer = () => {
         setModalOpen(false);
     };
 
-    const collateOrder = () => {
+    const collateOrder = (urls: { name: string; url: string }[]) => {
         const orders: OrderRow[] = [];
         const form = formRef.current;
         const name = form.name.value;
         const email = form.email.value;
         const message = form.message.value;
         uploadedPdfs.map((pdf) => {
+            const idx = urls.findIndex((item) => item.name === pdf.name);
             const order: OrderRow = {
                 name: name,
                 email: email,
@@ -82,6 +83,7 @@ const OrderContainer = () => {
                 quantity: pdf.quantity,
                 cost: pdf.price,
                 colour: pdf.isColor,
+                coursebookLink: urls[idx].url,
             };
             orders.push(order);
         });
@@ -143,11 +145,17 @@ const OrderContainer = () => {
             });
             promises.push(promise);
         }
-        Promise.all(promises).then((res) =>
-            res.map((item) => {
-                return;
-            })
-        );
+        const temp = [];
+        Promise.all(promises)
+            .then((res) =>
+                res.map((item) => {
+                    const info = item.message;
+                    temp.push({ name: info.name, url: info.url });
+                })
+            )
+            .then(() => {
+                collateOrder(temp);
+            });
     };
     const payWithCreditCard = () => {
         const items: { price: string; quantity: number }[] = [];
