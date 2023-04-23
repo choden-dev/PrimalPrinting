@@ -7,7 +7,11 @@ export default async function handler(
 ) {
     try {
         const items = JSON.parse(req.body);
-        const session = await createSession(items.items, items.orderId);
+        const session = await createSession(
+            items.items,
+            items.orderId,
+            items.email
+        );
         return res.json({
             paymentLink: session.url,
             orderId: session.metadata.orderId,

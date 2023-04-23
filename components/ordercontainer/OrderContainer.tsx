@@ -192,7 +192,11 @@ const OrderContainer = () => {
             items.push({ price: cartPackage.priceId, quantity: 1 });
         });
         if (items.length === 0) return;
-        const toPost = { items: items, orderId: orderId };
+        const toPost = {
+            items: items,
+            orderId: orderId,
+            email: formRef.current.email.value,
+        };
 
         fetch(`/api/checkout`, {
             method: "POST",
