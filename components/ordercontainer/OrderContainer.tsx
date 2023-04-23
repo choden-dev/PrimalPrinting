@@ -96,7 +96,11 @@ const OrderContainer = () => {
             };
             orders.push(order);
         });
-        console.log(orders);
+        console.log(JSON.stringify(orders));
+        fetch(`api/createorder`, {
+            method: "POST",
+            body: JSON.stringify(orders),
+        }).then((res) => res.json().then((data) => console.log(data)));
     };
     const checkFormValidity = () => {
         const form = formRef.current;

@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { OrderRow } from "../../types/types";
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
     try {
-        const orderRow = JSON.parse(res.body);
+        const orderRow = JSON.parse(req.body);
         return res.json({
-            message: response,
+            message: orderRow,
             success: true,
         });
     } catch (error) {
