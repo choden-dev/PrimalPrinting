@@ -33,16 +33,19 @@ export const authenticateGoogle = () => {
 export const appendToSpreadSheet = () => {
     const auth = authenticateGoogle();
     const sheets = google.sheets("v4");
-    sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.ORDER_SPREADSHEET_ID,
-        range: "Website Orders",
-        valueInputOption: "RAW",
-        insertDataOption: "INSERT_ROWS",
-        resource: {
-            values: [["test", "test"]],
+    sheets.spreadsheets.values.append(
+        {
+            spreadsheetId: process.env.ORDER_SPREADSHEET_ID,
+            range: "Website Orders",
+            valueInputOption: "RAW",
+            insertDataOption: "INSERT_ROWS",
+            resource: {
+                values: [["test"], ["test", "test"]],
+            },
+            auth: auth,
         },
-        auth: auth,
-	}, (err, response) => {
-		if err return console.error(err)
-	});
+        (err, response) => {
+            if (err) return console.error(err);
+        }
+    );
 };

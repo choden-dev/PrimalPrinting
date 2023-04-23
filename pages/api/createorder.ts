@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { guidGenerator } from "../../lib/utils";
+import { appendToSpreadSheet } from "../../lib/google";
 import { OrderRow } from "../../types/types";
 export default async function handler(
     req: NextApiRequest,
@@ -9,6 +10,7 @@ export default async function handler(
         const orderId = guidGenerator();
         const ordersToAdd: OrderRow[] = [];
         const orderRow = JSON.parse(req.body);
+        appendToSpreadSheet();
         return res.json({
             message: orderId,
             success: true,
