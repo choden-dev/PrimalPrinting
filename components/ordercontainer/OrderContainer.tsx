@@ -68,6 +68,20 @@ const OrderContainer = () => {
         setModalOpen(false);
     };
 
+    const collateOrder = () => {
+        const orders: OrderRow[] = [];
+        const form = formRef.current;
+        uploadedPdfs.map((pdf) => {
+            const order: OrderRow = {
+                name: form.name,
+                email: form.email,
+                message: form.message,
+                cost: pdf.price,
+                color: pdf.isColor,
+            };
+            orders.push();
+        });
+    };
     const checkFormValidity = () => {
         const form = formRef.current;
         console.log(form.name.value);

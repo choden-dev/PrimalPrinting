@@ -22,15 +22,15 @@ export type OrderPackage = {
 };
 
 export type OrderRow = {
-    orderId: string;
+    orderId?: string;
     name: string;
     email: string;
     pages: number;
-    coursebookLink: string;
+    coursebookLink?: string;
     colour: boolean;
-    paymentMethod: string;
+    paymentMethod?: string;
     quantity: number;
-    paid: boolean;
+    paid?: boolean;
     cost: number;
 };
 
