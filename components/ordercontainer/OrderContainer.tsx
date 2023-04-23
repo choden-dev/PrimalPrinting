@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { useState, useRef, useEffect } from "react";
 import {
     Box,
@@ -38,6 +39,7 @@ const OrderContainer = () => {
         }[]
     >([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
+    const router = useRouter();
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
     const formRef = useRef(null);
@@ -109,11 +111,20 @@ const OrderContainer = () => {
             };
             orders.push(order);
         });
-        console.log(JSON.stringify(orders));
         fetch(`api/createorder`, {
             method: "POST",
             body: JSON.stringify(orders),
-        }).then((res) => res.json().then((data) => console.log(data)));
+        }).then((res) =>
+            res.json().then((data) => {
+                if (isBankTransfer) {
+                    router.push(
+                        `/order_complete?orderId=${
+                            data.message.orderId
+                        }&items=${JSON.stringify(data.message.coursebooks)}`
+                    );
+                }
+            })
+        );
     };
     const checkFormValidity = () => {
         const form = formRef.current;
@@ -170,6 +181,7 @@ const OrderContainer = () => {
             });
     };
     const payWithCreditCard = () => {
+        handleOrderInformation(false);
         const items: { price: string; quantity: number }[] = [];
         uploadedPdfs.map((pdf) => {
             items.push({ price: pdf.priceId, quantity: pdf.quantity });
