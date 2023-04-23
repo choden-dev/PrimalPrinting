@@ -24,6 +24,7 @@ import ItemModal from "../itemmodal/ItemModal";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const OrderContainer = () => {
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [packages, setPackages] = useState(undefined);
     const [cartPackages, setCartPackages] = useState([]);
@@ -117,11 +118,15 @@ const OrderContainer = () => {
         }).then((res) =>
             res.json().then((data) => {
                 if (isBankTransfer) {
+                    setIsProcessing(false);
                     router.push(
                         `/order_complete?orderId=${
                             data.message.orderId
                         }&items=${JSON.stringify(data.message.coursebooks)}`
                     );
+                } else {
+                    setIsProcessing(false);
+                    payWithCreditCard(data.message.orderId);
                 }
             })
         );
@@ -131,11 +136,9 @@ const OrderContainer = () => {
         console.log(form.name.value);
         return form.checkValidity();
     };
-    const payWithBankTransfer = () => {
-        handleOrderInformation(true);
-    };
     const handleOrderInformation = (isBankTransfer: boolean) => {
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
+        setIsProcessing(true);
         const promises = [];
         for (let i = 0; i < uploadedPdfs.length; ++i) {
             const file = uploadedPdfs[i].file;
@@ -180,8 +183,7 @@ const OrderContainer = () => {
                 collateOrder(temp, isBankTransfer);
             });
     };
-    const payWithCreditCard = () => {
-        handleOrderInformation(false);
+    const payWithCreditCard = (orderId: string) => {
         const items: { price: string; quantity: number }[] = [];
         uploadedPdfs.map((pdf) => {
             items.push({ price: pdf.priceId, quantity: pdf.quantity });
@@ -190,9 +192,12 @@ const OrderContainer = () => {
             items.push({ price: cartPackage.priceId, quantity: 1 });
         });
         if (items.length === 0) return;
-        const arrStr = encodeURIComponent(JSON.stringify(items));
+        const toPost = { items: items, orderId: orderId };
 
-        fetch(`/api/checkout?items=${arrStr}`).then((res) => {
+        fetch(`/api/checkout`, {
+            method: "POST",
+            body: JSON.stringify(toPost),
+        }).then((res) => {
             res.json().then((data) => {
                 window.location.replace(data.paymentLink);
             });
@@ -320,8 +325,8 @@ const OrderContainer = () => {
             <ItemModal
                 isOpen={modalOpen}
                 closeFunction={closeModal}
-                creditCard={payWithCreditCard}
-                bankTransfer={payWithBankTransfer}
+                creditCard={() => handleOrderInformation(false)}
+                bankTransfer={() => handleOrderInformation(true)}
             />
             <Box
                 paddingTop="1rem"
