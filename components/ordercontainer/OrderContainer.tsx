@@ -17,7 +17,7 @@ import UploadCard from "../uploadcard/UploadCard";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
-import { createSession } from "../../lib/stripe";
+import { OrderRow } from "../../types/types";
 import ItemModal from "../itemmodal/ItemModal";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -70,33 +70,36 @@ const OrderContainer = () => {
 
     const checkFormValidity = () => {
         const form = formRef.current;
+        console.log(form.name.value);
         return form.checkValidity();
     };
 
     const payWithBankTransfer = () => {
         console.log("called");
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
-        const file = uploadedPdfs[0].file;
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function (e) {
-            var rawLog = reader.result.split(",")[1];
-            var dataSend = {
-                dataReq: { data: rawLog, name: file.name, type: file.type },
-                fname: "uploadFilesToGoogleDrive",
+        for (let i = 0; i < uploadedPdfs.length; ++i) {
+            const file = uploadedPdfs[i].file;
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (e) {
+                var rawLog = reader.result.split(",")[1];
+                var dataSend = {
+                    dataReq: { data: rawLog, name: file.name, type: file.type },
+                    fname: "uploadFilesToGoogleDrive",
+                };
+                console.log(dataSend);
+                fetch(`/api/upload`, {
+                    method: "POST",
+                    body: JSON.stringify(dataSend),
+                })
+                    .then((res) =>
+                        res.json().then((data) => {
+                            console.log(data);
+                        })
+                    )
+                    .catch((e) => console.log(e));
             };
-            console.log(dataSend);
-            fetch(`/api/upload`, {
-                method: "POST",
-                body: JSON.stringify(dataSend),
-            })
-                .then((res) =>
-                    res.json().then((data) => {
-                        console.log(data);
-                    })
-                )
-                .catch((e) => console.log(e));
-        };
+        }
     };
     const payWithCreditCard = () => {
         const items: { price: string; quantity: number }[] = [];
@@ -288,15 +291,15 @@ const OrderContainer = () => {
                                     );
                                 })}
                         </Box>
-                        <Input
-                            ref={defaultUploadZone}
-                            display="none"
-                            type="file"
-                            accept="application/pdf"
-                            onChange={handleFileEvent}
-                        />
                         <form ref={formRef}>
-                            <FormControl isRequired>
+                            <FormControl>
+                                <Input
+                                    ref={defaultUploadZone}
+                                    display="none"
+                                    type="file"
+                                    accept="application/pdf"
+                                    onChange={handleFileEvent}
+                                />
                                 <Box
                                     zIndex="76"
                                     display="flex"
@@ -349,14 +352,24 @@ const OrderContainer = () => {
                                         <FormLabel>Name</FormLabel>
                                         <FormLabel>Email</FormLabel>
                                         <Input
+                                            isRequired
+                                            name="name"
                                             minLength={2}
                                             type="text"
                                             borderRadius="sm"
                                         />
-                                        <Input type="email" borderRadius="sm" />
+                                        <Input
+                                            name="email"
+                                            type="email"
+                                            borderRadius="sm"
+                                        />
                                     </Box>
                                     <FormLabel>Extra requests</FormLabel>
-                                    <Textarea borderRadius="sm" />
+                                    <Textarea
+                                        name="message"
+                                        type="text"
+                                        borderRadius="sm"
+                                    />
                                 </Box>
                             </FormControl>
                         </form>
