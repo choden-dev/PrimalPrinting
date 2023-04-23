@@ -21,6 +21,21 @@ export type OrderPackage = {
     price: number;
 };
 
+export type OrderRow = {
+    orderId?: string;
+    name: string;
+    email: string;
+    pages: number;
+    message: string;
+    coursebookName?: string;
+    coursebookLink?: string;
+    colour: boolean;
+    paymentMethod?: string;
+    quantity: number;
+    paid?: boolean;
+    cost: number;
+};
+
 export type product = infoStructure & { image: any; price: string };
 
 export type testimonial = infoStructure & { author: string };
