@@ -26,6 +26,7 @@ export type OrderRow = {
     name: string;
     email: string;
     pages: number;
+    message: string;
     coursebookLink?: string;
     colour: boolean;
     paymentMethod?: string;

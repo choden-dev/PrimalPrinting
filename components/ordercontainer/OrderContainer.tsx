@@ -71,16 +71,32 @@ const OrderContainer = () => {
     const collateOrder = () => {
         const orders: OrderRow[] = [];
         const form = formRef.current;
+        const name = form.name.value;
+        const email = form.email.value;
+        const message = form.message.value;
         uploadedPdfs.map((pdf) => {
             const order: OrderRow = {
-                name: form.name,
-                email: form.email,
-                message: form.message,
+                name: name,
+                email: email,
+                message: message,
+                quantity: pdf.quantity,
                 cost: pdf.price,
-                color: pdf.isColor,
+                colour: pdf.isColor,
             };
-            orders.push();
+            orders.push(order);
         });
+        cartPackages.map((cartPackage) => {
+            const order: OrderRow = {
+                name: name,
+                email: email,
+                message: message,
+                quantity: 1,
+                cost: cartPackage.price,
+                colour: false,
+            };
+            orders.push(order);
+        });
+        console.log(orders);
     };
     const checkFormValidity = () => {
         const form = formRef.current;
@@ -89,7 +105,8 @@ const OrderContainer = () => {
     };
 
     const payWithBankTransfer = () => {
-        console.log("called");
+        collateOrder();
+        return;
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
         for (let i = 0; i < uploadedPdfs.length; ++i) {
             const file = uploadedPdfs[i].file;
