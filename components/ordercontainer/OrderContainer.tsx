@@ -68,7 +68,10 @@ const OrderContainer = () => {
         setModalOpen(false);
     };
 
-    const collateOrder = (urls: { name: string; url: string }[]) => {
+    const collateOrder = (
+        urls: { name: string; url: string }[],
+        isBankTransfer: boolean
+    ) => {
         const orders: OrderRow[] = [];
         const form = formRef.current;
         const name = form.name.value;
@@ -84,6 +87,7 @@ const OrderContainer = () => {
                 cost: pdf.price,
                 colour: pdf.isColor,
                 coursebookLink: urls[idx].url,
+                paid: false,
             };
             orders.push(order);
         });
@@ -96,6 +100,7 @@ const OrderContainer = () => {
                 coursebookLink: cartPackage.name,
                 cost: cartPackage.price,
                 colour: false,
+                paid: false,
             };
             orders.push(order);
         });
@@ -110,8 +115,10 @@ const OrderContainer = () => {
         console.log(form.name.value);
         return form.checkValidity();
     };
-
     const payWithBankTransfer = () => {
+        return;
+    };
+    const handleOrderInformation = () => {
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
         const promises = [];
         for (let i = 0; i < uploadedPdfs.length; ++i) {
