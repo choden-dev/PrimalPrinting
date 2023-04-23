@@ -24,11 +24,12 @@ import { OrderRow } from "../../types/types";
 import ItemModal from "../itemmodal/ItemModal";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
-const OrderContainer = () => {
+type Props = {
+    packages: any;
+};
+const OrderContainer = ({ packages }: Props) => {
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState(false);
-    const [packages, setPackages] = useState(undefined);
     const [cartPackages, setCartPackages] = useState([]);
     const [uploadedPdfs, setUploadedPdfs] = useState<
         {
@@ -46,14 +47,6 @@ const OrderContainer = () => {
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
     const formRef = useRef(null);
-    useEffect(() => {
-        fetch(`/api/products`).then((res) =>
-            res.json().then((data) => {
-                console.log(data.packages.data);
-                setPackages(data.packages.data);
-            })
-        );
-    }, []);
 
     useEffect(() => {
         uploadZone.current.addEventListener("dragover", handleDragOver);
@@ -438,7 +431,8 @@ const OrderContainer = () => {
                                         }}
                                         textAlign="center"
                                     >
-                                        Click or drag *.pdf file to upload
+                                        Click or drag *.pdf file to upload (20mb
+                                        max)
                                     </Text>
                                     <AddIcon alignSelf="center" />
                                 </Box>
