@@ -91,6 +91,7 @@ const OrderContainer = () => {
                 email: email,
                 message: message,
                 quantity: 1,
+                coursebookLink: cartPackage.name,
                 cost: cartPackage.price,
                 colour: false,
             };
@@ -109,32 +110,44 @@ const OrderContainer = () => {
     };
 
     const payWithBankTransfer = () => {
-        collateOrder();
-        return;
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
+        const promises = [];
         for (let i = 0; i < uploadedPdfs.length; ++i) {
             const file = uploadedPdfs[i].file;
             const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function (e) {
-                var rawLog = reader.result.split(",")[1];
-                var dataSend = {
-                    dataReq: { data: rawLog, name: file.name, type: file.type },
-                    fname: "uploadFilesToGoogleDrive",
-                };
-                console.log(dataSend);
-                fetch(`/api/upload`, {
-                    method: "POST",
-                    body: JSON.stringify(dataSend),
-                })
-                    .then((res) =>
-                        res.json().then((data) => {
-                            console.log(data);
+            const promise = new Promise((resolve, reject) => {
+                reader.onload = function (e) {
+                    var rawLog = reader.result.split(",")[1];
+                    var dataSend = {
+                        dataReq: {
+                            data: rawLog,
+                            name: file.name,
+                            type: file.type,
+                        },
+                        fname: "uploadFilesToGoogleDrive",
+                    };
+                    console.log(dataSend);
+                    fetch(`/api/upload`, {
+                        method: "POST",
+                        body: JSON.stringify(dataSend),
+                    })
+                        .then((res) => res.json())
+                        .then((data) => {
+                            resolve(data);
                         })
-                    )
-                    .catch((e) => console.log(e));
-            };
+                        .catch((e) => {
+                            reject(e);
+                        });
+                };
+                reader.readAsDataURL(file);
+            });
+            promises.push(promise);
         }
+        Promise.all(promises).then((res) =>
+            res.map((item) => {
+                return;
+            })
+        );
     };
     const payWithCreditCard = () => {
         const items: { price: string; quantity: number }[] = [];
