@@ -1,8 +1,6 @@
-import { createReadStream } from "fs";
-import { Readable } from "stream";
 import Multer from "multer";
-import { BlobFetch } from "fetch-blob";
 import { google } from "googleapis";
+import { OrderRow } from "../types/types";
 // adapted from https://www.mohammadfaisal.dev/blog/google-drive-nodejs-react
 const credentials = {
     type: process.env.type,
@@ -30,4 +28,21 @@ export const authenticateGoogle = () => {
         scopes: "https://www.googleapis.com/auth/drive",
     });
     return auth;
+};
+
+export const appendToSpreadSheet = () => {
+    const auth = authenticateGoogle();
+    const sheets = google.sheets("v4");
+    sheets.spreadsheets.values.append({
+        spreadsheetId: process.env.ORDER_SPREADSHEET_ID,
+        range: "Website Orders",
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
+        resource: {
+            values: [["test", "test"]],
+        },
+        auth: auth,
+	}, (err, response) => {
+		if err return console.error(err)
+	});
 };
