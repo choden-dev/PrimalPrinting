@@ -4,6 +4,7 @@ import {
     Box,
     FormLabel,
     Input,
+    Divider,
     Heading,
     FormControl,
     Textarea,
@@ -481,16 +482,30 @@ const OrderContainer = () => {
                     padding="1rem .5rem"
                     top={smallScreen ? "0" : "5rem"}
                 >
-                    <Box display="flex" flexDir="column">
+                    <Box display="flex" color="brown.900" flexDir="column">
                         <Heading fontSize="1.5rem" as="p">
                             Total Price
                         </Heading>
                         <List>
+                            <Text fontWeight="800">Packages</Text>
+                            <Divider marginBottom=".5rem" />
                             {cartPackages.map((cartPackage) => {
                                 return (
                                     <ListItem key={cartPackage.id}>
-                                        <Box display="flex">
-                                            <Text>{cartPackage.name}</Text>
+                                        <Box
+                                            display="flex"
+                                            border="1px solid"
+                                            borderColor="brown.700"
+                                            padding="1rem"
+                                            borderRadius="sm"
+                                            marginBottom=".5rem"
+                                        >
+                                            <Text>
+                                                {cartPackage.name} |{" "}
+                                                <strong>
+                                                    ${cartPackage.price}
+                                                </strong>
+                                            </Text>
                                             <Text
                                                 marginLeft="auto"
                                                 fontWeight="800"
@@ -512,9 +527,13 @@ const OrderContainer = () => {
                                     <Heading as="span" fontSize="1rem">
                                         Uploaded Files
                                     </Heading>
+                                    <Divider marginBottom=".5rem" />
                                     {uploadedPdfs.map((pdf) => {
                                         return (
-                                            <ListItem key={pdf.name}>
+                                            <ListItem
+                                                key={pdf.name}
+                                                marginBottom=".5rem"
+                                            >
                                                 <Box display="flex">
                                                     <Text>
                                                         {pdf.name} |{" "}
@@ -568,9 +587,11 @@ const OrderContainer = () => {
                                 </>
                             )}
                             <ListItem>
-                                <strong>
-                                    Estimated Price: {calculateTotalPrice()}
-                                </strong>
+                                <Text fontSize="1.5rem">
+                                    <strong>
+                                        Estimated Price: {calculateTotalPrice()}
+                                    </strong>
+                                </Text>
                             </ListItem>
                             <Button
                                 variant="browned"
