@@ -77,17 +77,21 @@ const OrderContainer = () => {
         const name = form.name.value;
         const email = form.email.value;
         const message = form.message.value;
+        const paymentMethod = isBankTransfer ? "Bank" : "Credit Card";
         uploadedPdfs.map((pdf) => {
             const idx = urls.findIndex((item) => item.name === pdf.name);
             const order: OrderRow = {
                 name: name,
                 email: email,
                 message: message,
+                pages: pdf.pageCount,
+                coursebookName: pdf.name,
                 quantity: pdf.quantity,
                 cost: pdf.price,
                 colour: pdf.isColor,
                 coursebookLink: urls[idx].url,
                 paid: false,
+                paymentMethod: paymentMethod,
             };
             orders.push(order);
         });
@@ -101,6 +105,7 @@ const OrderContainer = () => {
                 cost: cartPackage.price,
                 colour: false,
                 paid: false,
+                paymentMethod: paymentMethod,
             };
             orders.push(order);
         });
@@ -116,9 +121,9 @@ const OrderContainer = () => {
         return form.checkValidity();
     };
     const payWithBankTransfer = () => {
-        return;
+        handleOrderInformation(true);
     };
-    const handleOrderInformation = () => {
+    const handleOrderInformation = (isBankTransfer: boolean) => {
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
         const promises = [];
         for (let i = 0; i < uploadedPdfs.length; ++i) {
@@ -161,7 +166,7 @@ const OrderContainer = () => {
                 })
             )
             .then(() => {
-                collateOrder(temp);
+                collateOrder(temp, isBankTransfer);
             });
     };
     const payWithCreditCard = () => {

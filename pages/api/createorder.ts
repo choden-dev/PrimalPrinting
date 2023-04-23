@@ -9,6 +9,7 @@ export default async function handler(
     try {
         const orderId = guidGenerator();
         const toAppend: any[][] = [];
+        const coursebooks = [];
         const orderRows: OrderRow[] = JSON.parse(req.body);
         orderRows.map((row) => {
             const temp = [
@@ -16,6 +17,7 @@ export default async function handler(
                 row.name,
                 row.email,
                 row.pages,
+                row.coursebookName,
                 row.coursebookLink,
                 row.colour,
                 row.paymentMethod,
@@ -24,11 +26,21 @@ export default async function handler(
                 row.cost,
                 row.message,
             ];
+            coursebooks.push({
+                name: row.coursebookName
+                    ? row.coursebookName
+                    : row.coursebookLink,
+                quantity: row.quantity,
+                cost: row.cost,
+            });
             toAppend.push(temp);
         });
         appendToSpreadSheet(toAppend);
         return res.json({
-            message: orderId,
+            message: {
+                orderId: orderId,
+                coursebooks: coursebooks,
+            },
             success: true,
         });
     } catch (error) {
