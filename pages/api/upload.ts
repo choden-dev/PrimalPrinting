@@ -19,8 +19,9 @@ export default async function handler(
             method: "POST",
             body: reqBody,
         });
+        const data = await response.json();
         return res.json({
-            message: response,
+            message: data,
             success: true,
         });
     } catch (error) {
