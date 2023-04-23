@@ -94,5 +94,9 @@ export const createSession = async (
 export const checkSession = async (sessionId: string) => {
     const stripe: Stripe = await makeStripeConnection();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    return session.status === "complete";
+
+    return {
+        paid: session.status === "complete",
+        orderId: session.metadata.orderId,
+    };
 };

@@ -49,3 +49,32 @@ export const appendToSpreadSheet = (toAppend: any[][]) => {
         }
     );
 };
+
+export const updatePaymentStatus = async (orderId: string) => {
+    const auth = authenticateGoogle();
+    const sheets = google.sheets("v4");
+    const {
+        data: { values },
+    } = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.ORDER_SPREADSHEET_ID,
+        range: "Website Orders",
+        auth: auth,
+    });
+
+    const updatedValues = values.map((row) => {
+        if (row.includes(orderId)) {
+            row[10] = "yes";
+        }
+        return row;
+    });
+
+    sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.ORDER_SPREADSHEET_ID,
+        range: "Website Orders",
+        resource: {
+            values: updatedValues,
+        },
+        valueInputOption: "USER_ENTERED",
+        auth: auth,
+    });
+};

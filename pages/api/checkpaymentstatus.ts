@@ -1,13 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { checkSession } from "../../lib/stripe";
-
+import { updatePaymentStatus } from "../../lib/google";
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
     try {
         const success = await checkSession(req.query.session_id);
-        if (success) {
+        if (success.paid) {
+            updatePaymentStatus(success.orderId);
             return res.redirect(307, "/success");
         } else {
             return res.redirect(307, "/");
