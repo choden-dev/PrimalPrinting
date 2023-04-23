@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import UploadCard from "../uploadcard/UploadCard";
+import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
@@ -326,6 +327,7 @@ const OrderContainer = () => {
     };
     return (
         <>
+            <ProcessingOverlay />
             <ItemModal
                 isOpen={modalOpen}
                 closeFunction={closeModal}
