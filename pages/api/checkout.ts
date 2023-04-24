@@ -6,10 +6,15 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const items = JSON.parse(req.query.items);
-        const paymentLink = await createSession(items);
+        const items = JSON.parse(req.body);
+        const session = await createSession(
+            items.items,
+            items.orderId,
+            items.email
+        );
         return res.json({
-            paymentLink: paymentLink,
+            paymentLink: session.url,
+            orderId: session.metadata.orderId,
             success: true,
         });
     } catch (error) {

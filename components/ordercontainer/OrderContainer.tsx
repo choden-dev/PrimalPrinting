@@ -4,6 +4,7 @@ import {
     Box,
     FormLabel,
     Input,
+    Divider,
     Heading,
     FormControl,
     Textarea,
@@ -15,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import UploadCard from "../uploadcard/UploadCard";
+import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
@@ -22,10 +24,12 @@ import { OrderRow } from "../../types/types";
 import ItemModal from "../itemmodal/ItemModal";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
-const OrderContainer = () => {
+type Props = {
+    packages: any;
+};
+const OrderContainer = ({ packages }: Props) => {
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [modalOpen, setModalOpen] = useState(false);
-    const [packages, setPackages] = useState(undefined);
     const [cartPackages, setCartPackages] = useState([]);
     const [uploadedPdfs, setUploadedPdfs] = useState<
         {
@@ -43,14 +47,6 @@ const OrderContainer = () => {
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
     const formRef = useRef(null);
-    useEffect(() => {
-        fetch(`/api/products`).then((res) =>
-            res.json().then((data) => {
-                console.log(data.packages.data);
-                setPackages(data.packages.data);
-            })
-        );
-    }, []);
 
     useEffect(() => {
         uploadZone.current.addEventListener("dragover", handleDragOver);
@@ -117,25 +113,33 @@ const OrderContainer = () => {
         }).then((res) =>
             res.json().then((data) => {
                 if (isBankTransfer) {
+                    setIsProcessing(false);
                     router.push(
                         `/order_complete?orderId=${
                             data.message.orderId
                         }&items=${JSON.stringify(data.message.coursebooks)}`
                     );
+                } else {
+                    setIsProcessing(false);
+                    payWithCreditCard(data.message.orderId);
                 }
             })
         );
     };
+
     const checkFormValidity = () => {
         const form = formRef.current;
         console.log(form.name.value);
-        return form.checkValidity();
-    };
-    const payWithBankTransfer = () => {
-        handleOrderInformation(true);
+        return (
+            form.checkValidity() &&
+            ((cartPackages && cartPackages.length !== 0) ||
+                (uploadedPdfs && uploadedPdfs.length !== 0))
+        );
     };
     const handleOrderInformation = (isBankTransfer: boolean) => {
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
+        setModalOpen(false);
+        setIsProcessing(true);
         const promises = [];
         for (let i = 0; i < uploadedPdfs.length; ++i) {
             const file = uploadedPdfs[i].file;
@@ -180,8 +184,7 @@ const OrderContainer = () => {
                 collateOrder(temp, isBankTransfer);
             });
     };
-    const payWithCreditCard = () => {
-        handleOrderInformation(false);
+    const payWithCreditCard = (orderId: string) => {
         const items: { price: string; quantity: number }[] = [];
         uploadedPdfs.map((pdf) => {
             items.push({ price: pdf.priceId, quantity: pdf.quantity });
@@ -190,9 +193,16 @@ const OrderContainer = () => {
             items.push({ price: cartPackage.priceId, quantity: 1 });
         });
         if (items.length === 0) return;
-        const arrStr = encodeURIComponent(JSON.stringify(items));
+        const toPost = {
+            items: items,
+            orderId: orderId,
+            email: formRef.current.email.value,
+        };
 
-        fetch(`/api/checkout?items=${arrStr}`).then((res) => {
+        fetch(`/api/checkout`, {
+            method: "POST",
+            body: JSON.stringify(toPost),
+        }).then((res) => {
             res.json().then((data) => {
                 window.location.replace(data.paymentLink);
             });
@@ -317,12 +327,14 @@ const OrderContainer = () => {
     };
     return (
         <>
+            <ProcessingOverlay show={isProcessing} />
             <ItemModal
                 isOpen={modalOpen}
                 closeFunction={closeModal}
-                creditCard={payWithCreditCard}
-                bankTransfer={payWithBankTransfer}
+                creditCard={() => handleOrderInformation(false)}
+                bankTransfer={() => handleOrderInformation(true)}
             />
+
             <Box
                 paddingTop="1rem"
                 display="grid"
@@ -419,7 +431,8 @@ const OrderContainer = () => {
                                         }}
                                         textAlign="center"
                                     >
-                                        Click or drag *.pdf file to upload
+                                        Click or drag *.pdf file to upload (20mb
+                                        max)
                                     </Text>
                                     <AddIcon alignSelf="center" />
                                 </Box>
@@ -463,16 +476,30 @@ const OrderContainer = () => {
                     padding="1rem .5rem"
                     top={smallScreen ? "0" : "5rem"}
                 >
-                    <Box display="flex" flexDir="column">
+                    <Box display="flex" color="brown.900" flexDir="column">
                         <Heading fontSize="1.5rem" as="p">
                             Total Price
                         </Heading>
                         <List>
+                            <Text fontWeight="800">Packages</Text>
+                            <Divider marginBottom=".5rem" />
                             {cartPackages.map((cartPackage) => {
                                 return (
                                     <ListItem key={cartPackage.id}>
-                                        <Box display="flex">
-                                            <Text>{cartPackage.name}</Text>
+                                        <Box
+                                            display="flex"
+                                            border="1px solid"
+                                            borderColor="brown.700"
+                                            padding="1rem"
+                                            borderRadius="sm"
+                                            marginBottom=".5rem"
+                                        >
+                                            <Text>
+                                                {cartPackage.name} |{" "}
+                                                <strong>
+                                                    ${cartPackage.price}
+                                                </strong>
+                                            </Text>
                                             <Text
                                                 marginLeft="auto"
                                                 fontWeight="800"
@@ -494,9 +521,13 @@ const OrderContainer = () => {
                                     <Heading as="span" fontSize="1rem">
                                         Uploaded Files
                                     </Heading>
+                                    <Divider marginBottom=".5rem" />
                                     {uploadedPdfs.map((pdf) => {
                                         return (
-                                            <ListItem key={pdf.name}>
+                                            <ListItem
+                                                key={pdf.name}
+                                                marginBottom=".5rem"
+                                            >
                                                 <Box display="flex">
                                                     <Text>
                                                         {pdf.name} |{" "}
@@ -550,9 +581,11 @@ const OrderContainer = () => {
                                 </>
                             )}
                             <ListItem>
-                                <strong>
-                                    Estimated Price: {calculateTotalPrice()}
-                                </strong>
+                                <Text fontSize="1.5rem">
+                                    <strong>
+                                        Estimated Price: {calculateTotalPrice()}
+                                    </strong>
+                                </Text>
                             </ListItem>
                             <Button
                                 variant="browned"

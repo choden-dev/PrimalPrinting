@@ -73,14 +73,30 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 };
 
 export const createSession = async (
-    items: { price: string; quantity: number }[]
+    items: { price: string; quantity: number }[],
+    orderId: string,
+    email: string
 ) => {
     const stripe: Stripe = await makeStripeConnection();
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: items,
-        success_url: process.env.STRIPE_SUCCESS_URL!,
-        cancel_url: process.env.STRIPE_CANCEL_URL!,
+        success_url: `${process.env
+            .STRIPE_SUCCESS_URL!}?session_id={CHECKOUT_SESSION_ID}`,
+        customer_email: email,
+        cancel_url: `${process.env
+            .STRIPE_CANCEL_URL!}?session_id={CHECKOUT_SESSION_ID}`,
+        metadata: { orderId: orderId },
     });
-    return session.url;
+    return session;
+};
+
+export const checkSession = async (sessionId: string) => {
+    const stripe: Stripe = await makeStripeConnection();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    return {
+        paid: session.status === "complete",
+        orderId: session.metadata.orderId,
+    };
 };

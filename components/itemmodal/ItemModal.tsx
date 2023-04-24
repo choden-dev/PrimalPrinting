@@ -32,7 +32,7 @@ export default function ItemModal({
     const [smallScreen] = useMediaQuery("(max-width:900px)");
     return (
         <Modal isOpen={isOpen} onClose={closeFunction} size="xl">
-            <ModalOverlay overflow="auto" />
+            <ModalOverlay zIndex="999" overflow="auto" />
 
             <ModalContent
                 color="brown.900"

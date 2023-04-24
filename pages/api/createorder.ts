@@ -13,6 +13,7 @@ export default async function handler(
         const orderRows: OrderRow[] = JSON.parse(req.body);
         orderRows.map((row) => {
             const temp = [
+                new Date().toLocaleDateString(),
                 orderId,
                 row.name,
                 row.email,
