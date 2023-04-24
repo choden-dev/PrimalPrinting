@@ -79,7 +79,34 @@ const Home: NextPage<PageProps> = (text) => {
 
             <Box className="container">
                 <NavBar />
+                <Box
+                    paddingTop="5%"
+                    display="grid"
+                    gridTemplateColumns="1fr 1fr"
+                    flexDir="column"
+                    h="100vh"
+                >
+                    <Image
+                        src={"/coverimage.jpg"}
+                        alt={"about page image"}
+                        width="100%"
+                        objectFit="cover"
+                    />
 
+                    <Heading
+                        as="h1"
+                        zIndex="1"
+                        color="brown.900"
+                        fontSize="7rem"
+                        fontWeight="800"
+                        alignSelf="center"
+                    >
+                        Primal <br /> Printing
+                    </Heading>
+                    <Text gridColumn="1/-1" textAlign="center" fontSize="2xl">
+                        By students, for students
+                    </Text>
+                </Box>
                 <Box
                     margin="3rem 0"
                     alignSelf="center"
