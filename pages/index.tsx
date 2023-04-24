@@ -82,11 +82,14 @@ const Home: NextPage<PageProps> = (text) => {
                 <Box
                     paddingTop="5%"
                     display="grid"
-                    gridTemplateColumns="1fr 1fr"
+                    gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
                     flexDir="column"
                     h="100vh"
                 >
                     <Image
+                        opacity="0.7"
+                        alignSelf="center"
+                        transform={smallScreen ? "" : "translateX(5rem)"}
                         src={"/coverimage.jpg"}
                         alt={"about page image"}
                         width="100%"
@@ -97,7 +100,7 @@ const Home: NextPage<PageProps> = (text) => {
                         as="h1"
                         zIndex="1"
                         color="brown.900"
-                        fontSize="7rem"
+                        fontSize="max(10vw, 6rem)"
                         fontWeight="800"
                         alignSelf="center"
                     >
@@ -127,22 +130,6 @@ const Home: NextPage<PageProps> = (text) => {
                         gap="1.2rem"
                         position="relative"
                     >
-                        <Heading
-                            as="h1"
-                            zIndex="1"
-                            color="brown.900"
-                            size="4xl"
-                            fontWeight="400"
-                        >
-                            Our Story
-                        </Heading>
-                        <Box
-                            height="5px"
-                            bg="brown.700"
-                            width="160px"
-                            alignSelf="center"
-                            marginTop="-0.7rem"
-                        ></Box>
                         {text.text[0] &&
                             text.text[0].map((item: any) => {
                                 switch (item.Section) {
