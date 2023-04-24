@@ -79,36 +79,44 @@ const Home: NextPage<PageProps> = (text) => {
 
             <Box className="container">
                 <NavBar />
-                <Box
-                    paddingTop="5%"
-                    display="grid"
-                    gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
-                    flexDir="column"
-                    h="100vh"
-                >
-                    <Image
-                        opacity="0.7"
-                        alignSelf="center"
-                        transform={smallScreen ? "" : "translateX(5rem)"}
-                        src={"/coverimage.jpg"}
-                        alt={"about page image"}
-                        width="100%"
-                        objectFit="cover"
-                    />
-
-                    <Heading
-                        as="h1"
-                        zIndex="1"
-                        color="brown.900"
-                        fontSize="max(10vw, 6rem)"
-                        fontWeight="800"
-                        alignSelf="center"
+                <Box marginTop="-5rem" display="flex" position="relative">
+                    <Box
+                        display="grid"
+                        gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
+                        flexDir="column"
+                        h="100vh"
                     >
-                        Primal <br /> Printing
-                    </Heading>
-                    <Text gridColumn="1/-1" textAlign="center" fontSize="2xl">
-                        By students, for students
-                    </Text>
+                        <Image
+                            opacity="0.7"
+                            alignSelf={smallScreen ? "flex-end" : "center"}
+                            transform={smallScreen ? "" : "translateX(5rem)"}
+                            src={"/coverimage.jpg"}
+                            alt={"about page image"}
+                            w="max(100vw, 30rem)"
+                            objectFit="cover"
+                        />
+
+                        <Heading
+                            as="h1"
+                            zIndex="1"
+                            color="brown.900"
+                            fontSize="max(10vw, 6rem)"
+                            fontWeight="800"
+                            alignSelf={smallScreen ? "flex-start" : "center"}
+                        >
+                            Primal <br /> Printing
+                        </Heading>
+                    </Box>
+                    <Box
+                        width="100%"
+                        justifyContent="center"
+                        position="absolute"
+                        bottom="0"
+                    >
+                        <Text textAlign="center" fontSize="2xl">
+                            By students, for students
+                        </Text>
+                    </Box>
                 </Box>
                 <Box
                     margin="3rem 0"
