@@ -1,6 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Box, Image, Heading, Text, useMediaQuery } from "@chakra-ui/react";
+import {
+    Box,
+    Image,
+    Heading,
+    Text,
+    Divider,
+    useMediaQuery,
+} from "@chakra-ui/react";
 import NavBar from "../components/navbar/NavBar";
 import NoSsr from "../components/NoSsr";
 import TestimonialDiv from "../components/testimonialdiv/TestimonialDiv";
@@ -88,7 +95,7 @@ const Home: NextPage<PageProps> = (text) => {
                         h="100vh"
                     >
                         <Image
-                            borderRadius="md"
+                            borderRadius="lg"
                             opacity="0.7"
                             alignSelf={smallScreen ? "flex-end" : "center"}
                             src={"/coverimage.jpg"}
@@ -145,6 +152,7 @@ const Home: NextPage<PageProps> = (text) => {
                         bgRepeat="no-repeat"
                     ></Box>
                     <Box
+                        padding="2rem 0"
                         maxW="1000px"
                         justifyContent="center"
                         display="flex"
@@ -153,6 +161,7 @@ const Home: NextPage<PageProps> = (text) => {
                         <Heading color="brown.900" fontSize="4rem">
                             About Us
                         </Heading>
+                        <Divider borderColor="brown.900" margin="1rem 0" />
                         <Box
                             textAlign="center"
                             display="flex"
@@ -165,12 +174,36 @@ const Home: NextPage<PageProps> = (text) => {
                                     switch (item.Section) {
                                         case "Heading":
                                             return (
-                                                <Heading
-                                                    key={item._id}
-                                                    fontWeight="300"
+                                                <Box
+                                                    display="flex"
+                                                    position="relative"
+                                                    flexDir="column"
                                                 >
-                                                    {item.Text}
-                                                </Heading>
+                                                    <Box
+                                                        position="absolute"
+                                                        transformOrigin="top right"
+                                                        transform="rotate(90deg)"
+                                                        h="100vw"
+                                                        alignSelf="center"
+                                                        w="4.5rem"
+                                                        bgImage="binder.png"
+                                                        top="5rem"
+                                                        left="0"
+                                                        bgRepeat="no-repeat"
+                                                    ></Box>
+                                                    <Heading
+                                                        marginTop="5.4rem"
+                                                        color="brown.900"
+                                                        textAlign="left"
+                                                        fontSize="4rem"
+                                                    >
+                                                        {item.Text}
+                                                    </Heading>
+                                                    <Divider
+                                                        borderColor="brown.900"
+                                                        margin="1rem 0"
+                                                    />
+                                                </Box>
                                             );
                                         case "Text":
                                             return (
