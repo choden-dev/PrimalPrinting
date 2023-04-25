@@ -81,6 +81,7 @@ const Home: NextPage<PageProps> = (text) => {
                 <NavBar />
                 <Box marginTop="-5rem" display="flex" position="relative">
                     <Box
+                        columnGap="1rem"
                         display="grid"
                         gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
                         flexDir="column"
@@ -88,8 +89,7 @@ const Home: NextPage<PageProps> = (text) => {
                     >
                         <Image
                             opacity="0.7"
-                            alignSelf={smallScreen ? "flex-end" : "center"}
-                            transform={smallScreen ? "" : "translateX(5rem)"}
+                            alignSelf="center"
                             src={"/coverimage.jpg"}
                             alt={"about page image"}
                             w="max(100vw, 30rem)"
@@ -102,7 +102,7 @@ const Home: NextPage<PageProps> = (text) => {
                             color="brown.900"
                             fontSize="max(10vw, 6rem)"
                             fontWeight="800"
-                            alignSelf={smallScreen ? "flex-start" : "center"}
+                            alignSelf="center"
                         >
                             Primal <br /> Printing
                         </Heading>
@@ -119,66 +119,72 @@ const Home: NextPage<PageProps> = (text) => {
                     </Box>
                 </Box>
                 <Box
+                    display="flex"
+                    justifyContent="center"
                     margin="3rem 0"
                     alignSelf="center"
-                    display="flex"
-                    flexDir="column"
-                    maxWidth="1100px"
                     bg="white"
+                    w="100vw"
                     padding="3rem 2rem"
                     border="1px"
                     borderRadius="sm"
                     borderColor="brown.200"
-                    boxShadow="0.2rem 0.2rem 0 #672212"
                 >
                     <Box
-                        textAlign="center"
+                        maxW="1000px"
+                        justifyContent="center"
                         display="flex"
                         flexDir="column"
-                        gap="1.2rem"
-                        position="relative"
                     >
-                        {text.text[0] &&
-                            text.text[0].map((item: any) => {
-                                switch (item.Section) {
-                                    case "Heading":
-                                        return (
-                                            <Heading
-                                                key={item._id}
-                                                fontWeight="300"
-                                            >
-                                                {item.Text}
-                                            </Heading>
-                                        );
-                                    case "Text":
-                                        return (
-                                            <>
-                                                <Text
+                        <Box
+                            textAlign="center"
+                            display="flex"
+                            flexDir="column"
+                            gap="1.2rem"
+                            position="relative"
+                        >
+                            {text.text[0] &&
+                                text.text[0].map((item: any) => {
+                                    switch (item.Section) {
+                                        case "Heading":
+                                            return (
+                                                <Heading
                                                     key={item._id}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: item.Text,
-                                                    }}
-                                                    fontSize="xl"
-                                                    textAlign="left"
                                                     fontWeight="300"
-                                                    whiteSpace="pre-line"
+                                                >
+                                                    {item.Text}
+                                                </Heading>
+                                            );
+                                        case "Text":
+                                            return (
+                                                <>
+                                                    <Text
+                                                        key={item._id}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: item.Text,
+                                                        }}
+                                                        fontSize="xl"
+                                                        textAlign="left"
+                                                        fontWeight="300"
+                                                        whiteSpace="pre-line"
+                                                    />
+                                                </>
+                                            );
+                                        case "Image":
+                                            return (
+                                                <Image
+                                                    src={item.Text}
+                                                    key={item._id}
+                                                    alt={"about page image"}
+                                                    width="100%"
+                                                    objectFit="cover"
                                                 />
-                                            </>
-                                        );
-                                    case "Image":
-                                        return (
-                                            <Image
-                                                src={item.Text}
-                                                key={item._id}
-                                                alt={"about page image"}
-                                                width="100%"
-                                                objectFit="cover"
-                                            />
-                                        );
-                                    default:
-                                        return null;
-                                }
-                            })}
+                                            );
+                                        default:
+                                            return null;
+                                    }
+                                })}
+                        </Box>
                     </Box>
                 </Box>
                 {false && (
