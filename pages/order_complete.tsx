@@ -8,9 +8,7 @@ import OrderContainer from "../components/ordercontainer/OrderContainer";
 const OrderComplete: NextPage = () => {
     const router = useRouter();
     const orderId = router.query.orderId;
-    const orderItems = JSON.parse(router.query.items)
-        ? JSON.parse(router.query.items)
-        : [];
+    const orderItems = router.query.items ? JSON.parse(router.query.items) : [];
     const sum = () => {
         let sum = 0;
         orderItems.map((item) => {
