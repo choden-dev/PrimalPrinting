@@ -108,7 +108,7 @@ const Home: NextPage<PageProps> = (text) => {
                             as="h1"
                             zIndex="1"
                             color="brown.900"
-                            fontSize="max(10vw, 6rem)"
+                            fontSize="max(10vw, 5rem)"
                             fontWeight="800"
                             alignSelf={smallScreen ? "flex-start" : "center"}
                         >
@@ -195,7 +195,7 @@ const Home: NextPage<PageProps> = (text) => {
                                                         marginTop="5.4rem"
                                                         color="brown.900"
                                                         textAlign="left"
-                                                        fontSize="4rem"
+                                                        fontSize="3.2rem"
                                                     >
                                                         {item.Text}
                                                     </Heading>
@@ -273,6 +273,7 @@ const Home: NextPage<PageProps> = (text) => {
                         </Box>
                     </>
                 )}
+                <Divider borderColor="brown.900" marginBottom="3rem" />
                 <Box>
                     <WhatNextDiv />
                 </Box>
