@@ -49,16 +49,14 @@ const OrderContainer = ({ packages }: Props) => {
     const formRef = useRef(null);
 
     useEffect(() => {
-        uploadZone.current.addEventListener("dragover", handleDragOver);
-        uploadZone.current.addEventListener("drop", handleDrop);
+        const uploadZoneRef = uploadZone.current as HTMLDivElement | null; // Specify type using type assertion
+        uploadZoneRef!.addEventListener("dragover", handleDragOver);
+        uploadZoneRef!.addEventListener("drop", handleDrop);
 
         return () => {
-            if (uploadZone.current) {
-                uploadZone.current.removeEventListener(
-                    "dragover",
-                    handleDragOver
-                );
-                uploadZone.current.removeEventListener("drop", handleDrop);
+            if (uploadZoneRef) {
+                uploadZoneRef.removeEventListener("dragover", handleDragOver);
+                uploadZoneRef.removeEventListener("drop", handleDrop);
             }
         };
     }, []);
@@ -72,9 +70,9 @@ const OrderContainer = ({ packages }: Props) => {
     ) => {
         const orders: OrderRow[] = [];
         const form = formRef.current;
-        const name = form.name.value;
-        const email = form.email.value;
-        const message = form.message.value;
+        const name = form!.name.value;
+        const email = form!.email.value;
+        const message = form!.message.value;
         const paymentMethod = isBankTransfer ? "Bank" : "Credit Card";
         uploadedPdfs.map((pdf) => {
             const idx = urls.findIndex((item) => item.name === pdf.name);
