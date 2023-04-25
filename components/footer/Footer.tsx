@@ -9,6 +9,7 @@ import {
     Image,
     useMediaQuery,
 } from "@chakra-ui/react";
+import SocialLinks from "../sociallinks/sociallinks";
 
 type Props = {};
 
@@ -69,6 +70,7 @@ export default function Footer({}: Props) {
                             <ListItem>
                                 <Text fontWeight="800">Social Media</Text>
                             </ListItem>
+                            <SocialLinks />
                         </UnorderedList>
                     </Box>
                 </Box>
