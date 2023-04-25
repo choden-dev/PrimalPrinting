@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+import NoSsr from "../components/NoSsr";
 import { useRouter } from "next/router";
 import { Box, Heading, Text, List, ListItem, Divider } from "@chakra-ui/react";
 import NavBar from "../components/navbar/NavBar";
@@ -17,7 +18,7 @@ const OrderComplete: NextPage = () => {
     };
     console.log(orderItems);
     return (
-        <>
+        <NoSsr>
             <Box className="container">
                 <NavBar />
                 <Box
@@ -74,7 +75,7 @@ const OrderComplete: NextPage = () => {
                 </Box>
                 <Footer />
             </Box>
-        </>
+        </NoSsr>
     );
 };
 export default OrderComplete;
