@@ -114,7 +114,7 @@ const Home: NextPage<PageProps> = (text) => {
                         bottom="0"
                     >
                         <Text textAlign="center" fontSize="2xl">
-                            By students, for students
+                            For students, By students
                         </Text>
                     </Box>
                 </Box>
