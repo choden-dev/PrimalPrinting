@@ -1,6 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Box, Image, Heading, Text, useMediaQuery } from "@chakra-ui/react";
+import {
+    Box,
+    Image,
+    Heading,
+    Text,
+    Divider,
+    useMediaQuery,
+} from "@chakra-ui/react";
 import NavBar from "../components/navbar/NavBar";
 import NoSsr from "../components/NoSsr";
 import TestimonialDiv from "../components/testimonialdiv/TestimonialDiv";
@@ -79,84 +86,155 @@ const Home: NextPage<PageProps> = (text) => {
 
             <Box className="container">
                 <NavBar />
-
-                <Box
-                    margin="3rem 0"
-                    alignSelf="center"
-                    display="flex"
-                    flexDir="column"
-                    maxWidth="1100px"
-                    bg="white"
-                    padding="3rem 2rem"
-                    border="1px"
-                    borderRadius="sm"
-                    borderColor="brown.200"
-                    boxShadow="0.2rem 0.2rem 0 #672212"
-                >
+                <Box marginTop="-5rem" display="flex" position="relative">
                     <Box
-                        textAlign="center"
-                        display="flex"
+                        columnGap="1rem"
+                        display="grid"
+                        gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
                         flexDir="column"
-                        gap="1.2rem"
-                        position="relative"
+                        h="100vh"
                     >
+                        <Image
+                            borderRadius="lg"
+                            opacity="0.7"
+                            alignSelf={smallScreen ? "flex-end" : "center"}
+                            src={"/coverimage.jpg"}
+                            alt={"about page image"}
+                            w="max(100vw, 30rem)"
+                            objectFit="cover"
+                        />
+
                         <Heading
                             as="h1"
                             zIndex="1"
                             color="brown.900"
-                            size="4xl"
-                            fontWeight="400"
+                            fontSize="max(10vw, 5rem)"
+                            fontWeight="800"
+                            alignSelf={smallScreen ? "flex-start" : "center"}
                         >
-                            Our Story
+                            Primal <br /> Printing
                         </Heading>
+                    </Box>
+                    <Box
+                        width="100%"
+                        justifyContent="center"
+                        position="absolute"
+                        bottom="0"
+                    >
+                        <Text textAlign="center" fontSize="2xl">
+                            For students, By students
+                        </Text>
+                    </Box>
+                </Box>
+                <Box
+                    marginTop="10rem"
+                    marginBottom="3rem"
+                    display="flex"
+                    justifyContent="center"
+                    alignSelf="center"
+                    bg="white"
+                    w="100vw"
+                    padding="3rem 2rem"
+                    border="1px"
+                    borderRadius="sm"
+                    borderColor="brown.200"
+                    position="relative"
+                >
+                    <Box
+                        position="absolute"
+                        transformOrigin="top right"
+                        transform="rotate(90deg)"
+                        right="0"
+                        h="70%"
+                        w="4.5rem"
+                        bgImage="binder.png"
+                        top="2.7rem"
+                        bgRepeat="no-repeat"
+                    ></Box>
+                    <Box
+                        padding="2rem 0"
+                        maxW="1000px"
+                        justifyContent="center"
+                        display="flex"
+                        flexDir="column"
+                    >
+                        <Heading color="brown.900" fontSize="4rem">
+                            About Us
+                        </Heading>
+                        <Divider borderColor="brown.900" margin="1rem 0" />
                         <Box
-                            height="5px"
-                            bg="brown.700"
-                            width="160px"
-                            alignSelf="center"
-                            marginTop="-0.7rem"
-                        ></Box>
-                        {text.text[0] &&
-                            text.text[0].map((item: any) => {
-                                switch (item.Section) {
-                                    case "Heading":
-                                        return (
-                                            <Heading
-                                                key={item._id}
-                                                fontWeight="300"
-                                            >
-                                                {item.Text}
-                                            </Heading>
-                                        );
-                                    case "Text":
-                                        return (
-                                            <>
-                                                <Text
+                            textAlign="center"
+                            display="flex"
+                            flexDir="column"
+                            gap="1.2rem"
+                            position="relative"
+                        >
+                            {text.text[0] &&
+                                text.text[0].map((item: any) => {
+                                    switch (item.Section) {
+                                        case "Heading":
+                                            return (
+                                                <Box
+                                                    display="flex"
+                                                    position="relative"
+                                                    flexDir="column"
+                                                >
+                                                    <Box
+                                                        position="absolute"
+                                                        transformOrigin="top right"
+                                                        transform="rotate(90deg)"
+                                                        h="100vw"
+                                                        alignSelf="center"
+                                                        w="4.5rem"
+                                                        bgImage="binder.png"
+                                                        top="5rem"
+                                                        left="0"
+                                                        bgRepeat="no-repeat"
+                                                    ></Box>
+                                                    <Heading
+                                                        marginTop="5.4rem"
+                                                        color="brown.900"
+                                                        textAlign="left"
+                                                        fontSize="3.2rem"
+                                                    >
+                                                        {item.Text}
+                                                    </Heading>
+                                                    <Divider
+                                                        borderColor="brown.900"
+                                                        margin="1rem 0"
+                                                    />
+                                                </Box>
+                                            );
+                                        case "Text":
+                                            return (
+                                                <>
+                                                    <Text
+                                                        key={item._id}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: item.Text,
+                                                        }}
+                                                        fontSize="xl"
+                                                        textAlign="left"
+                                                        fontWeight="300"
+                                                        whiteSpace="pre-line"
+                                                    />
+                                                </>
+                                            );
+                                        case "Image":
+                                            return (
+                                                <Image
+                                                    src={item.Text}
                                                     key={item._id}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: item.Text,
-                                                    }}
-                                                    fontSize="xl"
-                                                    textAlign="left"
-                                                    fontWeight="300"
-                                                    whiteSpace="pre-line"
+                                                    alt={"about page image"}
+                                                    width="100%"
+                                                    objectFit="cover"
                                                 />
-                                            </>
-                                        );
-                                    case "Image":
-                                        return (
-                                            <Image
-                                                src={item.Text}
-                                                key={item._id}
-                                                alt={"about page image"}
-                                                width="100%"
-                                                objectFit="cover"
-                                            />
-                                        );
-                                    default:
-                                        return null;
-                                }
-                            })}
+                                            );
+                                        default:
+                                            return null;
+                                    }
+                                })}
+                        </Box>
                     </Box>
                 </Box>
                 {false && (
@@ -195,6 +273,7 @@ const Home: NextPage<PageProps> = (text) => {
                         </Box>
                     </>
                 )}
+                <Divider borderColor="brown.900" marginBottom="3rem" />
                 <Box>
                     <WhatNextDiv />
                 </Box>

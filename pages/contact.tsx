@@ -120,7 +120,6 @@ const Contact: NextPage<PageProps> = (details) => {
                     borderRadius="sm"
                     border="1px"
                     borderColor="brown.200"
-                    boxShadow="0.2rem 0.2rem 0 #672212"
                 >
                     <Box
                         width="100%"
@@ -203,4 +202,3 @@ const Contact: NextPage<PageProps> = (details) => {
     );
 };
 export default Contact;
-

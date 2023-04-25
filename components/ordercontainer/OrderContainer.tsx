@@ -343,6 +343,8 @@ const OrderContainer = ({ packages }: Props) => {
                 gridTemplateColumns={smallScreen ? "1fr" : "3fr 1.5fr"}
             >
                 <Box
+                    border="1px"
+                    borderColor="brown.200"
                     bg="white"
                     padding="1rem"
                     position="relative"
@@ -474,9 +476,12 @@ const OrderContainer = ({ packages }: Props) => {
                     h="fit-content"
                     position={smallScreen ? "relative" : "sticky"}
                     padding="1rem .5rem"
+                    border="1px"
+                    color="brown.900"
+                    borderColor="brown.200"
                     top={smallScreen ? "0" : "5rem"}
                 >
-                    <Box display="flex" color="brown.900" flexDir="column">
+                    <Box display="flex" flexDir="column">
                         <Heading fontSize="1.5rem" as="p">
                             Total Price
                         </Heading>
