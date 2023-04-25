@@ -119,9 +119,10 @@ const Home: NextPage<PageProps> = (text) => {
                     </Box>
                 </Box>
                 <Box
+                    marginTop="10rem"
+                    marginBottom="3rem"
                     display="flex"
                     justifyContent="center"
-                    margin="3rem 0"
                     alignSelf="center"
                     bg="white"
                     w="100vw"
@@ -129,13 +130,28 @@ const Home: NextPage<PageProps> = (text) => {
                     border="1px"
                     borderRadius="sm"
                     borderColor="brown.200"
+                    position="relative"
                 >
+                    <Box
+                        position="absolute"
+                        transformOrigin="top right"
+                        transform="rotate(90deg)"
+                        right="0"
+                        h="70%"
+                        w="4.5rem"
+                        bgImage="binder.png"
+                        top="2.7rem"
+                        bgRepeat="no-repeat"
+                    ></Box>
                     <Box
                         maxW="1000px"
                         justifyContent="center"
                         display="flex"
                         flexDir="column"
                     >
+                        <Heading color="brown.900" fontSize="4rem">
+                            About Us
+                        </Heading>
                         <Box
                             textAlign="center"
                             display="flex"
