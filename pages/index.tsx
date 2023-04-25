@@ -88,8 +88,9 @@ const Home: NextPage<PageProps> = (text) => {
                         h="100vh"
                     >
                         <Image
+                            borderRadius="md"
                             opacity="0.7"
-                            alignSelf="center"
+                            alignSelf={smallScreen ? "flex-end" : "center"}
                             src={"/coverimage.jpg"}
                             alt={"about page image"}
                             w="max(100vw, 30rem)"
@@ -102,7 +103,7 @@ const Home: NextPage<PageProps> = (text) => {
                             color="brown.900"
                             fontSize="max(10vw, 6rem)"
                             fontWeight="800"
-                            alignSelf="center"
+                            alignSelf={smallScreen ? "flex-start" : "center"}
                         >
                             Primal <br /> Printing
                         </Heading>
