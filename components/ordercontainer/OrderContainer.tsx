@@ -299,6 +299,12 @@ const OrderContainer = ({ packages }: Props) => {
                         fetch(`/api/shop?pages=${pages}&isColor=false`).then(
                             (res) =>
                                 res.json().then((data) => {
+                                    if (isNaN(data.price)) {
+                                        window.alert(
+                                            "Pdf is over 400 pages, please email us the pdf and we can arrange something."
+                                        );
+                                        return;
+                                    }
                                     uploaded.push({
                                         name: file.name,
                                         pageCount: pages,
@@ -433,8 +439,8 @@ const OrderContainer = ({ packages }: Props) => {
                                         }}
                                         textAlign="center"
                                     >
-                                        Click or drag *.pdf file to upload (20mb
-                                        max)
+                                        Double click to upload *.pdf file to
+                                        upload (20mb max)
                                     </Text>
                                     <AddIcon alignSelf="center" />
                                 </Box>
