@@ -358,6 +358,7 @@ const OrderContainer = ({ packages }: Props) => {
                         backgroundImage="/binder.png"
                     ></Box>
                     <Box display="flex" flexDir="column" gap="1rem">
+                        <Heading>Products</Heading>
                         <Box
                             display="grid"
                             gridTemplateColumns={
@@ -383,6 +384,7 @@ const OrderContainer = ({ packages }: Props) => {
                                     );
                                 })}
                         </Box>
+                        <Heading>Upload PDFs</Heading>
                         <form ref={formRef}>
                             <FormControl>
                                 <Input
