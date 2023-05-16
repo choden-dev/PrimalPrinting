@@ -548,6 +548,8 @@ const OrderContainer = ({ packages }: Props) => {
                                                     <Input
                                                         min="1"
                                                         max="5"
+                                                        width=""
+                                                        textAlign="right"
                                                         marginLeft="auto"
                                                         borderRadius="sm"
                                                         type="number"
