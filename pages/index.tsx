@@ -110,20 +110,21 @@ const Home: NextPage<PageProps> = (text) => {
                             color="brown.900"
                             fontSize="max(10vw, 5rem)"
                             fontWeight="800"
+                            textAlign={smallScreen ? "center" : "left"}
                             alignSelf={smallScreen ? "flex-start" : "center"}
                         >
                             Primal <br /> Printing
                         </Heading>
-                    </Box>
-                    <Box
-                        width="100%"
-                        justifyContent="center"
-                        position="absolute"
-                        bottom="0"
-                    >
-                        <Text textAlign="center" fontSize="2xl">
-                            For students, By students
-                        </Text>
+                        <Box
+                            width="100%"
+                            justifyContent="center"
+                            position="absolute"
+                            bottom={smallScreen ? "-2rem" : "0"}
+                        >
+                            <Text textAlign="center" fontSize="2xl">
+                                For students, By students
+                            </Text>
+                        </Box>
                     </Box>
                 </Box>
                 <Box
