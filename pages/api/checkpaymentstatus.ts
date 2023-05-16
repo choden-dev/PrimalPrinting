@@ -7,11 +7,12 @@ export default async function handler(
 ) {
     try {
         const success = await checkSession(req.query.session_id);
+        let orderId = success.orderId;
         if (success.paid) {
-            updatePaymentStatus(success.orderId);
-            return res.redirect(307, "/success");
+            updatePaymentStatus(orderId);
+            return res.redirect(307, `/success?orderId=${orderId}`);
         } else {
-            return res.redirect(307, "/");
+            return res.redirect(307, "/order");
         }
     } catch (error) {
         // return the error

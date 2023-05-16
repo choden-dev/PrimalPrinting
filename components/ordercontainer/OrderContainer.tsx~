@@ -1,10 +1,8 @@
-import { useRouter } from "next/router";
 import { useState, useRef, useEffect } from "react";
 import {
     Box,
     FormLabel,
     Input,
-    Divider,
     Heading,
     FormControl,
     Textarea,
@@ -16,20 +14,17 @@ import {
 } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import UploadCard from "../uploadcard/UploadCard";
-import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
 import * as pdfjs from "pdfjs-dist";
 import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
-import { OrderRow } from "../../types/types";
+import { createSession } from "../../lib/stripe";
 import ItemModal from "../itemmodal/ItemModal";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-type Props = {
-    packages: any;
-};
-const OrderContainer = ({ packages }: Props) => {
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+const OrderContainer = () => {
     const [modalOpen, setModalOpen] = useState(false);
+    const [packages, setPackages] = useState(undefined);
     const [cartPackages, setCartPackages] = useState([]);
     const [uploadedPdfs, setUploadedPdfs] = useState<
         {
@@ -43,149 +38,74 @@ const OrderContainer = ({ packages }: Props) => {
         }[]
     >([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
-    const router = useRouter();
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
+
     const formRef = useRef(null);
 
     useEffect(() => {
-        const uploadZoneRef = uploadZone.current as HTMLDivElement | null; // Specify type using type assertion
-        uploadZoneRef!.addEventListener("dragover", handleDragOver);
-        uploadZoneRef!.addEventListener("drop", handleDrop);
+        fetch(`/api/products`).then((res) =>
+            res.json().then((data) => {
+                console.log(data.packages.data);
+                setPackages(data.packages.data);
+            })
+        );
+    }, []);
+
+    useEffect(() => {
+        uploadZone.current.addEventListener("dragover", handleDragOver);
+        uploadZone.current.addEventListener("drop", handleDrop);
 
         return () => {
-            if (uploadZoneRef) {
-                uploadZoneRef.removeEventListener("dragover", handleDragOver);
-                uploadZoneRef.removeEventListener("drop", handleDrop);
+            if (uploadZone.current) {
+                uploadZone.current.removeEventListener(
+                    "dragover",
+                    handleDragOver
+                );
+                uploadZone.current.removeEventListener("drop", handleDrop);
             }
         };
     }, []);
     const closeModal = () => {
         setModalOpen(false);
     };
-
-    const collateOrder = (
-        urls: { name: string; url: string }[],
-        isBankTransfer: boolean
-    ) => {
-        const orders: OrderRow[] = [];
-        const form = formRef.current;
-        const name = form!.name.value;
-        const email = form!.email.value;
-        const message = form!.message.value;
-        const paymentMethod = isBankTransfer ? "Bank" : "Credit Card";
-        uploadedPdfs.map((pdf) => {
-            const idx = urls.findIndex((item) => item.name === pdf.name);
-            const order: OrderRow = {
-                name: name,
-                email: email,
-                message: message,
-                pages: pdf.pageCount,
-                coursebookName: pdf.name,
-                quantity: pdf.quantity,
-                cost: pdf.price,
-                colour: pdf.isColor,
-                coursebookLink: urls[idx].url,
-                paid: false,
-                paymentMethod: paymentMethod,
-            };
-            orders.push(order);
-        });
-        cartPackages.map((cartPackage) => {
-            const order: OrderRow = {
-                name: name,
-                email: email,
-                message: message,
-                quantity: 1,
-                coursebookLink: cartPackage.name,
-                cost: cartPackage.price,
-                colour: false,
-                paid: false,
-                paymentMethod: paymentMethod,
-            };
-            orders.push(order);
-        });
-        fetch(`api/createorder`, {
-            method: "POST",
-            body: JSON.stringify(orders),
-        }).then((res) =>
-            res.json().then((data) => {
-                if (isBankTransfer) {
-                    setIsProcessing(false);
-                    router.push(
-                        `/order_complete?orderId=${
-                            data.message.orderId
-                        }&items=${JSON.stringify(data.message.coursebooks)}`
-                    );
-                } else {
-                    setIsProcessing(false);
-                    payWithCreditCard(data.message.orderId);
-                }
-            })
-        );
-    };
-
     const checkFormValidity = () => {
         const form = formRef.current;
-        const formValid = form.checkValidity();
-        const cartValid =
-            (cartPackages && cartPackages.length !== 0) ||
-            (uploadedPdfs && uploadedPdfs.length !== 0);
-        const isValid = formValid && cartValid;
-        if (!cartValid)
-            window.alert("Please choose a package or upload a pdf.");
-        if (!formValid) window.alert("Please check your submission details.");
-        return isValid;
-    };
-    const handleOrderInformation = (isBankTransfer: boolean) => {
-        //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
-        setModalOpen(false);
-        setIsProcessing(true);
-        const promises = [];
-        for (let i = 0; i < uploadedPdfs.length; ++i) {
-            const file = uploadedPdfs[i].file;
-            const reader = new FileReader();
-            const promise = new Promise((resolve, reject) => {
-                reader.onload = function (e) {
-                    var rawLog = reader.result.split(",")[1];
-                    var dataSend = {
-                        dataReq: {
-                            data: rawLog,
-                            name: file.name,
-                            type: file.type,
-                        },
-                        fname: "uploadFilesToGoogleDrive",
-                    };
-                    console.log(dataSend);
-                    fetch(`/api/upload`, {
-                        method: "POST",
-                        body: JSON.stringify(dataSend),
-                    })
-                        .then((res) => res.json())
-                        .then((data) => {
-                            resolve(data);
-                        })
-                        .catch((e) => {
-                            reject(e);
-                        });
-                };
-                reader.readAsDataURL(file);
-            });
-            promises.push(promise);
+        console.log(form.checkValidity());
+        if (form.checkValidity()) {
+            // Perform action for valid form
+            console.log("Form is valid");
+        } else {
+            // Show validation errors
+            form.reportValidity();
         }
-        const temp = [];
-        Promise.all(promises)
-            .then((res) =>
-                res.map((item) => {
-                    const info = item.message;
-                    temp.push({ name: info.name, url: info.url });
-                })
-            )
-            .then(() => {
-                collateOrder(temp, isBankTransfer);
-            });
     };
-    const payWithCreditCard = (orderId: string) => {
+    const payWithBankTransfer = () => {
+        console.log("called");
+        //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
+        const file = uploadedPdfs[0].file;
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function (e) {
+            var rawLog = reader.result.split(",")[1];
+            var dataSend = {
+                dataReq: { data: rawLog, name: file.name, type: file.type },
+                fname: "uploadFilesToGoogleDrive",
+            };
+            console.log(dataSend);
+            fetch(`/api/upload`, {
+                method: "POST",
+                body: JSON.stringify(dataSend),
+            })
+                .then((res) =>
+                    res.json().then((data) => {
+                        console.log(data);
+                    })
+                )
+                .catch((e) => console.log(e));
+        };
+    };
+    const payWithCreditCard = () => {
         const items: { price: string; quantity: number }[] = [];
         uploadedPdfs.map((pdf) => {
             items.push({ price: pdf.priceId, quantity: pdf.quantity });
@@ -194,16 +114,9 @@ const OrderContainer = ({ packages }: Props) => {
             items.push({ price: cartPackage.priceId, quantity: 1 });
         });
         if (items.length === 0) return;
-        const toPost = {
-            items: items,
-            orderId: orderId,
-            email: formRef.current.email.value,
-        };
+        const arrStr = encodeURIComponent(JSON.stringify(items));
 
-        fetch(`/api/checkout`, {
-            method: "POST",
-            body: JSON.stringify(toPost),
-        }).then((res) => {
+        fetch(`/api/checkout?items=${arrStr}`).then((res) => {
             res.json().then((data) => {
                 window.location.replace(data.paymentLink);
             });
@@ -302,12 +215,6 @@ const OrderContainer = ({ packages }: Props) => {
                         fetch(`/api/shop?pages=${pages}&isColor=false`).then(
                             (res) =>
                                 res.json().then((data) => {
-                                    if (isNaN(data.price)) {
-                                        window.alert(
-                                            "Pdf is over 400 pages, please email us the pdf and we can arrange something."
-                                        );
-                                        return;
-                                    }
                                     uploaded.push({
                                         name: file.name,
                                         pageCount: pages,
@@ -334,14 +241,12 @@ const OrderContainer = ({ packages }: Props) => {
     };
     return (
         <>
-            <ProcessingOverlay show={isProcessing} />
             <ItemModal
                 isOpen={modalOpen}
                 closeFunction={closeModal}
-                creditCard={() => handleOrderInformation(false)}
-                bankTransfer={() => handleOrderInformation(true)}
+                creditCard={payWithCreditCard}
+                bankTransfer={payWithBankTransfer}
             />
-
             <Box
                 paddingTop="1rem"
                 display="grid"
@@ -350,8 +255,6 @@ const OrderContainer = ({ packages }: Props) => {
                 gridTemplateColumns={smallScreen ? "1fr" : "3fr 1.5fr"}
             >
                 <Box
-                    border="1px"
-                    borderColor="brown.200"
                     bg="white"
                     padding="1rem"
                     position="relative"
@@ -367,7 +270,6 @@ const OrderContainer = ({ packages }: Props) => {
                         backgroundImage="/binder.png"
                     ></Box>
                     <Box display="flex" flexDir="column" gap="1rem">
-                        <Heading>Products</Heading>
                         <Box
                             display="grid"
                             gridTemplateColumns={
@@ -393,16 +295,15 @@ const OrderContainer = ({ packages }: Props) => {
                                     );
                                 })}
                         </Box>
-                        <Heading>Upload PDFs</Heading>
+                        <Input
+                            ref={defaultUploadZone}
+                            display="none"
+                            type="file"
+                            accept="application/pdf"
+                            onChange={handleFileEvent}
+                        />
                         <form ref={formRef}>
-                            <FormControl>
-                                <Input
-                                    ref={defaultUploadZone}
-                                    display="none"
-                                    type="file"
-                                    accept="application/pdf"
-                                    onChange={handleFileEvent}
-                                />
+                            <FormControl isRequired>
                                 <Box
                                     zIndex="76"
                                     display="flex"
@@ -442,8 +343,7 @@ const OrderContainer = ({ packages }: Props) => {
                                         }}
                                         textAlign="center"
                                     >
-                                        Double click to upload *.pdf file to
-                                        upload (20mb max)
+                                        Click or drag *.pdf file to upload
                                     </Text>
                                     <AddIcon alignSelf="center" />
                                 </Box>
@@ -456,24 +356,15 @@ const OrderContainer = ({ packages }: Props) => {
                                         <FormLabel>Name</FormLabel>
                                         <FormLabel>Email</FormLabel>
                                         <Input
-                                            isRequired
-                                            name="name"
+                                            required
                                             minLength={2}
                                             type="text"
                                             borderRadius="sm"
                                         />
-                                        <Input
-                                            name="email"
-                                            type="email"
-                                            borderRadius="sm"
-                                        />
+                                        <Input type="email" borderRadius="sm" />
                                     </Box>
                                     <FormLabel>Extra requests</FormLabel>
-                                    <Textarea
-                                        name="message"
-                                        type="text"
-                                        borderRadius="sm"
-                                    />
+                                    <Textarea borderRadius="sm" />
                                 </Box>
                             </FormControl>
                         </form>
@@ -485,9 +376,6 @@ const OrderContainer = ({ packages }: Props) => {
                     h="fit-content"
                     position={smallScreen ? "relative" : "sticky"}
                     padding="1rem .5rem"
-                    border="1px"
-                    color="brown.900"
-                    borderColor="brown.200"
                     top={smallScreen ? "0" : "5rem"}
                 >
                     <Box display="flex" flexDir="column">
@@ -495,25 +383,11 @@ const OrderContainer = ({ packages }: Props) => {
                             Total Price
                         </Heading>
                         <List>
-                            <Text fontWeight="800">Packages</Text>
-                            <Divider marginBottom=".5rem" />
                             {cartPackages.map((cartPackage) => {
                                 return (
                                     <ListItem key={cartPackage.id}>
-                                        <Box
-                                            display="flex"
-                                            border="1px solid"
-                                            borderColor="brown.700"
-                                            padding="1rem"
-                                            borderRadius="sm"
-                                            marginBottom=".5rem"
-                                        >
-                                            <Text>
-                                                {cartPackage.name} |{" "}
-                                                <strong>
-                                                    ${cartPackage.price}
-                                                </strong>
-                                            </Text>
+                                        <Box display="flex">
+                                            <Text>{cartPackage.name}</Text>
                                             <Text
                                                 marginLeft="auto"
                                                 fontWeight="800"
@@ -535,13 +409,9 @@ const OrderContainer = ({ packages }: Props) => {
                                     <Heading as="span" fontSize="1rem">
                                         Uploaded Files
                                     </Heading>
-                                    <Divider marginBottom=".5rem" />
                                     {uploadedPdfs.map((pdf) => {
                                         return (
-                                            <ListItem
-                                                key={pdf.name}
-                                                marginBottom=".5rem"
-                                            >
+                                            <ListItem key={pdf.name}>
                                                 <Box display="flex">
                                                     <Text>
                                                         {pdf.name} |{" "}
@@ -551,8 +421,6 @@ const OrderContainer = ({ packages }: Props) => {
                                                     <Input
                                                         min="1"
                                                         max="5"
-                                                        width=""
-                                                        textAlign="right"
                                                         marginLeft="auto"
                                                         borderRadius="sm"
                                                         type="number"
@@ -597,16 +465,15 @@ const OrderContainer = ({ packages }: Props) => {
                                 </>
                             )}
                             <ListItem>
-                                <Text fontSize="1.5rem">
-                                    <strong>
-                                        Estimated Price: {calculateTotalPrice()}
-                                    </strong>
-                                </Text>
+                                <strong>
+                                    Estimated Price: {calculateTotalPrice()}
+                                </strong>
                             </ListItem>
                             <Button
                                 variant="browned"
                                 onClick={() => {
-                                    if (checkFormValidity()) setModalOpen(true);
+                                    checkFormValidity();
+                                    setModalOpen(true);
                                 }}
                             >
                                 Order Now

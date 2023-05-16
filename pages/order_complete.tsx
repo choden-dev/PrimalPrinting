@@ -67,8 +67,9 @@ const OrderComplete: NextPage = () => {
                     <Text fontSize="1.5rem">Total: ${sum()}</Text>
                     <Text>
                         {" "}
-                        Please transfer this to the account <strong>
-                            {}
+                        Please transfer this to the account{" "}
+                        <strong>
+                            {process.env.NEXT_PUBLIC_BANK_ACCOUNT}
                         </strong>{" "}
                         with the reference <strong>{orderId}</strong>
                     </Text>
