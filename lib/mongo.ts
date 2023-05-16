@@ -1,37 +1,38 @@
-import { MongoClient, MongoClientOptions } from 'mongodb';
+import { MongoClient, MongoClientOptions } from "mongodb";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB;
 
 // check the MongoDB URI
 if (!MONGODB_URI) {
-    throw new Error('Define the MONGODB_URI environmental variable');
+  throw new Error("Define the MONGODB_URI environmental variable");
 }
 
 let cachedClient: any = null;
 let cachedDb: any = null;
 
-export async function connectToDatabase(dbName:string) {
-    // check the cached.
-    if (cachedClient && cachedDb) {
-        // load from cache
-        return {
-            client: cachedClient,
-            db: cachedDb,
-        };
-    }
-
-    // Connect to cluster
-    let client = new MongoClient(MONGODB_URI!);
-    await client.connect();
-    let db = client.db(dbName);
-
-    // set cache
-    cachedClient = client;
-    cachedDb = db;
-
+export async function connectToDatabase(dbName: string) {
+  // check the cached.
+  if (cachedClient && cachedDb) {
+    // load from cache
     return {
-        client: cachedClient,
-        db: cachedDb,
+      client: cachedClient,
+      db: cachedDb,
     };
+  }
+
+  // Connect to cluster
+  let client = new MongoClient(MONGODB_URI!);
+  await client.connect();
+  let db = client.db(dbName);
+
+  // set cache
+  cachedClient = client;
+  cachedDb = db;
+
+  return {
+    client: cachedClient,
+    db: cachedDb,
+  };
 }
+

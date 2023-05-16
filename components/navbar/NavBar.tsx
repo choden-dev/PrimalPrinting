@@ -1,25 +1,16 @@
-import React from 'react'
-import {
-    Box,
-    Heading,
-    Image,
-    IconButton,
-    ButtonGroup
-} from '@chakra-ui/react'
-import {
-    HamburgerIcon
-} from '@chakra-ui/icons'
-import Link from 'next/link'
-import styles from './NavBar.module.css'
-import InstagramIcon from '../Icons/InstagramIcon'
-import FacebookIcon from '../Icons/FacebookIcon'
-type Props = {}
+import React from "react";
+import { Box, Heading, Image, IconButton, ButtonGroup } from "@chakra-ui/react";
+import { HamburgerIcon } from "@chakra-ui/icons";
+import Link from "next/link";
+import styles from "./NavBar.module.css";
+import SocialLinks from "../sociallinks/sociallinks";
+type Props = {};
 
-export default function NavBar({ }: Props) {
+export default function NavBar({}: Props) {
     const [menuOpened, setMenuOpened] = React.useState<boolean>(false);
     const handleMenuOpen = () => {
         setMenuOpened(!menuOpened);
-    }
+    };
     return (
         <Box
             display="flex"
@@ -33,80 +24,60 @@ export default function NavBar({ }: Props) {
             padding="0 7%"
             borderBottom="1px"
             borderColor="brown.200"
-            alignItems="center">
-            <Link href="/" >
+            alignItems="center"
+        >
+            <Link href="/">
                 <Image
-
                     cursor="pointer"
                     height="3rem"
                     width="auto"
-                    src='/primallogo.png'
-                    alt='logo' />
+                    src="/primallogo.png"
+                    alt="logo"
+                />
             </Link>
             <span className={styles.mobileicon}>
                 <IconButton
                     icon={<HamburgerIcon />}
-                    aria-label='mobilemenu'
+                    aria-label="mobilemenu"
                     onClick={() => handleMenuOpen()}
                     variant="unstyled"
                     size="lg"
                     _hover={{
-                        color: "brown.700"
+                        color: "brown.700",
                     }}
                 />
             </span>
             <Box marginLeft="auto" display="flex">
-                <ul className={`${styles.navigationitems} ${menuOpened && styles.opened}`}>
-        
+                <ul
+                    className={`${styles.navigationitems} ${
+                        menuOpened && styles.opened
+                    }`}
+                >
                     <li>
                         <Link href="/">
-                            <Heading size="sm" fontWeight="500">About</Heading>
+                            <Heading size="sm" fontWeight="500">
+                                About
+                            </Heading>
                         </Link>
                     </li>
                     <li>
+                        <Link href="/order">
+                            <Heading size="sm" fontWeight="500">
+                                Order Now
+                            </Heading>
+                        </Link>
+                    </li>
+
+                    <li>
                         <Link href="/contact">
-                            <Heading size="sm" fontWeight="500">Contact</Heading>
+                            <Heading size="sm" fontWeight="500">
+                                Contact
+                            </Heading>
                         </Link>
                     </li>
                 </ul>
-                <ButtonGroup
-                    marginBottom="5px"
-                >
-                    <a
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        href="https://www.instagram.com/primal.printing/" >
-                        <IconButton
-                            icon={<InstagramIcon />}
-                            aria-label='instagram'
-                            variant="unstyled"
-                            color="brown.900"
-                            size="lg"
-                            _hover={{
-                                color: "brown.700"
-                            }}
-                        />
-                    </a>
-                    <a
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        href="https://www.facebook.com/primal.printing" >
-                        <IconButton
-
-
-                            icon={<FacebookIcon />}
-                            aria-label='facebook'
-                            variant="unstyled"
-                            color="brown.900"
-                            size="lg"
-                            _hover={{
-                                color: "brown.700"
-                            }}
-                        />
-                    </a>
-
-                </ButtonGroup>
+                <SocialLinks />
             </Box>
         </Box>
-    )
+    );
 }
