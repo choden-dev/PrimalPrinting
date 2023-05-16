@@ -76,10 +76,8 @@ export default function ItemModal({
                             Choose an option
                         </ModalHeader>
                         <Text>
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Iusto, animi officia deleniti repellendus
-                            totam reprehenderit quia reiciendis sint quae
-                            aspernatur.
+                            Choose an option from below to proceed with your
+                            order.
                         </Text>
 
                         <Button
