@@ -127,12 +127,12 @@ const OrderContainer = ({ packages }: Props) => {
 
     const checkFormValidity = () => {
         const form = formRef.current;
-        console.log(form.name.value);
-        return (
+        const isValid =
             form.checkValidity() &&
             ((cartPackages && cartPackages.length !== 0) ||
-                (uploadedPdfs && uploadedPdfs.length !== 0))
-        );
+                (uploadedPdfs && uploadedPdfs.length !== 0));
+        if (!isValid) window.alert("Please choose a package or upload a pdf.");
+        return isValid;
     };
     const handleOrderInformation = (isBankTransfer: boolean) => {
         //heavily adapted from https://github.com/jozzer182/YoutubeCodes/blob/main/UploadFromWeb
