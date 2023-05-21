@@ -3,21 +3,15 @@ import * as pdfjs from "pdfjs-dist";
 import { Box, FormControl, Input, Text } from "@chakra-ui/react";
 import UploadCard from "../uploadcard/UploadCard";
 import { AddIcon } from "@chakra-ui/icons";
+import { UploadedPdf } from "../../types/types";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-const PdfOrder = () => {
-    const [uploadedPdfs, setUploadedPdfs] = useState<
-        {
-            name: string;
-            pageCount: number;
-            price: number;
-            priceId: string;
-            quantity: number;
-            isColor: boolean;
-            file: File;
-        }[]
-    >([]);
+type Props = {
+    uploadedPdfs: UploadedPdf;
+    setUploadedPdfs: (T: any[]) => any;
+};
+const PdfOrder = ({ uploadedPdfs, setUploadedPdfs }: Props) => {
     useEffect(() => {
         const uploadZoneRef = uploadZone.current as HTMLDivElement | null; // Specify type using type assertion
         uploadZoneRef!.addEventListener("dragover", handleDragOver);

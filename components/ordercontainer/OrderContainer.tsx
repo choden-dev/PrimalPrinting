@@ -8,6 +8,7 @@ import DetailsForm from "./DetailsForm";
 import { CartPackage, OrderRow, UploadedPdf } from "../../types/types";
 import Cart from "./Cart";
 import PackageOrder from "./PackageOrder";
+import PdfOrder from "./PdfOrder";
 
 type Props = {
     packages: any;
@@ -206,6 +207,10 @@ const OrderContainer = ({ packages }: Props) => {
                         cartPackages={cartPackages}
                         setCartPackages={setCartPackages}
                         smallScreen={smallScreen}
+                    />
+                    <PdfOrder
+                        uploadedPdfs={uploadedPdfs}
+                        setUploadedPdfs={setUploadedPdfs}
                     />
 
                     <DetailsForm />
