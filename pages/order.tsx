@@ -17,6 +17,7 @@ export async function getStaticProps() {
         props: {
             packages,
         },
+        revalidate: 60 * 60,
     };
 }
 const Order: NextPage = ({ packages }) => {
