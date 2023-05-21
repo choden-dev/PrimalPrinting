@@ -22,6 +22,7 @@ import Footer from "../footer/Footer";
 import { AddIcon } from "@chakra-ui/icons";
 import { OrderRow } from "../../types/types";
 import ItemModal from "../itemmodal/ItemModal";
+import DetailsForm from "./DetailsForm";
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 type Props = {
@@ -393,7 +394,7 @@ const OrderContainer = ({ packages }: Props) => {
                                     );
                                 })}
                         </Box>
-                        <Heading>Upload PDFs</Heading>
+                        <Heading>Your Details</Heading>
                         <form ref={formRef}>
                             <FormControl>
                                 <Input
@@ -447,37 +448,10 @@ const OrderContainer = ({ packages }: Props) => {
                                     </Text>
                                     <AddIcon alignSelf="center" />
                                 </Box>
-                                <Box display="flex" flexDir="column" gap="1rem">
-                                    <Box
-                                        display="grid"
-                                        gridTemplateColumns="1fr 1fr"
-                                        columnGap="1rem"
-                                    >
-                                        <FormLabel>Name</FormLabel>
-                                        <FormLabel>Email</FormLabel>
-                                        <Input
-                                            isRequired
-                                            name="name"
-                                            minLength={2}
-                                            type="text"
-                                            borderRadius="sm"
-                                        />
-                                        <Input
-                                            name="email"
-                                            type="email"
-                                            borderRadius="sm"
-                                        />
-                                    </Box>
-                                    <FormLabel>Extra requests</FormLabel>
-                                    <Textarea
-                                        name="message"
-                                        type="text"
-                                        borderRadius="sm"
-                                    />
-                                </Box>
                             </FormControl>
                         </form>
                     </Box>
+                    <DetailsForm />
                 </Box>
                 <Box
                     w="100%"
