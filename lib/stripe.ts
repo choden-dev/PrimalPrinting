@@ -26,7 +26,7 @@ export const findPrice = async (priceId: string) => {
 export const getPackages = async () => {
     const stripe: Stripe = await makeStripeConnection();
     const packages = await stripe.products.search({
-        query: `metadata["type"]: 'package'`,
+        query: `metadata["type"]: 'package' AND active: 'true' `,
     });
     return packages;
 };
