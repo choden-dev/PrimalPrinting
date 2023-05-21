@@ -2,7 +2,9 @@ import { useRouter } from "next/router";
 import { useState, useRef, useEffect } from "react";
 import {
     Box,
+    Divider,
     Tab,
+    TabIndicator,
     TabList,
     TabPanel,
     TabPanels,
@@ -212,10 +214,10 @@ const OrderContainer = ({ packages }: Props) => {
                         overflowY="hidden"
                         backgroundImage="/binder.png"
                     ></Box>
-                    <Tabs>
-                        <TabList>
-                            <Tab>Order Packages</Tab>
-                            <Tab>Upload Pdf</Tab>
+                    <Tabs variant="enclosed" colorScheme="brown">
+                        <TabList padding="0 1rem">
+                            <Tab fontWeight="700">Order Packages</Tab>
+                            <Tab fontWeight="700">Upload Pdf</Tab>
                         </TabList>
                         <TabPanels>
                             <TabPanel>
