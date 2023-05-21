@@ -175,7 +175,12 @@ const OrderContainer = ({ packages }: Props) => {
             body: JSON.stringify(toPost),
         }).then((res) => {
             res.json().then((data) => {
-                window.location.replace(data.paymentLink);
+                if (data && data.paymentLink)
+                    window.location.replace(data.paymentLink);
+                else
+                    console.log(
+                        "Sorry, a package seems to have been withdrawan"
+                    );
             });
         });
     };
