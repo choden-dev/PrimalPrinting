@@ -35,6 +35,32 @@ export type OrderRow = {
     paid?: boolean;
     cost: number;
 };
+export type OrderPdf = {
+    name: string;
+    pageCount: number;
+    quantity: number;
+    price: number;
+    isColor: boolean;
+};
+export type OrderCartPackage = {
+    name: string;
+    price: number;
+};
+export type UploadedPdf = {
+    name: string;
+    pageCount: number;
+    price: number;
+    priceId: string;
+    quantity: number;
+    isColor: boolean;
+    file: File;
+};
+
+export type CartPackage = {
+    name: string;
+    price: number;
+    priceId: string;
+};
 
 export type product = infoStructure & { image: any; price: string };
 
