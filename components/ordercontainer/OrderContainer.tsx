@@ -7,6 +7,7 @@ import ItemModal from "../itemmodal/ItemModal";
 import DetailsForm from "./DetailsForm";
 import { CartPackage, OrderRow, UploadedPdf } from "../../types/types";
 import Cart from "./Cart";
+import PackageOrder from "./PackageOrder";
 
 type Props = {
     packages: any;
@@ -200,6 +201,12 @@ const OrderContainer = ({ packages }: Props) => {
                         overflowY="hidden"
                         backgroundImage="/binder.png"
                     ></Box>
+                    <PackageOrder
+                        packages={packages}
+                        cartPackages={cartPackages}
+                        setCartPackages={setCartPackages}
+                        smallScreen={smallScreen}
+                    />
 
                     <DetailsForm />
                 </Box>

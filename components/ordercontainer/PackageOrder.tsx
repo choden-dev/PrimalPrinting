@@ -8,7 +8,12 @@ type Props = {
     smallScreen: boolean;
 };
 
-const PackageOrder = ({ packages, cartPackages, setCartPackages }: Props) => {
+const PackageOrder = ({
+    packages,
+    cartPackages,
+    setCartPackages,
+    smallScreen,
+}: Props) => {
     const addPackage = (
         id: string,
         name: string,
