@@ -1,8 +1,16 @@
-import { Box, FormLabel, Input, Textarea } from "@chakra-ui/react";
+import { Box, FormLabel, Heading, Input, Textarea } from "@chakra-ui/react";
 const DetailsForm = () => {
+    const checkFormValidity = () => {
+        const form = formRef.current;
+        const formValid = form.checkValidity();
+        const isValid = formValid && cartValid;
+        if (!formValid) window.alert("Please check your submission details.");
+        return isValid;
+    };
     return (
         <>
             <Box display="flex" flexDir="column" gap="1rem">
+                <Heading>Your Details</Heading>
                 <Box
                     display="grid"
                     gridTemplateColumns="1fr 1fr"
