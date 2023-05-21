@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import * as pdfjs from "pdfjs-dist";
-import { Box, FormControl, Input, Text } from "@chakra-ui/react";
+import { Box, FormControl, Heading, Input, Text } from "@chakra-ui/react";
 import UploadCard from "../uploadcard/UploadCard";
 import { AddIcon } from "@chakra-ui/icons";
 import { UploadedPdf } from "../../types/types";
@@ -116,52 +116,62 @@ const PdfOrder = ({ uploadedPdfs, setUploadedPdfs }: Props) => {
         handlePdfUpload(files);
     };
     return (
-        <form>
-            <FormControl>
-                <Input
-                    ref={defaultUploadZone}
-                    display="none"
-                    type="file"
-                    accept="application/pdf"
-                    onChange={handleFileEvent}
-                />
-                <Box
-                    zIndex="76"
-                    display="flex"
-                    flexDir="column"
-                    cursor="pointer"
-                    minH="5rem"
-                    padding="0.5rem"
-                    w="100%"
-                    bg="brown.100"
-                    borderRadius="2px"
-                    ref={uploadZone}
-                >
-                    {uploadedPdfs.map((pdf) => {
-                        return (
-                            <Box zIndex="77" key={pdf.name} marginBottom="1rem">
-                                <UploadCard
-                                    name={pdf.name}
-                                    pages={pdf.pageCount}
-                                    price={pdf.price}
-                                    removeFunction={removeFromCart}
-                                    changeFunction={handleColorChange}
-                                />
-                            </Box>
-                        );
-                    })}
-                    <Text
-                        onClick={(e) => {
-                            defaultUploadZone.current.click();
-                        }}
-                        textAlign="center"
+        <>
+            <Heading textAlign="center" marginBottom="1rem">
+                Upload a Pdf
+            </Heading>
+            <form>
+                <FormControl>
+                    <Input
+                        ref={defaultUploadZone}
+                        display="none"
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handleFileEvent}
+                    />
+                    <Box
+                        zIndex="76"
+                        display="flex"
+                        flexDir="column"
+                        cursor="pointer"
+                        minH="5rem"
+                        padding="0.5rem"
+                        w="100%"
+                        bg="brown.100"
+                        borderRadius="2px"
+                        ref={uploadZone}
                     >
-                        Double click to upload *.pdf file to upload (20mb max)
-                    </Text>
-                    <AddIcon alignSelf="center" />
-                </Box>
-            </FormControl>
-        </form>
+                        {uploadedPdfs.map((pdf) => {
+                            return (
+                                <Box
+                                    zIndex="77"
+                                    key={pdf.name}
+                                    marginBottom="1rem"
+                                >
+                                    <UploadCard
+                                        name={pdf.name}
+                                        pages={pdf.pageCount}
+                                        price={pdf.price}
+                                        removeFunction={removeFromCart}
+                                        changeFunction={handleColorChange}
+                                    />
+                                </Box>
+                            );
+                        })}
+                        <Text
+                            onClick={(e) => {
+                                defaultUploadZone.current.click();
+                            }}
+                            textAlign="center"
+                        >
+                            Double click to upload *.pdf file to upload (20mb
+                            max)
+                        </Text>
+                        <AddIcon alignSelf="center" />
+                    </Box>
+                </FormControl>
+            </form>
+        </>
     );
 };
 

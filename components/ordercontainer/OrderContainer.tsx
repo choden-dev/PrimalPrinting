@@ -1,6 +1,14 @@
 import { useRouter } from "next/router";
 import { useState, useRef, useEffect } from "react";
-import { Box, useMediaQuery } from "@chakra-ui/react";
+import {
+    Box,
+    Tab,
+    TabList,
+    TabPanel,
+    TabPanels,
+    Tabs,
+    useMediaQuery,
+} from "@chakra-ui/react";
 import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
 import Footer from "../footer/Footer";
 import ItemModal from "../itemmodal/ItemModal";
@@ -204,16 +212,28 @@ const OrderContainer = ({ packages }: Props) => {
                         overflowY="hidden"
                         backgroundImage="/binder.png"
                     ></Box>
-                    <PackageOrder
-                        packages={packages}
-                        cartPackages={cartPackages}
-                        setCartPackages={setCartPackages}
-                        smallScreen={smallScreen}
-                    />
-                    <PdfOrder
-                        uploadedPdfs={uploadedPdfs}
-                        setUploadedPdfs={setUploadedPdfs}
-                    />
+                    <Tabs>
+                        <TabList>
+                            <Tab>Order Packages</Tab>
+                            <Tab>Upload Pdf</Tab>
+                        </TabList>
+                        <TabPanels>
+                            <TabPanel>
+                                <PackageOrder
+                                    packages={packages}
+                                    cartPackages={cartPackages}
+                                    setCartPackages={setCartPackages}
+                                    smallScreen={smallScreen}
+                                />
+                            </TabPanel>
+                            <TabPanel>
+                                <PdfOrder
+                                    uploadedPdfs={uploadedPdfs}
+                                    setUploadedPdfs={setUploadedPdfs}
+                                />
+                            </TabPanel>
+                        </TabPanels>
+                    </Tabs>
 
                     <DetailsForm formRef={formRef} />
                 </Box>

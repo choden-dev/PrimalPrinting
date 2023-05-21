@@ -5,7 +5,7 @@ type Props = {
 const DetailsForm = ({ formRef }: Props) => {
     return (
         <>
-            <Box display="flex" flexDir="column" gap="1rem">
+            <Box display="flex" flexDir="column" gap="1rem" padding="0 1rem">
                 <Heading>Your Details</Heading>
                 <form ref={formRef}>
                     <Box

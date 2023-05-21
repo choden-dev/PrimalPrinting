@@ -28,7 +28,7 @@ const PackageOrder = ({
     };
     return (
         <Box display="flex" flexDir="column" gap="1rem">
-            <Heading>Products</Heading>
+            <Heading textAlign="center">Choose a Package</Heading>
             <Box
                 display="grid"
                 gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
