@@ -20,6 +20,7 @@ const OrderContainer = ({ packages }: Props) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [cartPackages, setCartPackages] = useState<CartPackage[]>([]);
     const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
+    const formRef = useRef(null);
     const router = useRouter();
 
     const closeModal = () => {
@@ -33,6 +34,7 @@ const OrderContainer = ({ packages }: Props) => {
         const orders: OrderRow[] = [];
 
         const form = formRef.current;
+        console.log(form);
         const name = form!.name.value;
         const email = form!.email.value;
         const message = form!.message.value;
@@ -213,13 +215,14 @@ const OrderContainer = ({ packages }: Props) => {
                         setUploadedPdfs={setUploadedPdfs}
                     />
 
-                    <DetailsForm />
+                    <DetailsForm formRef={formRef} />
                 </Box>
                 <Cart
                     cartPackages={cartPackages}
                     setCartPackages={setCartPackages}
                     uploadedPdfs={uploadedPdfs}
                     setUploadedPdfs={setUploadedPdfs}
+                    formRef={formRef}
                     smallScreen={smallScreen}
                     setModalOpen={setModalOpen}
                 />

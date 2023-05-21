@@ -26,7 +26,6 @@ const PdfOrder = ({ uploadedPdfs, setUploadedPdfs }: Props) => {
     }, []);
     const uploadZone = useRef(null);
     const defaultUploadZone = useRef(null);
-    const formRef = useRef(null);
     const removeFromCart = (name: string): any => {
         const newUploads = uploadedPdfs.filter((pdf) => pdf.name !== name);
         setUploadedPdfs(newUploads);
@@ -117,7 +116,7 @@ const PdfOrder = ({ uploadedPdfs, setUploadedPdfs }: Props) => {
         handlePdfUpload(files);
     };
     return (
-        <form ref={formRef}>
+        <form>
             <FormControl>
                 <Input
                     ref={defaultUploadZone}

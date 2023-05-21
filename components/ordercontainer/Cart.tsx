@@ -16,6 +16,7 @@ type Props = {
     setModalOpen: () => void;
     setUploadedPdfs: (T: any[]) => any;
     smallScreen: boolean;
+    formRef: any;
 };
 
 const Cart = ({
@@ -25,7 +26,15 @@ const Cart = ({
     setModalOpen,
     setUploadedPdfs,
     smallScreen,
+    formRef,
 }: Props) => {
+    const checkFormValidity = () => {
+        const form = formRef.current;
+        const formValid = form.checkValidity();
+        if (!formValid) window.alert("Please check your submission details.");
+        return formValid;
+    };
+
     const checkCartValidity = () => {
         const cartValid =
             (cartPackages && cartPackages.length !== 0) ||
@@ -170,7 +179,8 @@ const Cart = ({
                     <Button
                         variant="browned"
                         onClick={() => {
-                            if (checkCartValidity()) setModalOpen(true);
+                            if (checkCartValidity() && checkFormValidity())
+                                setModalOpen(true);
                         }}
                     >
                         Order Now
