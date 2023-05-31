@@ -63,7 +63,9 @@ const Home: NextPage<PageProps> = (text) => {
                 <title>Primal Printing - All your printing needs</title>
                 <meta
                     name="description"
-                    content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, business cards, and more"
+                    content="We’re THE student run print shop at University of Auckland. 
+We offer affordable printing and binding services, providing students with course books and manuals for as little as $9.99 
+By Students, For Students💯🚀"
                 />
                 <meta property="og:type" content="website" />
                 <meta

@@ -125,11 +125,15 @@ const PdfOrder = ({ uploadedPdfs, setUploadedPdfs }: Props) => {
                     <Input
                         ref={defaultUploadZone}
                         display="none"
+                        height="100%"
                         type="file"
                         accept="application/pdf"
                         onChange={handleFileEvent}
                     />
                     <Box
+                        onClick={(e) => {
+                            defaultUploadZone.current.click();
+                        }}
                         zIndex="76"
                         display="flex"
                         flexDir="column"
@@ -158,12 +162,7 @@ const PdfOrder = ({ uploadedPdfs, setUploadedPdfs }: Props) => {
                                 </Box>
                             );
                         })}
-                        <Text
-                            onClick={(e) => {
-                                defaultUploadZone.current.click();
-                            }}
-                            textAlign="center"
-                        >
+                        <Text textAlign="center">
                             Double click to upload *.pdf file to upload (20mb
                             max)
                         </Text>
