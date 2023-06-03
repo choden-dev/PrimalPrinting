@@ -19,6 +19,7 @@ import { CartPackage, OrderRow, UploadedPdf } from "../../types/types";
 import Cart from "./Cart";
 import PackageOrder from "./PackageOrder";
 import PdfOrder from "./PdfOrder";
+import { formatItems, orderSum } from "../../lib/utils";
 
 type Props = {
     packages: any;
@@ -88,13 +89,25 @@ const OrderContainer = ({ packages }: Props) => {
             body: JSON.stringify(orders),
         }).then((res) =>
             res.json().then((data) => {
+                const emailInfo = {
+                    email: formRef.current.email.value,
+                    name: formRef.current.name.value,
+                    orderId: data.message.orderId,
+                    items: formatItems(data.message.coursebooks),
+                    price: orderSum(data.message.coursebooks),
+                };
                 if (isBankTransfer) {
                     setIsProcessing(false);
-                    router.push(
-                        `/order_complete?orderId=${
-                            data.message.orderId
-                        }&items=${JSON.stringify(data.message.coursebooks)}`
-                    );
+                    fetch(`api/sendemailbank`, {
+                        method: "POST",
+                        body: JSON.stringify(emailInfo),
+                    }).then(() => {
+                        router.push(
+                            `/order_complete?orderId=${
+                                data.message.orderId
+                            }&items=${JSON.stringify(data.message.coursebooks)}`
+                        );
+                    });
                 } else {
                     setIsProcessing(false);
                     payWithCreditCard(data.message.orderId);
