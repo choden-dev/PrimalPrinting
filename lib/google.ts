@@ -30,11 +30,12 @@ export const authenticateGoogle = () => {
     return auth;
 };
 //adapted from https://gist.github.com/iaincollins/43302ea047d4a77e6605350598d160c1
-export const appendToSpreadSheet = (toAppend: any[][]) => {
+export const appendToSpreadSheet = async (toAppend: any[][]) => {
     const auth = authenticateGoogle();
     const sheets = google.sheets("v4");
-    sheets.spreadsheets.values.append(
-        {
+
+    try {
+        await sheets.spreadsheets.values.append({
             spreadsheetId: process.env.ORDER_SPREADSHEET_ID,
             range: "Website Orders",
             valueInputOption: "RAW",
@@ -43,11 +44,10 @@ export const appendToSpreadSheet = (toAppend: any[][]) => {
                 values: toAppend,
             },
             auth: auth,
-        },
-        (err, response) => {
-            if (err) return console.error(err);
-        }
-    );
+        });
+    } catch (err) {
+        console.error(err);
+    }
 };
 
 export const updatePaymentStatus = async (orderId: string) => {

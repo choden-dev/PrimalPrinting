@@ -36,7 +36,7 @@ export default async function handler(
             });
             toAppend.push(temp);
         });
-        appendToSpreadSheet(toAppend);
+        await appendToSpreadSheet(toAppend);
         return res.json({
             message: {
                 orderId: orderId,
