@@ -21,15 +21,15 @@ export const sendEmailBankTransfer = async (
             price: price,
         },
     };
-    sg.send(msg)
-        .then(() => {
-            console.log("Email sent");
-            return Promise.resolve(true);
-        })
-        .catch((error) => {
-            console.error(error.response.body.errors);
-            return Promise.resolve(false);
-        });
+
+    try {
+        await sg.send(msg);
+        console.log("Email sent");
+        return true;
+    } catch (error) {
+        console.error(error.response.body.errors);
+        return false;
+    }
 };
 
 export const sendEmailStripePayment = async (
@@ -48,13 +48,13 @@ export const sendEmailStripePayment = async (
             price: price,
         },
     };
-    sg.send(msg)
-        .then(() => {
-            console.log("Email sent");
-            return Promise.resolve(true);
-        })
-        .catch((error) => {
-            console.error(error.response.body.errors);
-            return Promise.resolve(false);
-        });
+
+    try {
+        await sg.send(msg);
+        console.log("Email sent");
+        return true;
+    } catch (error) {
+        console.error(error.response.body.errors);
+        return false;
+    }
 };
