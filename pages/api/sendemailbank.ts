@@ -6,7 +6,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
     const body = JSON.parse(req.body);
-    const success = sendEmailBankTransfer(
+    const success = await sendEmailBankTransfer(
         body.email,
         body.name,
         body.orderId,
