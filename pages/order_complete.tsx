@@ -5,6 +5,7 @@ import { Box, Heading, Text, List, ListItem, Divider } from "@chakra-ui/react";
 import NavBar from "../components/navbar/NavBar";
 import Footer from "../components/footer/Footer";
 import OrderContainer from "../components/ordercontainer/OrderContainer";
+import { orderSum } from "../lib/utils";
 const OrderComplete: NextPage = () => {
     const router = useRouter();
     const orderId = router.query.orderId;
@@ -64,7 +65,9 @@ const OrderComplete: NextPage = () => {
                         </Box>
                     </List>
                     <Divider margin="1rem 0" />
-                    <Text fontSize="1.5rem">Total: ${sum()}</Text>
+                    <Text fontSize="1.5rem">
+                        {orderItems && `Total: ${orderSum(orderItems)}`}
+                    </Text>
                     <Text>
                         {" "}
                         Please transfer this to the account{" "}

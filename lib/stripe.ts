@@ -96,6 +96,8 @@ export const checkSession = async (sessionId: string) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     return {
+        price: session.amount_total,
+        customer: session.customer_details,
         paid: session.status === "complete",
         orderId: session.metadata.orderId,
     };
