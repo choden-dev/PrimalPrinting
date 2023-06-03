@@ -1,6 +1,7 @@
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const sg = sgMail;
+sg.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const sendEmailBankTransfer = async (
     email: string,
@@ -20,8 +21,7 @@ export const sendEmailBankTransfer = async (
             price: price,
         },
     };
-    sgMail
-        .send(msg)
+    sg.send(msg)
         .then(() => {
             console.log("Email sent");
             return Promise.resolve(true);
@@ -48,8 +48,7 @@ export const sendEmailStripePayment = async (
             price: price,
         },
     };
-    sgMail
-        .send(msg)
+    sg.send(msg)
         .then(() => {
             console.log("Email sent");
             return Promise.resolve(true);
