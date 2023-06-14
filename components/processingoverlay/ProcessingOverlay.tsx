@@ -1,8 +1,14 @@
-import { Box, Spinner, Text } from "@chakra-ui/react";
+import { Box, Heading, Spinner, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 type Props = {
     show: boolean;
+    items: { name: string; percent: number }[];
 };
-export default function ProcessingOverlay({ show }: Props) {
+export default function ProcessingOverlay({ show, items }: Props) {
+    const [currentItems, setCurrentItems] = useState(items);
+    useEffect(() => {
+        setCurrentItems(items);
+    }, [items]);
     return (
         <>
             <Box
@@ -17,6 +23,7 @@ export default function ProcessingOverlay({ show }: Props) {
                 alignItems="center"
                 flexDir="column"
                 zIndex="1000"
+                gap=".5rem"
                 bg="rgb(33,33,33)"
             >
                 <Spinner
@@ -25,10 +32,19 @@ export default function ProcessingOverlay({ show }: Props) {
                     thickness="1rem"
                     color="brown.700"
                 />
-                <Text fontSize="2rem" color="white">
+                <Text textAlign="center" fontSize="2rem" color="white">
                     Currently processing your order... This might take up to a
                     minute.
                 </Text>
+                {currentItems.map((item) => {
+                    return (
+                        <>
+                            <Heading as="p" color="white">
+                                {item.name}: {item.percent}%
+                            </Heading>
+                        </>
+                    );
+                })}
             </Box>
         </>
     );
