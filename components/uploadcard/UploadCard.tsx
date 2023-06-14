@@ -17,17 +17,29 @@ const UploadCard = ({
     return (
         <Box
             bg="white"
-            height="3rem"
-            padding="0 1rem"
+            height="fit-content"
+            padding="1rem"
             borderRadius="sm"
             onClick={(e) => e.stopPropagation()}
             display="flex"
-            gap="1rem"
+            flexDir="column"
         >
-            <Box>
-                Filename: <strong>{name}</strong> | {pages} Pages
+            <Box display="flex" w="100%" alignItems="center">
+                <Box>
+                    Filename: <strong>{name}</strong> | {pages} Pages
+                </Box>
+                <Box marginLeft="auto">Price: ${price}</Box>
+                <IconButton
+                    aria-label="remove from uploads"
+                    icon={<CloseIcon />}
+                    variant={"unstyled"}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        removeFunction(name);
+                    }}
+                />
             </Box>
-            <Box marginLeft="auto">Price: {price}</Box>
+
             <Select
                 defaultValue="B/W"
                 onChange={(e) => {
@@ -35,20 +47,10 @@ const UploadCard = ({
                     else changeFunction(true, name);
                 }}
                 borderRadius="sm"
-                maxW="6.2rem"
             >
                 <option value="Colour">Colour</option>
                 <option value="B/W">B/W</option>
             </Select>
-            <IconButton
-                aria-label="remove from uploads"
-                icon={<CloseIcon />}
-                variant={"unstyled"}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    removeFunction(name);
-                }}
-            />
         </Box>
     );
 };
