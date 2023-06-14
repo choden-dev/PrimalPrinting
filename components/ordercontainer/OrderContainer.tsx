@@ -20,12 +20,16 @@ import Cart from "./Cart";
 import PackageOrder from "./PackageOrder";
 import PdfOrder from "./PdfOrder";
 import { formatItems, orderSum } from "../../lib/utils";
-
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import storage from "../../firebase";
 type Props = {
     packages: any;
 };
 
 const OrderContainer = ({ packages }: Props) => {
+    const [currentlyUploading, setCurrentlyUploading] = useState<
+        { name: string; percent: number }[]
+    >([]);
     const [uploadedPdfs, setUploadedPdfs] = useState<UploadedPdf[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
@@ -36,6 +40,49 @@ const OrderContainer = ({ packages }: Props) => {
 
     const closeModal = () => {
         setModalOpen(false);
+    };
+
+    const uploadPdf = (
+        file: File,
+        name: string,
+        index: number
+    ): Promise<{ name: string; url: string }> => {
+        const prevArray = [...currentlyUploading];
+        prevArray.push({ name: name, percent: 0 });
+        console.log(currentlyUploading);
+        return new Promise((resolve, reject) => {
+            const storageRef = ref(storage, `files/${name}`);
+            const uploadWorker = uploadBytesResumable(storageRef, file);
+
+            uploadWorker.on(
+                "state_changed",
+                (snapshot) => {
+                    const percent = Math.round(
+                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    );
+                    setCurrentlyUploading((prevItems) => {
+                        const updatedItems = [...prevItems];
+                        updatedItems[index] = { name: name, percent: percent };
+                        return updatedItems;
+                    });
+                },
+                (err) => {
+                    console.log(err);
+                    reject(err);
+                },
+                () => {
+                    getDownloadURL(uploadWorker.snapshot.ref)
+                        .then((url) => {
+                            console.log(url);
+                            resolve({ name: name, url: url });
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            reject(err);
+                        });
+                }
+            );
+        });
     };
 
     const collateOrder = (
@@ -120,47 +167,24 @@ const OrderContainer = ({ packages }: Props) => {
         setModalOpen(false);
         setIsProcessing(true);
 
-        const promises = uploadedPdfs.map((pdf) => {
+        const promises = uploadedPdfs.map((pdf, index) => {
             const file = pdf.file;
-            const reader = new FileReader();
-
-            return new Promise((resolve, reject) => {
-                reader.onload = function (e) {
-                    var rawLog = reader.result.split(",")[1];
-                    var dataSend = {
-                        dataReq: {
-                            data: rawLog,
-                            name: file.name,
-                            type: file.type,
-                        },
-                        fname: "uploadFilesToGoogleDrive",
-                    };
-                    console.log(dataSend);
-                    fetch(`/api/upload`, {
-                        method: "POST",
-                        body: JSON.stringify(dataSend),
-                    })
-                        .then((res) => res.json())
-                        .then((data) => {
-                            resolve(data);
-                        })
-                        .catch((e) => {
-                            reject(e);
-                        });
-                };
-                reader.readAsDataURL(file);
-            });
+            const fileName = pdf.name;
+            return uploadPdf(file, fileName, index);
         });
 
+        let tempItems = [];
         Promise.all(promises)
-            .then((res) =>
-                res.map((item) => ({
-                    name: item.message.name,
-                    url: item.message.url,
-                }))
-            )
-            .then((temp) => {
-                collateOrder(temp, isBankTransfer);
+            .then((res) => {
+                res.map((item) =>
+                    tempItems.push({
+                        name: item.name,
+                        url: item.url,
+                    })
+                );
+            })
+            .then(() => {
+                collateOrder(tempItems, isBankTransfer);
             });
     };
 
@@ -200,7 +224,7 @@ const OrderContainer = ({ packages }: Props) => {
 
     return (
         <>
-            <ProcessingOverlay show={isProcessing} />
+            <ProcessingOverlay show={isProcessing} items={currentlyUploading} />
             <ItemModal
                 isOpen={modalOpen}
                 closeFunction={closeModal}
