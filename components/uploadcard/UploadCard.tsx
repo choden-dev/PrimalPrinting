@@ -20,6 +20,7 @@ const UploadCard = ({
             height="3rem"
             padding="0 1rem"
             borderRadius="sm"
+            onClick={(e) => e.stopPropagation()}
             display="flex"
             gap="1rem"
         >
