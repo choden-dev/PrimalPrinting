@@ -49,7 +49,6 @@ const OrderContainer = ({ packages }: Props) => {
     ): Promise<{ name: string; url: string }> => {
         const prevArray = [...currentlyUploading];
         prevArray.push({ name: name, percent: 0 });
-        console.log(currentlyUploading);
         return new Promise((resolve, reject) => {
             const storageRef = ref(storage, `files/${name}`);
             const uploadWorker = uploadBytesResumable(storageRef, file);
@@ -67,7 +66,7 @@ const OrderContainer = ({ packages }: Props) => {
                     });
                 },
                 (err) => {
-                    console.log(err);
+                    console.error(err);
                     reject(err);
                 },
                 () => {
@@ -77,7 +76,7 @@ const OrderContainer = ({ packages }: Props) => {
                             resolve({ name: name, url: url });
                         })
                         .catch((err) => {
-                            console.log(err);
+                            console.error(err);
                             reject(err);
                         });
                 }
