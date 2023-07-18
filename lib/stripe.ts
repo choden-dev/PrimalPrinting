@@ -42,8 +42,11 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
         case pages >= 1 && pages < 100:
             updatePageRange(1, 99);
             break;
-        case pages >= 100 && pages < 300:
-            updatePageRange(100, 299);
+        case pages >= 100 && pages < 200:
+            updatePageRange(100, 199);
+            break;
+        case pages >= 200 && pages < 300:
+            updatePageRange(200, 299);
             break;
         case pages >= 300 && pages < 350:
             updatePageRange(300, 349);
@@ -81,6 +84,7 @@ export const createSession = async (
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: items,
+        allow_promotion_codes: true,
         success_url: `${process.env
             .STRIPE_SUCCESS_URL!}?session_id={CHECKOUT_SESSION_ID}`,
         customer_email: email,
