@@ -7,18 +7,13 @@ import {
   ListItem,
   UnorderedList,
   ButtonGroup,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
 } from "@chakra-ui/react";
 import styles from "./ProductCard.module.css";
-import { OrderPackage } from "../../types/types";
+import { StripeProduct } from "../../types/types";
 import { IAddOrder } from "../../types/helper";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
 type Props = {
-  orderPackage: OrderPackage;
+  orderPackage: StripeProduct;
   image: string;
   hasButton: boolean;
   addFunction: IAddOrder;
@@ -73,8 +68,8 @@ export default function ProductCard({
               </Text>
               <ButtonGroup marginLeft="auto">
                 <QuantityPicker
-                  onChange={(valueString) => {
-                    setQuantity(parseInt(valueString));
+                  onChange={(_, value) => {
+                    setQuantity(value);
                   }}
                 />
                 {hasButton && (

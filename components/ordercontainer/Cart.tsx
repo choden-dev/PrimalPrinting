@@ -39,8 +39,8 @@ const CartItemContainer = ({
   return (
     <>
       {cartPackages.map((cartPackage: CartItem) => {
-        const [displayPrice, setDisplayPrice] = useState<number>(
-          cartPackage.getDisplayPrice()
+        const [displayPrice, setDisplayPrice] = useState<string>(
+          cartPackage.getDisplayPrice()?.toFixed(2)
         );
         return (
           <ListItem key={cartPackage.id}>
@@ -65,7 +65,7 @@ const CartItemContainer = ({
                   defaultValue={cartPackage.getQuantity()}
                   onChange={(_, value) => {
                     cartPackage.setQuantity(value);
-                    setDisplayPrice(cartPackage.getDisplayPrice());
+                    setDisplayPrice(cartPackage.getDisplayPrice().toFixed(2));
                     updatePrice();
                   }}
                 />
@@ -95,7 +95,7 @@ const Cart = ({
   smallScreen,
   formRef,
 }: Props) => {
-  const [totalPrice, setTotalPrice] = useState<string>("0.00");
+  const [totalPrice, setTotalPrice] = useState<string>();
   const checkFormValidity = () => {
     const form = formRef.current;
     const formValid = form.checkValidity();
@@ -199,8 +199,7 @@ const Cart = ({
           <Button
             variant="browned"
             onClick={() => {
-              if (checkCartValidity() && checkFormValidity())
-                setModalOpen(true);
+              if (checkCartValidity() && checkFormValidity()) setModalOpen();
             }}
           >
             Order Now
