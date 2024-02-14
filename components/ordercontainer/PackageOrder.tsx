@@ -1,59 +1,62 @@
 import { Box, Heading } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
+import { IAddOrder } from "../../types/helper";
+import { CartPackage } from "../../types/types";
+import CartItem from "../../types/models/CartItem";
 
 type Props = {
-    packages: any;
-    cartPackages: any[];
-    setCartPackages: (T: any[]) => void;
-    smallScreen: boolean;
+  displayPackages: any;
+  cartPackages: CartItem[];
+  setCartPackages: (cartPackages: CartItem[]) => void;
+  smallScreen: boolean;
 };
 
 const PackageOrder = ({
-    packages,
-    cartPackages,
-    setCartPackages,
-    smallScreen,
+  displayPackages,
+  cartPackages,
+  setCartPackages,
+  smallScreen,
 }: Props) => {
-    const addPackage = (
-        id: string,
-        name: string,
-        priceId: string,
-        price: number
-    ) => {
-        const temp = [...cartPackages];
-        if (temp.find((item) => item.id === id)) return;
-        temp.push({ id: id, name: name, priceId: priceId, price: price });
-        console.log(temp);
-        setCartPackages(temp);
-    };
-    return (
-        <Box display="flex" flexDir="column" gap="1rem">
-            <Heading textAlign="center">Choose a Package</Heading>
-            <Box
-                display="grid"
-                gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}
-            >
-                {packages &&
-                    packages.map((item: any) => {
-                        return (
-                            <ProductCard
-                                key={item.updated}
-                                addFunction={addPackage}
-                                orderPackage={{
-                                    title: item.name,
-                                    id: item.id,
-                                    priceId: item.default_price,
-                                    description: item.description,
-                                    price: item.price / 100,
-                                }}
-                                image=""
-                                hasButton={true}
-                            />
-                        );
-                    })}
-            </Box>
-        </Box>
-    );
+  const addPackage: IAddOrder = (
+    id: string,
+    name: string,
+    priceId: string,
+    price: number,
+    quantity: number
+  ) => {
+    const temp = [...cartPackages];
+    if (temp.find((item) => item.id === id)) return;
+    temp.push(new CartItem(id, name, quantity, price, priceId));
+    setCartPackages(temp);
+  };
+  return (
+    <Box display="flex" flexDir="column" gap="1rem">
+      <Heading textAlign="center">Choose a Package</Heading>
+      <Box display="grid" gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}>
+        {displayPackages &&
+          displayPackages.map((displayPackage: any) => {
+            const { name, id, default_price, description, price, features } =
+              displayPackage;
+            return (
+              <ProductCard
+                key={displayPackage.updated}
+                addFunction={addPackage}
+                orderPackage={{
+                  title: name,
+                  id: id,
+                  priceId: default_price,
+                  description: description,
+                  price: price / 100,
+                  features: features,
+                }}
+                image=""
+                hasButton={true}
+              />
+            );
+          })}
+      </Box>
+    </Box>
+  );
 };
 
 export default PackageOrder;
