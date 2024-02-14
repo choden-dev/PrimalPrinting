@@ -3,106 +3,115 @@ let stripeCached: any = null;
 
 // caches the connection or starts a new one
 const makeStripeConnection = async () => {
-    if (stripeCached) return stripeCached;
-    stripeCached = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`, {
-        apiVersion: `2022-11-15`,
-    });
-    return stripeCached;
+  if (stripeCached) return stripeCached;
+  stripeCached = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`, {
+    apiVersion: `2022-11-15`,
+  });
+  return stripeCached;
 };
 export const getProducts = async () => {
-    const stripe: Stripe = await makeStripeConnection();
-    const products = await stripe.products.list({
-        limit: 3,
-    });
-    return products;
+  const stripe: Stripe = await makeStripeConnection();
+  const products = await stripe.products.list({
+    limit: 3,
+  });
+  return products;
 };
 
 export const findPrice = async (priceId: string) => {
-    const stripe: Stripe = await makeStripeConnection();
-    const price = await stripe.prices.retrieve(priceId);
-    return price.unit_amount;
+  const stripe: Stripe = await makeStripeConnection();
+  const price = await stripe.prices.retrieve(priceId);
+  return price.unit_amount;
 };
 
 export const getPackages = async () => {
-    const stripe: Stripe = await makeStripeConnection();
-    const packages = await stripe.products.search({
-        query: `metadata["type"]: 'package' AND active: 'true' `,
-    });
-    return packages;
+  const stripe: Stripe = await makeStripeConnection();
+  const packages = await stripe.products.search({
+    query: `metadata["type"]: 'package' AND active: 'true' `,
+  });
+  return packages;
 };
 
 export const getPriceForPages = async (pages: number, isColor: boolean) => {
-    const stripe: Stripe = await makeStripeConnection();
-    let pageRange = { maxPages: -1, minPages: -1 };
-    const updatePageRange = (minPages: number, maxPages: number): void => {
-        pageRange.minPages = minPages;
-        pageRange.maxPages = maxPages;
-    };
-    switch (true) {
-        case pages >= 1 && pages < 100:
-            updatePageRange(1, 99);
-            break;
-        case pages >= 100 && pages < 200:
-            updatePageRange(100, 199);
-            break;
-        case pages >= 200 && pages < 300:
-            updatePageRange(200, 299);
-            break;
-        case pages >= 300 && pages < 350:
-            updatePageRange(300, 349);
-            break;
-        case pages >= 350 && pages < 400:
-            updatePageRange(350, 399);
-            break;
-        case pages >= 400:
-            updatePageRange(400, 400);
-            break;
-        default:
-            throw new Error("Invalid Page Range!");
-    }
-    const products = await stripe.products.search({
-        query: `metadata["maxPages"]:'${
-            pageRange.maxPages
-        }' AND metadata["minPages"]:'${
-            pageRange.minPages
-        }' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
-    });
-    const priceId = products.data[0].default_price!.toString();
-    const price = await findPrice(priceId);
-    return {
-        price: price,
-        priceId: priceId,
-    };
+  const stripe: Stripe = await makeStripeConnection();
+  let pageRange = { maxPages: -1, minPages: -1 };
+  const updatePageRange = (minPages: number, maxPages: number): void => {
+    pageRange.minPages = minPages;
+    pageRange.maxPages = maxPages;
+  };
+  switch (true) {
+    case pages >= 1 && pages < 100:
+      updatePageRange(1, 99);
+      break;
+    case pages >= 100 && pages < 200:
+      updatePageRange(100, 199);
+      break;
+    case pages >= 200 && pages < 300:
+      updatePageRange(200, 299);
+      break;
+    case pages >= 300 && pages < 350:
+      updatePageRange(300, 349);
+      break;
+    case pages >= 350 && pages < 400:
+      updatePageRange(350, 399);
+      break;
+    case pages >= 400:
+      updatePageRange(400, 400);
+      break;
+    default:
+      throw new Error("Invalid Page Range!");
+  }
+  const products = await stripe.products.search({
+    query: `metadata["maxPages"]:'${
+      pageRange.maxPages
+    }' AND metadata["minPages"]:'${pageRange.minPages}' AND metadata["type"]:${
+      isColor ? "'Colour'" : "'B/W'"
+    }`,
+  });
+  const priceId = products.data[0].default_price!.toString();
+  const price = await findPrice(priceId);
+  return {
+    price: price,
+    priceId: priceId,
+  };
 };
 
 export const createSession = async (
-    items: { price: string; quantity: number }[],
-    orderId: string,
-    email: string
+  items: { price: string; quantity: number }[],
+  orderId: string,
+  email: string
 ) => {
-    const stripe: Stripe = await makeStripeConnection();
-    const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        line_items: items,
-        allow_promotion_codes: true,
-        success_url: `${process.env
-            .STRIPE_SUCCESS_URL!}?session_id={CHECKOUT_SESSION_ID}`,
-        customer_email: email,
-        cancel_url: `${process.env
-            .STRIPE_CANCEL_URL!}?session_id={CHECKOUT_SESSION_ID}`,
-        metadata: { orderId: orderId },
-    });
-    return session;
+  const stripe: Stripe = await makeStripeConnection();
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items: items.map((item) => {
+      return {
+        ...item,
+        adjustable_quantity: {
+          enabled: true,
+          minimum: 1,
+        },
+      };
+    }),
+    allow_promotion_codes: true,
+
+    success_url: `${process.env
+      .STRIPE_SUCCESS_URL!}?session_id={CHECKOUT_SESSION_ID}`,
+    customer_email: email,
+    cancel_url: `${process.env
+      .STRIPE_CANCEL_URL!}?session_id={CHECKOUT_SESSION_ID}`,
+    metadata: { orderId: orderId },
+  });
+  return session;
 };
 
 export const checkSession = async (sessionId: string) => {
-    const stripe: Stripe = await makeStripeConnection();
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const stripe: Stripe = await makeStripeConnection();
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    return {
-        price: session.amount_total,
-        customer: session.customer_details,
-        paid: session.status === "complete",
-        orderId: session.metadata.orderId,
-    };
+  return {
+    price: session.amount_total,
+    customer: session.customer_details,
+    paid: session.status === "complete",
+    orderId: session.metadata.orderId,
+  };
 };

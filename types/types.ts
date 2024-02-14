@@ -26,7 +26,7 @@ export type OrderRow = {
   orderId?: string;
   name: string;
   email: string;
-  pages: number;
+  pages?: number;
   message: string;
   coursebookName?: string;
   coursebookLink?: string;

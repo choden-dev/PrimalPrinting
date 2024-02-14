@@ -2,9 +2,7 @@ import { useRouter } from "next/router";
 import { useState, useRef, useEffect } from "react";
 import {
   Box,
-  Divider,
   Tab,
-  TabIndicator,
   TabList,
   TabPanel,
   TabPanels,
@@ -22,6 +20,7 @@ import PdfOrder from "./PdfOrder";
 import { formatItems, orderSum } from "../../lib/utils";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import storage from "../../firebase";
+import CartItem from "../../types/models/CartItem";
 type Props = {
   packages: any;
 };
@@ -33,7 +32,7 @@ const OrderContainer = ({ packages }: Props) => {
   const [uploadedPdfs, setUploadedPdfs] = useState<UploadedPdf[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [cartPackages, setCartPackages] = useState<CartPackage[]>([]);
+  const [cartPackages, setCartPackages] = useState<CartItem[]>([]);
   const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
   const formRef = useRef(null);
   const router = useRouter();
@@ -120,9 +119,9 @@ const OrderContainer = ({ packages }: Props) => {
         name,
         email,
         message,
-        quantity: 1,
-        coursebookLink: cartPackage.name,
-        cost: cartPackage.price,
+        quantity: cartPackage.getQuantity(),
+        coursebookLink: cartPackage.displayName,
+        cost: cartPackage.getDisplayPrice(),
         colour: false,
         paid: false,
         paymentMethod,
@@ -195,7 +194,10 @@ const OrderContainer = ({ packages }: Props) => {
     });
 
     cartPackages.forEach((cartPackage) => {
-      items.push({ price: cartPackage.priceId, quantity: 1 });
+      items.push({
+        price: cartPackage.priceId,
+        quantity: cartPackage.getQuantity(),
+      });
     });
 
     if (items.length === 0) return;

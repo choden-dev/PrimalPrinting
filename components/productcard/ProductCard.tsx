@@ -53,8 +53,8 @@ export default function ProductCard({
               {orderPackage.title}
             </Heading>
             <UnorderedList>
-              {orderPackage.features.map((feature, index) => {
-                return <ListItem>{feature.name}</ListItem>;
+              {orderPackage.features.map((feature) => {
+                return <ListItem key={feature.name}>{feature.name}</ListItem>;
               })}
             </UnorderedList>
             <Text>{orderPackage.description}</Text>

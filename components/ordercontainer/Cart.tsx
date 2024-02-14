@@ -17,7 +17,7 @@ type Props = {
   cartPackages: CartItem[];
   setCartPackages: (T: any[]) => any;
   uploadedPdfs: any;
-  setModalOpen: () => void;
+  setModalOpen: (value: boolean) => void;
   setUploadedPdfs: (T: any[]) => any;
   smallScreen: boolean;
   formRef: any;
@@ -199,7 +199,8 @@ const Cart = ({
           <Button
             variant="browned"
             onClick={() => {
-              if (checkCartValidity() && checkFormValidity()) setModalOpen();
+              if (checkCartValidity() && checkFormValidity())
+                setModalOpen(true);
             }}
           >
             Order Now
