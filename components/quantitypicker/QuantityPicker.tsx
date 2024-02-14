@@ -17,7 +17,7 @@ export default function QuantityPicker(props: NumberInputProps) {
         max={max ?? 999}
         defaultValue={defaultValue ?? 1}
         min={min ?? 1}
-        width={width ?? ""}
+        width={width ?? "4rem"}
       >
         <NumberInputField />
         <NumberInputStepper>

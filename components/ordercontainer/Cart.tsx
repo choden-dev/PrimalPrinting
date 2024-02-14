@@ -23,10 +23,15 @@ type Props = {
   formRef: any;
 };
 
+type CartItemProps = {
+  updatePrice: () => void;
+};
+
 const CartItemContainer = ({
   cartPackages,
   setCartPackages,
-}: Pick<Props, "cartPackages" | "setCartPackages">) => {
+  updatePrice,
+}: Pick<Props, "cartPackages" | "setCartPackages"> & CartItemProps) => {
   const removePackage = (id: string) => {
     const newPackages = cartPackages.filter((item) => item.id !== id);
     setCartPackages(newPackages);
@@ -50,21 +55,29 @@ const CartItemContainer = ({
               <Text>
                 {cartPackage.displayName} | <strong>${displayPrice}</strong>
               </Text>
-              <QuantityPicker
-                defaultValue={cartPackage.getQuantity()}
-                onChange={(_, value) => {
-                  cartPackage.setQuantity(value);
-                  setDisplayPrice(value);
-                }}
-              />
-              <Text
+              <Box
                 marginLeft="auto"
-                fontWeight="800"
-                cursor="pointer"
-                onClick={() => removePackage(cartPackage.id)}
+                display="flex"
+                gap="1rem"
+                alignItems="center"
               >
-                X
-              </Text>
+                <QuantityPicker
+                  defaultValue={cartPackage.getQuantity()}
+                  onChange={(_, value) => {
+                    cartPackage.setQuantity(value);
+                    setDisplayPrice(cartPackage.getDisplayPrice());
+                    updatePrice();
+                  }}
+                />
+                <Text
+                  marginLeft="auto"
+                  fontWeight="800"
+                  cursor="pointer"
+                  onClick={() => removePackage(cartPackage.id)}
+                >
+                  X
+                </Text>
+              </Box>
             </Box>
           </ListItem>
         );
@@ -82,6 +95,7 @@ const Cart = ({
   smallScreen,
   formRef,
 }: Props) => {
+  const [totalPrice, setTotalPrice] = useState<string>("0.00");
   const checkFormValidity = () => {
     const form = formRef.current;
     const formValid = form.checkValidity();
@@ -112,7 +126,7 @@ const Cart = ({
     cartPackages.map((cartPackage) => {
       sum += cartPackage.getDisplayPrice();
     });
-    return sum.toFixed(2);
+    setTotalPrice(sum.toFixed(2));
   };
   return (
     <Box
@@ -136,6 +150,7 @@ const Cart = ({
           <CartItemContainer
             cartPackages={cartPackages}
             setCartPackages={setCartPackages}
+            updatePrice={calculateTotalPrice}
           />
           {uploadedPdfs && (
             <>
@@ -178,7 +193,7 @@ const Cart = ({
           )}
           <ListItem>
             <Text fontSize="1.5rem">
-              <strong>Estimated Price: {calculateTotalPrice()}</strong>
+              <strong>Estimated Price: ${totalPrice}</strong>
             </Text>
           </ListItem>
           <Button
