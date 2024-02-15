@@ -170,8 +170,11 @@ const Cart = ({ smallScreen, formRef }: Props) => {
     >
       <Box display="flex" flexDir="column">
         <Heading fontSize="1.5rem" as="p">
-          Total Price
+          Your Items
         </Heading>
+        <p>
+          click the <strong>X</strong> on the right of an item to remove
+        </p>
         <List>
           <Text fontWeight="800">Packages</Text>
           <Divider marginBottom=".5rem" />

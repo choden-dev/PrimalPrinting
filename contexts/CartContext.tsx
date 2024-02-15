@@ -48,6 +48,13 @@ const replaceInArray = <T extends CartItem>(
   );
 };
 
+const alreadyInArray = <T extends CartItem>(
+  arrayToSearch: T[],
+  itemToCheck: T
+) => {
+  return arrayToSearch.some((item) => item.id === itemToCheck.id);
+};
+
 export function CartContextProvider(props: any) {
   const [cartPackages, setCartPackages] = useState<CartItem[]>([]);
   const [uploadedPdfs, setUploadedPdfs] = useState<PdfCartItem[]>([]);
@@ -62,6 +69,9 @@ export function CartContextProvider(props: any) {
   }, [cartPackages, uploadedPdfs]);
 
   function addCartPackage(cartPackage: CartItem) {
+    if (alreadyInArray(cartPackages, cartPackage)) {
+      return;
+    }
     setCartPackages([...cartPackages, cartPackage]);
   }
 
@@ -85,6 +95,9 @@ export function CartContextProvider(props: any) {
   }
 
   function addUploadedPdf(cartPdf: PdfCartItem) {
+    if (alreadyInArray(uploadedPdfs, cartPdf)) {
+      return;
+    }
     setUploadedPdfs([...uploadedPdfs, cartPdf]);
   }
 

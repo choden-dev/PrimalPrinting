@@ -21,6 +21,7 @@ import { formatItems, orderSum } from "../../lib/utils";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import storage from "../../firebase";
 import { CartContext, CartContextProvider } from "../../contexts/CartContext";
+import ExtraInfo from "./ExtraInfo";
 type Props = {
   packages: any;
 };
@@ -236,7 +237,7 @@ const OrderContainerInner = ({ packages }: Props) => {
         creditCard={() => handleOrderInformation(false)}
         bankTransfer={() => handleOrderInformation(true)}
       />
-
+      <ExtraInfo />
       <Box
         paddingTop="1rem"
         display="grid"
