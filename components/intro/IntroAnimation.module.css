@@ -33,6 +33,9 @@
   bottom: 0;
   width: 40vw;
 }
+.info_text {
+  text-align: right;
+}
 
 .background_gradient {
   background: rgb(243, 235, 227);
@@ -58,5 +61,11 @@
     bottom: 5rem;
     justify-content: flex-end;
     width: 70vw;
+  }
+  .info_text {
+    border-radius: 2px;
+    background-color: white;
+    box-shadow: 5px 5px 20px rgb(102, 102, 102);
+    text-align: center;
   }
 }

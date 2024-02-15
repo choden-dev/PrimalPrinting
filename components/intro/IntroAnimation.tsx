@@ -28,9 +28,9 @@ const IntroAnimation = () => {
             <Box className={styles.landing_text}>
               <Image src="/LandingTextFull.svg" />
               <Text
+                className={styles.info_text}
                 fontWeight="700"
-                textAlign="right"
-                color="white"
+                color="brown.800"
                 fontSize="xl"
               >
                 <Link href="/order">Order Now</Link> or{" "}
