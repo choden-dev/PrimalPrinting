@@ -275,10 +275,7 @@ const OrderContainerInner = ({ packages }: Props) => {
                 />
               </TabPanel>
               <TabPanel>
-                <PdfOrder
-                  uploadedPdfs={uploadedPdfs}
-                  setUploadedPdfs={setUploadedPdfs}
-                />
+                <PdfOrder />
               </TabPanel>
             </TabPanels>
           </Tabs>

@@ -1,7 +1,6 @@
 import { Box, Heading } from "@chakra-ui/react";
 import ProductCard from "../productcard/ProductCard";
 import { IAddOrder } from "../../types/helper";
-import { CartPackage } from "../../types/types";
 import CartItem from "../../types/models/CartItem";
 import { useContext } from "react";
 import { CartContext } from "../../contexts/CartContext";

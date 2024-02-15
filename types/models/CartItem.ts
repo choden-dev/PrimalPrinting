@@ -2,8 +2,8 @@ export default class CartItem {
   constructor(
     public id: string,
     public displayName: string,
-    private quantity: number,
-    private unitPrice: number,
+    protected quantity: number,
+    protected unitPrice: number,
     public priceId: string
   ) {}
 
@@ -11,6 +11,9 @@ export default class CartItem {
     return this.quantity * this.unitPrice;
   }
 
+  public setUnitPrice(newUnitPrice: number) {
+    this.unitPrice = newUnitPrice;
+  }
   public getQuantity() {
     return this.quantity;
   }

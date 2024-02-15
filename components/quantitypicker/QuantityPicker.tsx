@@ -13,6 +13,7 @@ export default function QuantityPicker(props: NumberInputProps) {
   return (
     <>
       <NumberInput
+        size={"sm"}
         onChange={onChange}
         max={max ?? 999}
         defaultValue={defaultValue ?? 1}

@@ -25,8 +25,9 @@ type CartItemProps = {
   updatePrice: () => void;
 };
 
-const CartItemContainer = ({ updatePrice }: CartItemProps) => {
-  const { cartPackages, removeCartPackage } = useContext(CartContext);
+const CartItemContainer = () => {
+  const { cartPackages, removeCartPackage, updateCartPackage } =
+    useContext(CartContext);
 
   return (
     <>
@@ -55,7 +56,7 @@ const CartItemContainer = ({ updatePrice }: CartItemProps) => {
                   defaultValue={cartPackage.getQuantity()}
                   onChange={(_, value) => {
                     cartPackage.setQuantity(value);
-                    updatePrice();
+                    updateCartPackage(cartPackage);
                   }}
                 />
                 <Text
@@ -64,7 +65,6 @@ const CartItemContainer = ({ updatePrice }: CartItemProps) => {
                   cursor="pointer"
                   onClick={() => {
                     removeCartPackage(cartPackage);
-                    updatePrice();
                   }}
                 >
                   X
@@ -78,15 +78,45 @@ const CartItemContainer = ({ updatePrice }: CartItemProps) => {
   );
 };
 
-const Cart = ({
-  uploadedPdfs,
-  setModalOpen,
-  setUploadedPdfs,
-  smallScreen,
-  formRef,
-}: Props) => {
-  const { cartPackages } = useContext(CartContext);
-  const [totalPrice, setTotalPrice] = useState<string>();
+const PdfItemContainer = () => {
+  const { uploadedPdfs, updateUploadedPdf } = useContext(CartContext);
+  return (
+    <>
+      {uploadedPdfs && (
+        <>
+          <Heading as="span" fontSize="1rem">
+            Uploaded Files
+          </Heading>
+          <Divider marginBottom=".5rem" />
+          {uploadedPdfs.map((pdf) => {
+            return (
+              <ListItem key={pdf.id} marginBottom=".5rem">
+                <Box display="flex" gap="1rem">
+                  <Text>
+                    {pdf.displayName} | {pdf.getDisplayPrice().toFixed(2)}
+                  </Text>
+                  <Box display="flex" marginLeft="auto">
+                    <QuantityPicker
+                      defaultValue={pdf.getQuantity()}
+                      onChange={(_, value) => {
+                        pdf.setQuantity(value);
+                        updateUploadedPdf(pdf);
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </ListItem>
+            );
+          })}
+        </>
+      )}
+    </>
+  );
+};
+
+const Cart = ({ setModalOpen, smallScreen, formRef }: Props) => {
+  const { cartPackages, uploadedPdfs, displayPriceString } =
+    useContext(CartContext);
   const checkFormValidity = () => {
     const form = formRef.current;
     const formValid = form.checkValidity();
@@ -102,23 +132,6 @@ const Cart = ({
     return cartValid;
   };
 
-  const changeQuantity = (name: string, newQuantity: number): any => {
-    const idx = uploadedPdfs.findIndex((pdf) => pdf.name === name);
-    let temp = [...uploadedPdfs];
-    temp[idx].quantity = newQuantity;
-    setUploadedPdfs(temp);
-  };
-
-  const calculateTotalPrice = () => {
-    let sum = 0;
-    uploadedPdfs.map((pdf) => {
-      sum += pdf.price;
-    });
-    cartPackages.map((cartPackage) => {
-      sum += cartPackage.getDisplayPrice();
-    });
-    setTotalPrice(sum.toFixed(2));
-  };
   return (
     <Box
       w="100%"
@@ -138,49 +151,11 @@ const Cart = ({
         <List>
           <Text fontWeight="800">Packages</Text>
           <Divider marginBottom=".5rem" />
-          <CartItemContainer updatePrice={calculateTotalPrice} />
-          {uploadedPdfs && (
-            <>
-              <Heading as="span" fontSize="1rem">
-                Uploaded Files
-              </Heading>
-              <Divider marginBottom=".5rem" />
-              {uploadedPdfs.map((pdf) => {
-                return (
-                  <ListItem key={pdf.name} marginBottom=".5rem">
-                    <Box display="flex">
-                      <Text>
-                        {pdf.name} | {pdf.price * pdf.quantity}
-                      </Text>
-                      <Input
-                        min="1"
-                        max="5"
-                        width=""
-                        textAlign="right"
-                        marginLeft="auto"
-                        borderRadius="sm"
-                        type="number"
-                        placeholder={pdf.quantity}
-                        onChange={(e) => {
-                          const num = parseInt(e.target.value);
-                          const min = parseInt(e.target.min);
-                          const max = parseInt(e.target.max);
-                          if (num > max || num < min) {
-                            e.target.value = pdf.quantity;
-                            return;
-                          }
-                          changeQuantity(pdf.name, parseInt(e.target.value));
-                        }}
-                      />
-                    </Box>
-                  </ListItem>
-                );
-              })}
-            </>
-          )}
+          <CartItemContainer />
+          <PdfItemContainer />
           <ListItem>
             <Text fontSize="1.5rem">
-              <strong>Estimated Price: ${totalPrice}</strong>
+              <strong>Estimated Price: ${displayPriceString}</strong>
             </Text>
           </ListItem>
           <Button
