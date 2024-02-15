@@ -8,14 +8,12 @@ import {
   ListItem,
   Text,
 } from "@chakra-ui/react";
-import { CartPackage } from "../../types/types";
+import { CartContext } from "../../contexts/CartContext";
 import CartItem from "../../types/models/CartItem";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 type Props = {
-  cartPackages: CartItem[];
-  setCartPackages: (T: any[]) => any;
   uploadedPdfs: any;
   setModalOpen: (value: boolean) => void;
   setUploadedPdfs: (T: any[]) => any;
@@ -27,21 +25,12 @@ type CartItemProps = {
   updatePrice: () => void;
 };
 
-const CartItemContainer = ({
-  cartPackages,
-  setCartPackages,
-  updatePrice,
-}: Pick<Props, "cartPackages" | "setCartPackages"> & CartItemProps) => {
-  const removePackage = (id: string) => {
-    const newPackages = cartPackages.filter((item) => item.id !== id);
-    setCartPackages(newPackages);
-  };
+const CartItemContainer = ({ updatePrice }: CartItemProps) => {
+  const { cartPackages, removeCartPackage } = useContext(CartContext);
+
   return (
     <>
       {cartPackages.map((cartPackage: CartItem) => {
-        const [displayPrice, setDisplayPrice] = useState<string>(
-          cartPackage.getDisplayPrice()?.toFixed(2)
-        );
         return (
           <ListItem key={cartPackage.id}>
             <Box
@@ -53,7 +42,8 @@ const CartItemContainer = ({
               marginBottom=".5rem"
             >
               <Text>
-                {cartPackage.displayName} | <strong>${displayPrice}</strong>
+                {cartPackage.displayName} |{" "}
+                <strong>${cartPackage.getDisplayPrice().toFixed(2)}</strong>
               </Text>
               <Box
                 marginLeft="auto"
@@ -65,7 +55,6 @@ const CartItemContainer = ({
                   defaultValue={cartPackage.getQuantity()}
                   onChange={(_, value) => {
                     cartPackage.setQuantity(value);
-                    setDisplayPrice(cartPackage.getDisplayPrice().toFixed(2));
                     updatePrice();
                   }}
                 />
@@ -73,7 +62,10 @@ const CartItemContainer = ({
                   marginLeft="auto"
                   fontWeight="800"
                   cursor="pointer"
-                  onClick={() => removePackage(cartPackage.id)}
+                  onClick={() => {
+                    removeCartPackage(cartPackage);
+                    updatePrice();
+                  }}
                 >
                   X
                 </Text>
@@ -87,14 +79,13 @@ const CartItemContainer = ({
 };
 
 const Cart = ({
-  cartPackages,
-  setCartPackages,
   uploadedPdfs,
   setModalOpen,
   setUploadedPdfs,
   smallScreen,
   formRef,
 }: Props) => {
+  const { cartPackages } = useContext(CartContext);
   const [totalPrice, setTotalPrice] = useState<string>();
   const checkFormValidity = () => {
     const form = formRef.current;
@@ -147,11 +138,7 @@ const Cart = ({
         <List>
           <Text fontWeight="800">Packages</Text>
           <Divider marginBottom=".5rem" />
-          <CartItemContainer
-            cartPackages={cartPackages}
-            setCartPackages={setCartPackages}
-            updatePrice={calculateTotalPrice}
-          />
+          <CartItemContainer updatePrice={calculateTotalPrice} />
           {uploadedPdfs && (
             <>
               <Heading as="span" fontSize="1rem">

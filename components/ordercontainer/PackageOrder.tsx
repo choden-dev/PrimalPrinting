@@ -3,20 +3,16 @@ import ProductCard from "../productcard/ProductCard";
 import { IAddOrder } from "../../types/helper";
 import { CartPackage } from "../../types/types";
 import CartItem from "../../types/models/CartItem";
+import { useContext } from "react";
+import { CartContext } from "../../contexts/CartContext";
 
 type Props = {
   displayPackages: any;
-  cartPackages: CartItem[];
-  setCartPackages: (cartPackages: CartItem[]) => void;
   smallScreen: boolean;
 };
 
-const PackageOrder = ({
-  displayPackages,
-  cartPackages,
-  setCartPackages,
-  smallScreen,
-}: Props) => {
+const PackageOrder = ({ displayPackages, smallScreen }: Props) => {
+  const { addCartPackage } = useContext(CartContext);
   const addPackage: IAddOrder = (
     id: string,
     name: string,
@@ -24,10 +20,7 @@ const PackageOrder = ({
     price: number,
     quantity: number
   ) => {
-    const temp = [...cartPackages];
-    if (temp.find((item) => item.id === id)) return;
-    temp.push(new CartItem(id, name, quantity, price, priceId));
-    setCartPackages(temp);
+    addCartPackage(new CartItem(id, name, quantity, price, priceId));
   };
   return (
     <Box display="flex" flexDir="column" gap="1rem">

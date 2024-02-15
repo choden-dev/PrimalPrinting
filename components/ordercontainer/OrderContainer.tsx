@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import {
   Box,
   Tab,
@@ -20,22 +20,31 @@ import PdfOrder from "./PdfOrder";
 import { formatItems, orderSum } from "../../lib/utils";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import storage from "../../firebase";
-import CartItem from "../../types/models/CartItem";
+import { CartContext, CartContextProvider } from "../../contexts/CartContext";
 type Props = {
   packages: any;
 };
 
 const OrderContainer = ({ packages }: Props) => {
+  return (
+    <CartContextProvider>
+      <OrderContainerInner packages={packages} />
+    </CartContextProvider>
+  );
+};
+
+const OrderContainerInner = ({ packages }: Props) => {
   const [currentlyUploading, setCurrentlyUploading] = useState<
     { name: string; percent: number }[]
   >([]);
   const [uploadedPdfs, setUploadedPdfs] = useState<UploadedPdf[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [cartPackages, setCartPackages] = useState<CartItem[]>([]);
   const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
   const formRef = useRef(null);
   const router = useRouter();
+
+  const { cartPackages } = useContext(CartContext);
 
   const closeModal = () => {
     setModalOpen(false);
@@ -262,8 +271,6 @@ const OrderContainer = ({ packages }: Props) => {
               <TabPanel>
                 <PackageOrder
                   displayPackages={packages}
-                  cartPackages={cartPackages}
-                  setCartPackages={setCartPackages}
                   smallScreen={smallScreen}
                 />
               </TabPanel>
@@ -279,8 +286,6 @@ const OrderContainer = ({ packages }: Props) => {
           <DetailsForm formRef={formRef} />
         </Box>
         <Cart
-          cartPackages={cartPackages}
-          setCartPackages={setCartPackages}
           uploadedPdfs={uploadedPdfs}
           setUploadedPdfs={setUploadedPdfs}
           formRef={formRef}
