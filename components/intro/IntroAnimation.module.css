@@ -47,7 +47,7 @@
   );
 }
 
-@media only screen and (max-width: 770px) {
+@media only screen and (max-width: 790px) {
   .landing_container {
     grid-template-columns: 1fr;
   }
