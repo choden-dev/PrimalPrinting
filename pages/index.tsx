@@ -213,7 +213,6 @@ By Students, For Students💯🚀"
             </Box>
           </>
         )}
-        <Divider borderColor="brown.900" marginBottom="3rem" />
         <Box>
           <WhatNextDiv />
         </Box>
