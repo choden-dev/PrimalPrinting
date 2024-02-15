@@ -1,0 +1,62 @@
+@keyframes glow {
+  0% {
+    filter: brightness(80%);
+  }
+  50% {
+    filter: brightness(100%);
+  }
+  100% {
+    filter: brightness(80%);
+  }
+}
+
+.glowing_image {
+  animation: glow 3s infinite;
+}
+
+.landing_container {
+  display: grid;
+  width: 1500px;
+  overflow: visible;
+  grid-template-columns: 1fr 1fr;
+  justify-content: center;
+}
+.landing_text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  bottom: 0;
+  width: 40vw;
+}
+
+.background_gradient {
+  background: rgb(243, 235, 227);
+  background: linear-gradient(
+    160deg,
+    rgba(243, 235, 227, 1) 0%,
+    rgba(201, 158, 135, 1) 35%,
+    rgba(243, 235, 227, 1) 100%
+  );
+}
+
+@media only screen and (max-width: 770px) {
+  .landing_container {
+    grid-template-columns: 1fr;
+  }
+  .landing_text {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    text-align: center;
+    top: auto;
+    bottom: 5rem;
+    justify-content: flex-end;
+    width: 70vw;
+  }
+}
