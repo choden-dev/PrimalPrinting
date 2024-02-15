@@ -33,7 +33,7 @@ const AccordionItemComponent = ({
 );
 
 const HelpAccordion = () => (
-  <Accordion allowToggle allowMultiple>
+  <Accordion marginTop=".5rem" allowToggle allowMultiple>
     <AccordionItemComponent title="I want to send a PDF for printing">
       <UnorderedList>
         <ListItem>
