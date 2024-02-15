@@ -38,6 +38,7 @@ const PdfOrder = () => {
     fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`).then(
       (res) =>
         res.json().then((data) => {
+          console.log(data);
           toChange.isColor = option;
           toChange.priceId = data.priceId;
           toChange.setUnitPrice(data.price / 100);

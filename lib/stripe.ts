@@ -1,4 +1,9 @@
 import Stripe from "stripe";
+import {
+  getMinimumItemsForDiscount,
+  getPercentOff,
+  hasBulkDiscount,
+} from "./utils";
 let stripeCached: any = null;
 
 // caches the connection or starts a new one
@@ -75,24 +80,42 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
   };
 };
 
+export const createCoupon = async (items: { quantity: number }[]) => {
+  const stripe: Stripe = await makeStripeConnection();
+
+  const MIN_ITEMS = getMinimumItemsForDiscount;
+
+  if (!hasBulkDiscount(items)) {
+    return undefined;
+  }
+
+  const coupon = await stripe.coupons.create({
+    percent_off: getPercentOff(),
+    duration: "once",
+    name: `discount for purchasing ${MIN_ITEMS} or more items!}`,
+  });
+
+  return coupon;
+};
+
 export const createSession = async (
   items: { price: string; quantity: number }[],
   orderId: string,
-  email: string
+  email: string,
+  coupon?: Stripe.Coupon
 ) => {
   const stripe: Stripe = await makeStripeConnection();
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    line_items: items.map((item) => {
-      return {
-        ...item,
-        adjustable_quantity: {
-          enabled: true,
-          minimum: 1,
+    line_items: items,
+    ...(coupon !== undefined && {
+      discounts: [
+        {
+          coupon: coupon ? coupon.id : undefined,
         },
-      };
+      ],
     }),
-    allow_promotion_codes: true,
+    ...(coupon === undefined && { allow_promotion_codes: true }),
 
     success_url: `${process.env
       .STRIPE_SUCCESS_URL!}?session_id={CHECKOUT_SESSION_ID}`,

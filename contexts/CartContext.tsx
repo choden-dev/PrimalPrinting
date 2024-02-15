@@ -1,4 +1,6 @@
 import { createContext, ReactPropTypes, useEffect, useState } from "react";
+import { hasBulkDiscount } from "../lib/utils";
+import { getPercentOff } from "../lib/utils";
 import CartItem from "../types/models/CartItem";
 import PdfCartItem from "../types/models/PdfCartItem";
 import { UploadedPdf } from "../types/types";
@@ -10,6 +12,7 @@ interface ICartContext {
   uploadedPdfs: PdfCartItem[];
   displayPriceString: string;
   isModalOpen: boolean;
+  hasDiscountApplied: boolean;
   setIsModalOpen: (newState: boolean) => void;
   addCartPackage: cartPackageOperation;
   updateCartPackage: cartPackageOperation;
@@ -24,6 +27,7 @@ const defaultCartContext: ICartContext = {
   uploadedPdfs: [],
   displayPriceString: "$0.00",
   isModalOpen: false,
+  hasDiscountApplied: false,
   setIsModalOpen: (state) => {},
   addCartPackage: (cartPackage) => {},
   updateCartPackage: (cartPackage) => {},
@@ -51,6 +55,7 @@ export function CartContextProvider(props: any) {
     defaultCartContext.displayPriceString
   );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [hasDiscountApplied, setHasDiscountApplied] = useState<boolean>(false);
 
   useEffect(() => {
     calculateTotalPrice();
@@ -64,6 +69,15 @@ export function CartContextProvider(props: any) {
     setCartPackages(
       cartPackages.filter((_cartPackage) => _cartPackage.id !== cartPackage.id)
     );
+  }
+
+  function checkForDiscount() {
+    const hasDiscount = hasBulkDiscount([
+      ...(uploadedPdfs as CartItem[]),
+      ...cartPackages,
+    ]);
+    setHasDiscountApplied(hasDiscount);
+    return hasDiscount;
   }
 
   function updateCartPackage(updatedCartPackage: CartItem) {
@@ -92,6 +106,9 @@ export function CartContextProvider(props: any) {
     cartPackages.map((cartPackage) => {
       sum += cartPackage.getDisplayPrice();
     });
+    if (checkForDiscount()) {
+      sum = sum * ((100 - getPercentOff()) / 100);
+    }
     setDisplayPriceString(sum.toFixed(2));
   };
 
@@ -101,6 +118,7 @@ export function CartContextProvider(props: any) {
     addCartPackage,
     updateCartPackage,
     updateUploadedPdf,
+    hasDiscountApplied,
     isModalOpen,
     removeCartPackage,
     setIsModalOpen,

@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   Divider,
@@ -11,6 +13,7 @@ import { CartContext } from "../../contexts/CartContext";
 import CartItem from "../../types/models/CartItem";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
 import { useContext } from "react";
+import { getMinimumItemsForDiscount, getPercentOff } from "../../lib/utils";
 
 type Props = {
   smallScreen: boolean;
@@ -131,8 +134,13 @@ const PdfItemContainer = () => {
 };
 
 const Cart = ({ smallScreen, formRef }: Props) => {
-  const { cartPackages, uploadedPdfs, displayPriceString, setIsModalOpen } =
-    useContext(CartContext);
+  const {
+    cartPackages,
+    uploadedPdfs,
+    displayPriceString,
+    setIsModalOpen,
+    hasDiscountApplied,
+  } = useContext(CartContext);
   const checkFormValidity = () => {
     const form = formRef.current;
     const formValid = form.checkValidity();
@@ -174,6 +182,12 @@ const Cart = ({ smallScreen, formRef }: Props) => {
               <strong>Estimated Price: ${displayPriceString}</strong>
             </Text>
           </ListItem>
+          {hasDiscountApplied && (
+            <Alert marginY=".5rem" status="success">
+              <AlertIcon />A {getPercentOff()}% discount has been applied for
+              purchasing {getMinimumItemsForDiscount()} or more item(s)!
+            </Alert>
+          )}
           <Button
             variant="browned"
             onClick={() => {
