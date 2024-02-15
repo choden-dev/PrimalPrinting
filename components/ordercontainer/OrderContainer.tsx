@@ -34,20 +34,19 @@ const OrderContainer = ({ packages }: Props) => {
 };
 
 const OrderContainerInner = ({ packages }: Props) => {
+  const { cartPackages, uploadedPdfs, setIsModalOpen, isModalOpen } =
+    useContext(CartContext);
+
   const [currentlyUploading, setCurrentlyUploading] = useState<
     { name: string; percent: number }[]
   >([]);
-  const [uploadedPdfs, setUploadedPdfs] = useState<UploadedPdf[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
   const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
   const formRef = useRef(null);
   const router = useRouter();
 
-  const { cartPackages } = useContext(CartContext);
-
   const closeModal = () => {
-    setModalOpen(false);
+    setIsModalOpen(false);
   };
 
   const uploadPdf = (
@@ -171,7 +170,7 @@ const OrderContainerInner = ({ packages }: Props) => {
   };
 
   const handleOrderInformation = (isBankTransfer: boolean) => {
-    setModalOpen(false);
+    closeModal();
     setIsProcessing(true);
 
     const promises = uploadedPdfs.map((pdf, index) => {
@@ -232,7 +231,7 @@ const OrderContainerInner = ({ packages }: Props) => {
     <>
       <ProcessingOverlay show={isProcessing} items={currentlyUploading} />
       <ItemModal
-        isOpen={modalOpen}
+        isOpen={isModalOpen}
         closeFunction={closeModal}
         creditCard={() => handleOrderInformation(false)}
         bankTransfer={() => handleOrderInformation(true)}
@@ -282,13 +281,7 @@ const OrderContainerInner = ({ packages }: Props) => {
 
           <DetailsForm formRef={formRef} />
         </Box>
-        <Cart
-          uploadedPdfs={uploadedPdfs}
-          setUploadedPdfs={setUploadedPdfs}
-          formRef={formRef}
-          smallScreen={smallScreen}
-          setModalOpen={setModalOpen}
-        />
+        <Cart formRef={formRef} smallScreen={smallScreen} />
       </Box>
       <Footer />
     </>

@@ -10,6 +10,7 @@ interface ICartContext {
   uploadedPdfs: PdfCartItem[];
   displayPriceString: string;
   isModalOpen: boolean;
+  setIsModalOpen: (newState: boolean) => void;
   addCartPackage: cartPackageOperation;
   updateCartPackage: cartPackageOperation;
   removeCartPackage: cartPackageOperation;
@@ -23,6 +24,7 @@ const defaultCartContext: ICartContext = {
   uploadedPdfs: [],
   displayPriceString: "$0.00",
   isModalOpen: false,
+  setIsModalOpen: (state) => {},
   addCartPackage: (cartPackage) => {},
   updateCartPackage: (cartPackage) => {},
   removeCartPackage: (cartPackage) => {},
@@ -48,6 +50,7 @@ export function CartContextProvider(props: any) {
   const [displayPriceString, setDisplayPriceString] = useState<string>(
     defaultCartContext.displayPriceString
   );
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     calculateTotalPrice();
@@ -98,8 +101,9 @@ export function CartContextProvider(props: any) {
     addCartPackage,
     updateCartPackage,
     updateUploadedPdf,
-    isModalOpen: defaultCartContext.isModalOpen,
+    isModalOpen,
     removeCartPackage,
+    setIsModalOpen,
     displayPriceString,
     addUploadedPdf,
     removeUploadedPdf,

@@ -3,7 +3,6 @@ import {
   Button,
   Divider,
   Heading,
-  Input,
   List,
   ListItem,
   Text,
@@ -11,18 +10,11 @@ import {
 import { CartContext } from "../../contexts/CartContext";
 import CartItem from "../../types/models/CartItem";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 type Props = {
-  uploadedPdfs: any;
-  setModalOpen: (value: boolean) => void;
-  setUploadedPdfs: (T: any[]) => any;
   smallScreen: boolean;
   formRef: any;
-};
-
-type CartItemProps = {
-  updatePrice: () => void;
 };
 
 const CartItemContainer = () => {
@@ -79,7 +71,8 @@ const CartItemContainer = () => {
 };
 
 const PdfItemContainer = () => {
-  const { uploadedPdfs, updateUploadedPdf } = useContext(CartContext);
+  const { uploadedPdfs, updateUploadedPdf, removeUploadedPdf } =
+    useContext(CartContext);
   return (
     <>
       {uploadedPdfs && (
@@ -91,11 +84,24 @@ const PdfItemContainer = () => {
           {uploadedPdfs.map((pdf) => {
             return (
               <ListItem key={pdf.id} marginBottom=".5rem">
-                <Box display="flex" gap="1rem">
+                <Box
+                  display="flex"
+                  border="1px solid"
+                  borderColor="brown.700"
+                  padding="1rem"
+                  borderRadius="sm"
+                  marginBottom=".5rem"
+                >
                   <Text>
-                    {pdf.displayName} | {pdf.getDisplayPrice().toFixed(2)}
+                    {pdf.displayName} |{" "}
+                    <strong>${pdf.getDisplayPrice().toFixed(2)}</strong>
                   </Text>
-                  <Box display="flex" marginLeft="auto">
+                  <Box
+                    marginLeft="auto"
+                    display="flex"
+                    gap="1rem"
+                    alignItems="center"
+                  >
                     <QuantityPicker
                       defaultValue={pdf.getQuantity()}
                       onChange={(_, value) => {
@@ -103,6 +109,16 @@ const PdfItemContainer = () => {
                         updateUploadedPdf(pdf);
                       }}
                     />
+                    <Text
+                      marginLeft="auto"
+                      fontWeight="800"
+                      cursor="pointer"
+                      onClick={() => {
+                        removeUploadedPdf(pdf);
+                      }}
+                    >
+                      X
+                    </Text>
                   </Box>
                 </Box>
               </ListItem>
@@ -114,8 +130,8 @@ const PdfItemContainer = () => {
   );
 };
 
-const Cart = ({ setModalOpen, smallScreen, formRef }: Props) => {
-  const { cartPackages, uploadedPdfs, displayPriceString } =
+const Cart = ({ smallScreen, formRef }: Props) => {
+  const { cartPackages, uploadedPdfs, displayPriceString, setIsModalOpen } =
     useContext(CartContext);
   const checkFormValidity = () => {
     const form = formRef.current;
@@ -162,7 +178,7 @@ const Cart = ({ setModalOpen, smallScreen, formRef }: Props) => {
             variant="browned"
             onClick={() => {
               if (checkCartValidity() && checkFormValidity())
-                setModalOpen(true);
+                setIsModalOpen(true);
             }}
           >
             Order Now
