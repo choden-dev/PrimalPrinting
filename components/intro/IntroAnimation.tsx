@@ -31,7 +31,7 @@ const IntroAnimation = () => {
                 className={styles.info_text}
                 fontWeight="700"
                 color="brown.800"
-                fontSize="xl"
+                fontSize="sm"
               >
                 <Link href="/order">Order Now</Link> or{" "}
                 <Link href="#about">scroll down</Link> to find out more...
