@@ -1,9 +1,8 @@
-import { createContext, ReactPropTypes, useEffect, useState } from "react";
-import { hasBulkDiscount } from "../lib/utils";
+import { createContext, useEffect, useState } from "react";
+import { getItemsWithBulkDiscount } from "../lib/utils";
 import { getPercentOff } from "../lib/utils";
 import CartItem from "../types/models/CartItem";
 import PdfCartItem from "../types/models/PdfCartItem";
-import { UploadedPdf } from "../types/types";
 
 type cartPackageOperation = (cartPackage: CartItem) => void;
 type cartPdfOperation = (cartPackage: PdfCartItem) => void;
@@ -12,6 +11,9 @@ interface ICartContext {
   uploadedPdfs: PdfCartItem[];
   displayPriceString: string;
   isModalOpen: boolean;
+  /**
+   * @deprecated probably doesn't need to be used
+   */
   hasDiscountApplied: boolean;
   setIsModalOpen: (newState: boolean) => void;
   addCartPackage: cartPackageOperation;
@@ -82,12 +84,12 @@ export function CartContextProvider(props: any) {
   }
 
   function checkForDiscount() {
-    const hasDiscount = hasBulkDiscount([
+    const discountedItems = getItemsWithBulkDiscount([
       ...(uploadedPdfs as CartItem[]),
       ...cartPackages,
     ]);
-    setHasDiscountApplied(hasDiscount);
-    return hasDiscount;
+    setHasDiscountApplied(discountedItems !== undefined);
+    return hasDiscountApplied;
   }
 
   function updateCartPackage(updatedCartPackage: CartItem) {
@@ -119,9 +121,6 @@ export function CartContextProvider(props: any) {
     cartPackages.map((cartPackage) => {
       sum += cartPackage.getDisplayPrice();
     });
-    if (checkForDiscount()) {
-      sum = sum * ((100 - getPercentOff()) / 100);
-    }
     setDisplayPriceString(sum.toFixed(2));
   };
 

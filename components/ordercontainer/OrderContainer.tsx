@@ -13,7 +13,7 @@ import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
 import Footer from "../footer/Footer";
 import ItemModal from "../itemmodal/ItemModal";
 import DetailsForm from "./DetailsForm";
-import { CartPackage, OrderRow, UploadedPdf } from "../../types/types";
+import { OrderRow, StripeBackendItem } from "../../types/types";
 import Cart from "./Cart";
 import PackageOrder from "./PackageOrder";
 import PdfOrder from "./PdfOrder";
@@ -106,19 +106,20 @@ const OrderContainerInner = ({ packages }: Props) => {
     const paymentMethod = isBankTransfer ? "Bank" : "Credit Card";
 
     uploadedPdfs.forEach((pdf) => {
-      const idx = urls.findIndex((item) => item.name === pdf.name);
+      const idx = urls.findIndex((item) => item.name === pdf.displayName);
       const order: OrderRow = {
         name,
         email,
         message,
-        pages: pdf.pageCount,
-        coursebookName: pdf.name,
-        quantity: pdf.quantity,
-        cost: pdf.price,
+        pages: pdf.getPages(),
+        coursebookName: pdf.displayName,
+        quantity: pdf.getQuantity(),
+        cost: pdf.getDisplayPrice(),
         colour: pdf.isColor,
         coursebookLink: urls[idx].url,
         paid: false,
         paymentMethod,
+        discounted: pdf.shouldApplyDiscount(),
       };
       orders.push(order);
     });
@@ -134,6 +135,7 @@ const OrderContainerInner = ({ packages }: Props) => {
         colour: false,
         paid: false,
         paymentMethod,
+        discounted: cartPackage.shouldApplyDiscount(),
       };
       orders.push(order);
     });
@@ -176,11 +178,11 @@ const OrderContainerInner = ({ packages }: Props) => {
 
     const promises = uploadedPdfs.map((pdf, index) => {
       const file = pdf.file;
-      const fileName = pdf.name;
+      const fileName = pdf.displayName;
       return uploadPdf(file, fileName, index);
     });
 
-    let tempItems = [];
+    let tempItems: any[] = [];
     Promise.all(promises)
       .then((res) => {
         res.map((item) =>
@@ -196,16 +198,25 @@ const OrderContainerInner = ({ packages }: Props) => {
   };
 
   const payWithCreditCard = (orderId: string) => {
-    const items: { price: string; quantity: number }[] = [];
+    const items: StripeBackendItem[] = [];
 
     uploadedPdfs.forEach((pdf) => {
-      items.push({ price: pdf.priceId, quantity: pdf.quantity });
+      items.push({
+        name: pdf.displayName,
+        price: pdf.priceId,
+        quantity: pdf.getQuantity(),
+        productId: pdf.productId,
+        priceId: pdf.priceId,
+      });
     });
 
     cartPackages.forEach((cartPackage) => {
       items.push({
+        name: cartPackage.displayName,
         price: cartPackage.priceId,
         quantity: cartPackage.getQuantity(),
+        productId: cartPackage.id,
+        priceId: cartPackage.priceId,
       });
     });
 

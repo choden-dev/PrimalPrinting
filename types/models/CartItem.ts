@@ -1,3 +1,5 @@
+import { getMinimumItemsForDiscount, getPercentOff } from "../../lib/utils";
+
 export default class CartItem {
   constructor(
     public id: string,
@@ -8,14 +10,23 @@ export default class CartItem {
   ) {}
 
   public getDisplayPrice() {
-    return this.quantity * this.unitPrice;
+    let percentagePrice = 1;
+    if (this.shouldApplyDiscount()) {
+      percentagePrice = percentagePrice - getPercentOff() / 100;
+    }
+    return percentagePrice * (this.quantity * this.unitPrice);
   }
 
   public setUnitPrice(newUnitPrice: number) {
     this.unitPrice = newUnitPrice;
   }
+
   public getQuantity() {
     return this.quantity;
+  }
+
+  public shouldApplyDiscount() {
+    return this.quantity >= getMinimumItemsForDiscount();
   }
 
   public setQuantity(quantity: number) {

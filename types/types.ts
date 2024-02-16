@@ -22,6 +22,14 @@ export type StripeProduct = {
   features: { name: string }[];
 };
 
+export type StripeBackendItem = {
+  name: string;
+  price: string;
+  quantity: number;
+  productId: string;
+  priceId: string;
+};
+
 export type OrderRow = {
   orderId?: string;
   name: string;
@@ -35,6 +43,7 @@ export type OrderRow = {
   quantity: number;
   paid?: boolean;
   cost: number;
+  discounted: boolean;
 };
 export type OrderPdf = {
   name: string;

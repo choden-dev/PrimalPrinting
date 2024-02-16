@@ -1,8 +1,9 @@
 import Stripe from "stripe";
+import { StripeBackendItem } from "../types/types";
 import {
   getMinimumItemsForDiscount,
   getPercentOff,
-  hasBulkDiscount,
+  getItemsWithBulkDiscount,
 } from "./utils";
 let stripeCached: any = null;
 
@@ -74,32 +75,67 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
   });
   const priceId = products.data[0].default_price!.toString();
   const price = await findPrice(priceId);
+  const productId = products.data[0].id;
   return {
     price: price,
     priceId: priceId,
+    productId: productId,
   };
 };
 
-export const createCoupon = async (items: { quantity: number }[]) => {
+export const createUniqueProductsForDuplicates = async (
+  items: (StripeBackendItem & { name: string })[]
+) => {
   const stripe: Stripe = await makeStripeConnection();
 
-  const MIN_ITEMS = getMinimumItemsForDiscount;
+  await Promise.all(
+    items.map(async (item, index) => {
+      const duplicateIndex = items.findIndex(
+        (otherItem, otherIndex) =>
+          otherIndex !== index && otherItem.price === item.price
+      );
 
-  if (!hasBulkDiscount(items)) {
-    return undefined;
-  }
+      if (duplicateIndex !== -1) {
+        const duplicate = items[duplicateIndex];
+        const price = await stripe.prices.retrieve(duplicate.priceId);
+        const product = await stripe.products.create({
+          name: duplicate.name,
+          default_price_data: {
+            unit_amount_decimal: price.unit_amount_decimal as string,
+            currency: price.currency,
+          },
+        });
+
+        items[index].productId = product.id;
+        items[index].price = product.default_price as string;
+      }
+    })
+  );
+
+  return items;
+};
+
+export const createCoupons = async <T extends StripeBackendItem>(
+  items: T[]
+) => {
+  const stripe: Stripe = await makeStripeConnection();
+
+  const itemsWithBulkDiscount = getItemsWithBulkDiscount(items);
+  if (itemsWithBulkDiscount.length === 0) return undefined;
 
   const coupon = await stripe.coupons.create({
     percent_off: getPercentOff(),
+    applies_to: {
+      products: itemsWithBulkDiscount.map((item) => item.productId),
+    },
     duration: "once",
-    name: `discount for purchasing ${MIN_ITEMS} or more items!}`,
+    name: `${getMinimumItemsForDiscount()} or more discount!`,
   });
-
   return coupon;
 };
 
 export const createSession = async (
-  items: { price: string; quantity: number }[],
+  items: StripeBackendItem[],
   orderId: string,
   email: string,
   coupon?: Stripe.Coupon
@@ -107,13 +143,11 @@ export const createSession = async (
   const stripe: Stripe = await makeStripeConnection();
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    line_items: items,
+    line_items: items.map(
+      ({ productId, priceId, name, ...relevant }) => relevant
+    ),
     ...(coupon !== undefined && {
-      discounts: [
-        {
-          coupon: coupon ? coupon.id : undefined,
-        },
-      ],
+      discounts: [{ coupon: coupon ? coupon.id : undefined }],
     }),
     ...(coupon === undefined && { allow_promotion_codes: true }),
 

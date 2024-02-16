@@ -12,8 +12,8 @@ export default async function handler(
     let param = false;
     if (isColor === "true") param = true;
     let price = await getPriceForPages(req.query.pages, param);
-    // return the posts
     return res.json({
+      productId: price.productId,
       price: price.price,
       priceId: price.priceId,
       success: true,

@@ -1,6 +1,7 @@
 import {
   Alert,
   AlertIcon,
+  Badge,
   Box,
   Button,
   Divider,
@@ -13,7 +14,8 @@ import { CartContext } from "../../contexts/CartContext";
 import CartItem from "../../types/models/CartItem";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
 import { useContext } from "react";
-import { getMinimumItemsForDiscount, getPercentOff } from "../../lib/utils";
+import { getPercentOff } from "../../lib/utils";
+import DiscountBadge from "../discountbadge/DiscountBadge";
 
 type Props = {
   smallScreen: boolean;
@@ -47,6 +49,9 @@ const CartItemContainer = () => {
                 gap="1rem"
                 alignItems="center"
               >
+                <DiscountBadge
+                  displayCondition={cartPackage.shouldApplyDiscount()}
+                />
                 <QuantityPicker
                   defaultValue={cartPackage.getQuantity()}
                   onChange={(_, value) => {
@@ -105,6 +110,9 @@ const PdfItemContainer = () => {
                     gap="1rem"
                     alignItems="center"
                   >
+                    <DiscountBadge
+                      displayCondition={pdf.shouldApplyDiscount()}
+                    />
                     <QuantityPicker
                       defaultValue={pdf.getQuantity()}
                       onChange={(_, value) => {
@@ -185,12 +193,6 @@ const Cart = ({ smallScreen, formRef }: Props) => {
               <strong>Estimated Price: ${displayPriceString}</strong>
             </Text>
           </ListItem>
-          {hasDiscountApplied && (
-            <Alert marginY=".5rem" status="success">
-              <AlertIcon />A {getPercentOff()}% discount has been applied for
-              purchasing {getMinimumItemsForDiscount()} or more item(s)!
-            </Alert>
-          )}
           <Button
             variant="browned"
             onClick={() => {

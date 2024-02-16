@@ -61,11 +61,12 @@
     top: auto;
     bottom: 5rem;
     justify-content: flex-end;
-    width: 70vw;
+    width: 85vw;
   }
   .info_text {
     border-radius: 2px;
     background-color: white;
+    opacity: 60%;
     box-shadow: 5px 5px 20px rgb(102, 102, 102);
     text-align: center;
   }
