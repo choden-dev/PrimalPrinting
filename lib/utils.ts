@@ -32,17 +32,16 @@ export const getMinimumItemsForDiscount = () =>
 export const getPercentOff = () =>
   parseInt(process.env.NEXT_PUBLIC_DISCOUNT_PERCENT ?? "0");
 
-export const hasBulkDiscount = <T extends CartItem>(
-  items: { quantity: number }[] | T[]
+export const getItemsWithBulkDiscount = <
+  T extends { quantity: number } | CartItem
+>(
+  items: T[]
 ) => {
   const MIN_ITEMS = getMinimumItemsForDiscount();
-  return (
-    items.length >= MIN_ITEMS ||
-    items.some((item) => {
-      if (item instanceof CartItem) {
-        return item.getQuantity() >= MIN_ITEMS;
-      }
-      return item.quantity >= MIN_ITEMS;
-    })
-  );
+  return items.filter((item) => {
+    if (item instanceof CartItem) {
+      return item.getQuantity() >= MIN_ITEMS;
+    }
+    return item.quantity >= MIN_ITEMS;
+  });
 };

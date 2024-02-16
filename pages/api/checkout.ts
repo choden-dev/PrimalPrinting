@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { createCoupon, createSession } from "../../lib/stripe";
+import { createCoupons, createSession } from "../../lib/stripe";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,7 +7,7 @@ export default async function handler(
 ) {
   try {
     const items = JSON.parse(req.body);
-    const coupon = await createCoupon(items.items);
+    const coupon = await createCoupons(items.items);
     const session = await createSession(
       items.items,
       items.orderId,

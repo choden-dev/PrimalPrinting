@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import {
   getMinimumItemsForDiscount,
   getPercentOff,
-  hasBulkDiscount,
+  getItemsWithBulkDiscount,
 } from "./utils";
 let stripeCached: any = null;
 
@@ -74,32 +74,35 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
   });
   const priceId = products.data[0].default_price!.toString();
   const price = await findPrice(priceId);
+  const productId = products.data[0].id;
   return {
     price: price,
     priceId: priceId,
+    productId: productId,
   };
 };
 
-export const createCoupon = async (items: { quantity: number }[]) => {
+export const createCoupons = async (
+  items: { quantity: number; name: string; productId: string }[]
+) => {
   const stripe: Stripe = await makeStripeConnection();
 
-  const MIN_ITEMS = getMinimumItemsForDiscount;
-
-  if (!hasBulkDiscount(items)) {
-    return undefined;
-  }
+  const itemsWithBulkDiscount = getItemsWithBulkDiscount(items);
+  if (itemsWithBulkDiscount.length === 0) return undefined;
 
   const coupon = await stripe.coupons.create({
     percent_off: getPercentOff(),
+    applies_to: {
+      products: itemsWithBulkDiscount.map((item) => item.productId),
+    },
     duration: "once",
-    name: `discount for purchasing ${MIN_ITEMS} or more items!}`,
+    name: `${getMinimumItemsForDiscount()} or more discount!`,
   });
-
   return coupon;
 };
 
 export const createSession = async (
-  items: { price: string; quantity: number }[],
+  items: { price: string; quantity: number; productId: string }[],
   orderId: string,
   email: string,
   coupon?: Stripe.Coupon
@@ -107,13 +110,9 @@ export const createSession = async (
   const stripe: Stripe = await makeStripeConnection();
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    line_items: items,
+    line_items: items.map(({ productId, ...relevant }) => relevant),
     ...(coupon !== undefined && {
-      discounts: [
-        {
-          coupon: coupon ? coupon.id : undefined,
-        },
-      ],
+      discounts: [{ coupon: coupon ? coupon.id : undefined }],
     }),
     ...(coupon === undefined && { allow_promotion_codes: true }),
 

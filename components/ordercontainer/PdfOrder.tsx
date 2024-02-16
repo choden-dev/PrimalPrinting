@@ -99,7 +99,8 @@ const PdfOrder = () => {
                       data.priceId,
                       pages,
                       DEFAULT_IS_COLOR,
-                      file
+                      file,
+                      data.productId
                     )
                   );
                 })

@@ -196,16 +196,21 @@ const OrderContainerInner = ({ packages }: Props) => {
   };
 
   const payWithCreditCard = (orderId: string) => {
-    const items: { price: string; quantity: number }[] = [];
+    const items: { price: string; quantity: number; productId: string }[] = [];
 
     uploadedPdfs.forEach((pdf) => {
-      items.push({ price: pdf.priceId, quantity: pdf.quantity });
+      items.push({
+        price: pdf.priceId,
+        quantity: pdf.getQuantity(),
+        productId: pdf.productId,
+      });
     });
 
     cartPackages.forEach((cartPackage) => {
       items.push({
         price: cartPackage.priceId,
         quantity: cartPackage.getQuantity(),
+        productId: cartPackage.id,
       });
     });
 

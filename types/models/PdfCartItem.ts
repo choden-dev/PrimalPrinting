@@ -9,7 +9,9 @@ export default class PdfCartItem extends CartItem {
     public priceId: string,
     private pages: number,
     public isColor: boolean,
-    public file: File
+    public file: File,
+    // not unique, but needed for stripe
+    public productId: string
   ) {
     super(id, displayName, quantity, unitPrice, priceId);
   }

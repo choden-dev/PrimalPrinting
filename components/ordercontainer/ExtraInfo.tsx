@@ -11,8 +11,7 @@ import {
   ListItem,
   UnorderedList,
 } from "@chakra-ui/react";
-import { ReactNode, useContext } from "react";
-import { CartContext } from "../../contexts/CartContext";
+import { ReactNode } from "react";
 import { getMinimumItemsForDiscount, getPercentOff } from "../../lib/utils";
 const AccordionItemComponent = ({
   children,
@@ -89,16 +88,13 @@ const HelpAccordion = () => (
   </Accordion>
 );
 const ExtraInfo = () => {
-  const { hasDiscountApplied } = useContext(CartContext);
   return (
     <>
-      {!hasDiscountApplied && (
-        <Alert marginY=".5rem" status="info">
-          <AlertIcon />
-          You can get a {getPercentOff()}% discount if you purchase{" "}
-          {getMinimumItemsForDiscount()} or more item(s)!
-        </Alert>
-      )}
+      <Alert marginY=".5rem" status="info">
+        <AlertIcon />
+        You can get a {getPercentOff()}% discount if you purchase{" "}
+        {getMinimumItemsForDiscount()} or more of the same item!
+      </Alert>
       <HelpAccordion />
     </>
   );
