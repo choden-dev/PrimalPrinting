@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { StripeBackendItem } from "../types/types";
 import {
   getMinimumItemsForDiscount,
   getPercentOff,
@@ -82,8 +83,40 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
   };
 };
 
-export const createCoupons = async (
-  items: { quantity: number; name: string; productId: string }[]
+export const createUniqueProductsForDuplicates = async (
+  items: (StripeBackendItem & { name: string })[]
+) => {
+  const stripe: Stripe = await makeStripeConnection();
+
+  await Promise.all(
+    items.map(async (item, index) => {
+      const duplicateIndex = items.findIndex(
+        (otherItem, otherIndex) =>
+          otherIndex !== index && otherItem.price === item.price
+      );
+
+      if (duplicateIndex !== -1) {
+        const duplicate = items[duplicateIndex];
+        const price = await stripe.prices.retrieve(duplicate.priceId);
+        const product = await stripe.products.create({
+          name: duplicate.name,
+          default_price_data: {
+            unit_amount_decimal: price.unit_amount_decimal as string,
+            currency: price.currency,
+          },
+        });
+
+        items[index].productId = product.id;
+        items[index].price = product.default_price as string;
+      }
+    })
+  );
+
+  return items;
+};
+
+export const createCoupons = async <T extends StripeBackendItem>(
+  items: T[]
 ) => {
   const stripe: Stripe = await makeStripeConnection();
 
@@ -102,7 +135,7 @@ export const createCoupons = async (
 };
 
 export const createSession = async (
-  items: { price: string; quantity: number; productId: string }[],
+  items: StripeBackendItem[],
   orderId: string,
   email: string,
   coupon?: Stripe.Coupon
@@ -110,7 +143,9 @@ export const createSession = async (
   const stripe: Stripe = await makeStripeConnection();
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    line_items: items.map(({ productId, ...relevant }) => relevant),
+    line_items: items.map(
+      ({ productId, priceId, name, ...relevant }) => relevant
+    ),
     ...(coupon !== undefined && {
       discounts: [{ coupon: coupon ? coupon.id : undefined }],
     }),

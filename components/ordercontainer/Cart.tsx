@@ -15,6 +15,7 @@ import CartItem from "../../types/models/CartItem";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
 import { useContext } from "react";
 import { getPercentOff } from "../../lib/utils";
+import DiscountBadge from "../discountbadge/DiscountBadge";
 
 type Props = {
   smallScreen: boolean;
@@ -48,9 +49,9 @@ const CartItemContainer = () => {
                 gap="1rem"
                 alignItems="center"
               >
-                {cartPackage.shouldApplyDiscount() && (
-                  <Badge colorScheme="green">{getPercentOff()}% off!</Badge>
-                )}
+                <DiscountBadge
+                  displayCondition={cartPackage.shouldApplyDiscount()}
+                />
                 <QuantityPicker
                   defaultValue={cartPackage.getQuantity()}
                   onChange={(_, value) => {
@@ -109,9 +110,9 @@ const PdfItemContainer = () => {
                     gap="1rem"
                     alignItems="center"
                   >
-                    {pdf.shouldApplyDiscount() && (
-                      <Badge colorScheme="green">{getPercentOff()}% off!</Badge>
-                    )}
+                    <DiscountBadge
+                      displayCondition={pdf.shouldApplyDiscount()}
+                    />
                     <QuantityPicker
                       defaultValue={pdf.getQuantity()}
                       onChange={(_, value) => {
