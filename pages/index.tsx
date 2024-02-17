@@ -62,7 +62,8 @@ By Students, For Students💯🚀"
         />
         <meta
           property="og:description"
-          content="We offer affordable small and large scale printing in NZ for many paper products such as coursebooks, business cards, and more"
+          content="We’re a student run print shop at University of Auckland, providing students with course books, lab manuals & more for a fraction of the usual cost!
+By Students, For Students🚀💯"
         />
         <meta property="og:url" content="https://primalprinting.co.nz" />
         <meta
