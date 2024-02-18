@@ -4,6 +4,7 @@ import NavBar from "../components/navbar/NavBar";
 import OrderContainer from "../components/ordercontainer/OrderContainer";
 import { getPackages, findPrice } from "../lib/stripe";
 export async function getStaticProps() {
+  /* TODO: renable after packages are back
   let packages = await getPackages();
   // return the posts
   await Promise.all(
@@ -12,10 +13,11 @@ export async function getStaticProps() {
       pack.price = price;
     })
   );
+  */
 
   return {
     props: {
-      packages,
+      packages: [], // packages,
     },
     revalidate: 60 * 60,
   };

@@ -33,7 +33,7 @@ const AccordionItemComponent = ({
 
 const HelpAccordion = () => (
   <Accordion marginTop=".5rem" allowToggle allowMultiple>
-    <AccordionItemComponent title="I want to send a PDF for printing">
+    <AccordionItemComponent title="I want to send a PDF (coursebook, lab manual etc) for printing">
       <UnorderedList>
         <ListItem>
           Click on <strong>Upload Pdf</strong>
@@ -44,17 +44,7 @@ const HelpAccordion = () => (
         <ListItem>Wait for the upload to finish</ListItem>
       </UnorderedList>
     </AccordionItemComponent>
-    <AccordionItemComponent title="I want to buy coursebooks">
-      <UnorderedList>
-        <ListItem>
-          Click on <strong>Order Packages</strong>
-        </ListItem>
-        <ListItem>Find the package you want</ListItem>
-        <ListItem>
-          Set the quantity and click <strong>add</strong>
-        </ListItem>
-      </UnorderedList>
-    </AccordionItemComponent>
+
     <AccordionItemComponent title="I want to finalize my order">
       <UnorderedList>
         <ListItem>

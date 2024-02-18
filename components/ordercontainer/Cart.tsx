@@ -25,7 +25,6 @@ type Props = {
 const CartItemContainer = () => {
   const { cartPackages, removeCartPackage, updateCartPackage } =
     useContext(CartContext);
-
   return (
     <>
       {cartPackages.map((cartPackage: CartItem) => {
@@ -184,7 +183,7 @@ const Cart = ({ smallScreen, formRef }: Props) => {
           click the <strong>X</strong> on the right of an item to remove
         </p>
         <List>
-          <Text fontWeight="800">Packages</Text>
+          {false && <Text fontWeight="800">Packages</Text>}
           <Divider marginBottom=".5rem" />
           <CartItemContainer />
           <PdfItemContainer />

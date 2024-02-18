@@ -275,16 +275,18 @@ const OrderContainerInner = ({ packages }: Props) => {
           ></Box>
           <Tabs variant="enclosed" colorScheme="brown">
             <TabList padding="0 1rem">
-              <Tab fontWeight="700">Order Packages</Tab>
+              {false && <Tab fontWeight="700">Order Packages</Tab>}
               <Tab fontWeight="700">Upload Pdf</Tab>
             </TabList>
             <TabPanels>
-              <TabPanel>
-                <PackageOrder
-                  displayPackages={packages}
-                  smallScreen={smallScreen}
-                />
-              </TabPanel>
+              {false && (
+                <TabPanel>
+                  <PackageOrder
+                    displayPackages={packages}
+                    smallScreen={smallScreen}
+                  />
+                </TabPanel>
+              )}
               <TabPanel>
                 <PdfOrder />
               </TabPanel>
