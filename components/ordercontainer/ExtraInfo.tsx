@@ -7,9 +7,13 @@ import {
   Alert,
   AlertIcon,
   Box,
+  Heading,
+  Image,
   Link,
   ListItem,
+  Text,
   UnorderedList,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import { getMinimumItemsForDiscount, getPercentOff } from "../../lib/utils";
@@ -77,14 +81,52 @@ const HelpAccordion = () => (
     </AccordionItemComponent>
   </Accordion>
 );
-const ExtraInfo = () => {
+
+const Highlighted = ({ children }: { children: ReactNode }) => {
   return (
     <>
-      <Alert marginY=".5rem" status="info">
-        <AlertIcon />
-        You can get a {getPercentOff()}% discount if you purchase{" "}
-        {getMinimumItemsForDiscount()} or more of the same item!
-      </Alert>
+      <Text as="span" color="brown.800">
+        {children}
+      </Text>
+    </>
+  );
+};
+
+const ExtraInfo = () => {
+  const [smallScreen] = useMediaQuery("(max-width: 700px)");
+  return (
+    <>
+      <Box display="flex" justifyContent="flex-start">
+        <Box
+          borderColor="brown.700"
+          borderWidth="1px"
+          display="flex"
+          flexDir={smallScreen ? "column" : "row"}
+          alignItems="center"
+          gap="1rem"
+          bg="white"
+          borderRadius="sm"
+          marginTop="1rem"
+          padding="1rem"
+        >
+          <Image maxHeight="7rem" src="/cheaperwithafriendgraphic.png" />
+          <Box display="flex" flexDir="column" fontWeight="900">
+            <Heading>
+              <Highlighted>CHEAPER</Highlighted> WITH A FRIEND
+            </Heading>
+            <Text>
+              Get a <Highlighted>{getPercentOff()}%</Highlighted> discount off
+              coursebooks you order{" "}
+              <Highlighted>{getMinimumItemsForDiscount()}</Highlighted> or more
+              of...{" "}
+            </Text>
+            <Text>
+              So if you have friends (must be nice){" "}
+              <Highlighted>ORDER TOGETHER AND SAVE $$</Highlighted>
+            </Text>
+          </Box>
+        </Box>
+      </Box>
       <HelpAccordion />
     </>
   );
