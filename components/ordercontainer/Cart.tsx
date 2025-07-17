@@ -137,12 +137,8 @@ const PdfItemContainer = () => {
 };
 
 const Cart = ({ smallScreen, formRef }: Props) => {
-	const {
-		cartPackages,
-		uploadedPdfs,
-		displayPriceString,
-		setIsModalOpen,
-	} = useContext(CartContext);
+	const { cartPackages, uploadedPdfs, displayPriceString, setIsModalOpen } =
+		useContext(CartContext);
 	const checkFormValidity = () => {
 		const form = formRef.current;
 		const formValid = form?.checkValidity();

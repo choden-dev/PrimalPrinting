@@ -183,7 +183,7 @@ const OrderContainerInner = ({ packages }: Props) => {
 			return uploadPdf(file, fileName, index);
 		});
 
-		const tempItems: any[] = [];
+		const tempItems: { name: string; url: string }[] = [];
 		Promise.all(promises)
 			.then((res) => {
 				res.map((item) =>
