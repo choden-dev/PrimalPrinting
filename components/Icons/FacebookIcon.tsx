@@ -1,5 +1,5 @@
 import { Icon } from "@chakra-ui/react";
-export default function FacebookIcon(props: any) {
+export default function FacebookIcon(props: React.ComponentProps<typeof Icon>) {
 	return (
 		<Icon {...props}>
 			<path

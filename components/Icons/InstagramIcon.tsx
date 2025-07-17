@@ -1,6 +1,6 @@
 import { Icon } from "@chakra-ui/react";
 
-export default function InstagramIcon(props: any) {
+export default function InstagramIcon(props: React.ComponentProps<typeof Icon>) {
 	return (
 		<Icon viewBox="0 0 250 250" {...props}>
 			<g>

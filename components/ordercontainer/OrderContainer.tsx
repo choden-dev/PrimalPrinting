@@ -24,7 +24,7 @@ import PackageOrder from "./PackageOrder";
 import PdfOrder from "./PdfOrder";
 
 type Props = {
-	packages: any;
+	packages: StripeBackendItem[];
 };
 
 const OrderContainer = ({ packages }: Props) => {
@@ -44,7 +44,7 @@ const OrderContainerInner = ({ packages }: Props) => {
 	>([]);
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
-	const formRef = useRef(null);
+	const formRef = useRef<HTMLFormElement>(null);
 	const router = useRouter();
 
 	const closeModal = () => {
