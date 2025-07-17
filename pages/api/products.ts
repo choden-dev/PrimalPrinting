@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
 import { findPrice, getPackages } from "../../lib/stripe";
+
+const ProductsSchema = z.object({}); // No specific input expected for this handler
 
 export default async function handler(
 	_req: NextApiRequest,
@@ -7,21 +10,24 @@ export default async function handler(
 ) {
 	try {
 		const packages = await getPackages();
-		// return the posts
+
 		await Promise.all(
 			packages.data.map(async (pack) => {
-				const price = await findPrice(pack.default_price?.toString());
-				pack.price = price;
+				if (!pack.default_price) {
+					throw new Error("Package default price is missing");
+				}
+				const price = await findPrice(pack.default_price.toString());
+				(pack as any).price = price; // Temporarily cast to any to add price property
 			}),
 		);
+
 		return res.json({
 			packages: packages,
 			success: true,
 		});
 	} catch (error) {
-		// return the error
-		return res.json({
-			message: new Error(error).message,
+		return res.status(500).json({
+			message: error instanceof Error ? error.message : "Unknown error",
 			success: false,
 		});
 	}

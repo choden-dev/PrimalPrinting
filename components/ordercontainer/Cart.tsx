@@ -15,7 +15,7 @@ import QuantityPicker from "../quantitypicker/QuantityPicker";
 
 type Props = {
 	smallScreen: boolean;
-	formRef: any;
+	formRef: React.RefObject<HTMLFormElement>;
 };
 
 const CartItemContainer = () => {
@@ -137,16 +137,11 @@ const PdfItemContainer = () => {
 };
 
 const Cart = ({ smallScreen, formRef }: Props) => {
-	const {
-		cartPackages,
-		uploadedPdfs,
-		displayPriceString,
-		setIsModalOpen,
-		hasDiscountApplied,
-	} = useContext(CartContext);
+	const { cartPackages, uploadedPdfs, displayPriceString, setIsModalOpen } =
+		useContext(CartContext);
 	const checkFormValidity = () => {
 		const form = formRef.current;
-		const formValid = form.checkValidity();
+		const formValid = form?.checkValidity();
 		if (!formValid) window.alert("Please check your submission details.");
 		return formValid;
 	};

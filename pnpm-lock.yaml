@@ -62,6 +62,9 @@ importers:
       stripe:
         specifier: ^12.1.1
         version: 12.1.1
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
     devDependencies:
       '@biomejs/biome':
         specifier: 2.1.1
@@ -78,6 +81,9 @@ importers:
       eslint-config-next:
         specifier: 12.2.3
         version: 12.2.3(eslint@8.20.0)(typescript@4.7.4)
+      lefthook:
+        specifier: ^1.12.2
+        version: 1.12.2
       typescript:
         specifier: 4.7.4
         version: 4.7.4
@@ -1945,6 +1951,60 @@ packages:
   language-tags@1.0.5:
     resolution: {integrity: sha512-qJhlO9cGXi6hBGKoxEG/sKZDAHD5Hnu9Hs4WbOY3pCWXDhw0N8x1NenNzm2EnNLkLkk7J2SdxAkDSbb6ftT+UQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/language-tags/-/language-tags-1.0.5.tgz}
 
+  lefthook-darwin-arm64@1.12.2:
+    resolution: {integrity: sha512-fTxeI9tEskrHjc3QyEO+AG7impBXY2Ed8V5aiRc3fw9POfYtVh9b5jRx90fjk2+ld5hf+Z1DsyyLq/vOHDFskQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-darwin-arm64/-/lefthook-darwin-arm64-1.12.2.tgz}
+    cpu: [arm64]
+    os: [darwin]
+
+  lefthook-darwin-x64@1.12.2:
+    resolution: {integrity: sha512-T1dCDKAAfdHgYZ8qtrS02SJSHoR52RFcrGArFNll9Mu4ZSV19Sp8BO+kTwDUOcLYdcPGNaqOp9PkRBQGZWQC7g==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-darwin-x64/-/lefthook-darwin-x64-1.12.2.tgz}
+    cpu: [x64]
+    os: [darwin]
+
+  lefthook-freebsd-arm64@1.12.2:
+    resolution: {integrity: sha512-2n9z7Q4BKeMBoB9cuEdv0UBQH82Z4GgBQpCrfjCtyzpDnYQwrH8Tkrlnlko4qPh9MM6nLLGIYMKsA5nltzo8Cg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-freebsd-arm64/-/lefthook-freebsd-arm64-1.12.2.tgz}
+    cpu: [arm64]
+    os: [freebsd]
+
+  lefthook-freebsd-x64@1.12.2:
+    resolution: {integrity: sha512-1hNY/irY+/3kjRzKoJYxG+m3BYI8QxopJUK1PQnknGo1Wy5u302SdX+tR7pnpz6JM5chrNw4ozSbKKOvdZ5VEw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-freebsd-x64/-/lefthook-freebsd-x64-1.12.2.tgz}
+    cpu: [x64]
+    os: [freebsd]
+
+  lefthook-linux-arm64@1.12.2:
+    resolution: {integrity: sha512-1W4swYIVRkxq/LFTuuK4oVpd6NtTKY4E3VY2Uq2JDkIOJV46+8qGBF+C/QA9K3O9chLffgN7c+i+NhIuGiZ/Vw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-linux-arm64/-/lefthook-linux-arm64-1.12.2.tgz}
+    cpu: [arm64]
+    os: [linux]
+
+  lefthook-linux-x64@1.12.2:
+    resolution: {integrity: sha512-J6VGuMfhq5iCsg1Pv7xULbuXC63gP5LaikT0PhkyBNMi3HQneZFDJ8k/sp0Ue9HkQv6QfWIo3/FgB9gz38MCFw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-linux-x64/-/lefthook-linux-x64-1.12.2.tgz}
+    cpu: [x64]
+    os: [linux]
+
+  lefthook-openbsd-arm64@1.12.2:
+    resolution: {integrity: sha512-wncDRW3ml24DaOyH22KINumjvCohswbQqbxyH2GORRCykSnE859cTjOrRIchTKBIARF7PSeGPUtS7EK0+oDbaw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-openbsd-arm64/-/lefthook-openbsd-arm64-1.12.2.tgz}
+    cpu: [arm64]
+    os: [openbsd]
+
+  lefthook-openbsd-x64@1.12.2:
+    resolution: {integrity: sha512-2jDOkCHNnc/oK/vR62hAf3vZb1EQ6Md2GjIlgZ/V7A3ztOsM8QZ5IxwYN3D1UOIR5ZnwMBy7PtmTJC/HJrig5w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-openbsd-x64/-/lefthook-openbsd-x64-1.12.2.tgz}
+    cpu: [x64]
+    os: [openbsd]
+
+  lefthook-windows-arm64@1.12.2:
+    resolution: {integrity: sha512-ZMH/q6UNSidhHEG/1QoqIl1n4yPTBWuVmKx5bONtKHicoz4QCQ+QEiNjKsG5OO4C62nfyHGThmweCzZVUQECJw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-windows-arm64/-/lefthook-windows-arm64-1.12.2.tgz}
+    cpu: [arm64]
+    os: [win32]
+
+  lefthook-windows-x64@1.12.2:
+    resolution: {integrity: sha512-TqT2jIPcTQ9uwaw+v+DTmvnUHM/p7bbsSrPoPX+fRXSGLzFjyiY+12C9dObSwfCQq6rT70xqQJ9AmftJQsa5/Q==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook-windows-x64/-/lefthook-windows-x64-1.12.2.tgz}
+    cpu: [x64]
+    os: [win32]
+
+  lefthook@1.12.2:
+    resolution: {integrity: sha512-2CeTu5NcmoT9YnqsHTq/TF36MlqlzHzhivGx3DrXHwcff4TdvrkIwUTA56huM3Nlo5ODAF/0hlPzaKLmNHCBnQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/lefthook/-/lefthook-1.12.2.tgz}
+    hasBin: true
+
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/levn/-/levn-0.4.1.tgz}
     engines: {node: '>= 0.8.0'}
@@ -2693,6 +2753,9 @@ packages:
   yargs@17.7.2:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/yargs/-/yargs-17.7.2.tgz}
     engines: {node: '>=12'}
+
+  zod@4.0.5:
+    resolution: {integrity: sha512-/5UuuRPStvHXu7RS+gmvRf4NXrNxpSllGwDnCBcJZtQsKrviYXm54yDGV2KYNLT5kq0lHGcl7lqWJLgSaG+tgA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/zod/-/zod-4.0.5.tgz}
 
 snapshots:
 
@@ -5075,6 +5138,49 @@ snapshots:
     dependencies:
       language-subtag-registry: 0.3.22
 
+  lefthook-darwin-arm64@1.12.2:
+    optional: true
+
+  lefthook-darwin-x64@1.12.2:
+    optional: true
+
+  lefthook-freebsd-arm64@1.12.2:
+    optional: true
+
+  lefthook-freebsd-x64@1.12.2:
+    optional: true
+
+  lefthook-linux-arm64@1.12.2:
+    optional: true
+
+  lefthook-linux-x64@1.12.2:
+    optional: true
+
+  lefthook-openbsd-arm64@1.12.2:
+    optional: true
+
+  lefthook-openbsd-x64@1.12.2:
+    optional: true
+
+  lefthook-windows-arm64@1.12.2:
+    optional: true
+
+  lefthook-windows-x64@1.12.2:
+    optional: true
+
+  lefthook@1.12.2:
+    optionalDependencies:
+      lefthook-darwin-arm64: 1.12.2
+      lefthook-darwin-x64: 1.12.2
+      lefthook-freebsd-arm64: 1.12.2
+      lefthook-freebsd-x64: 1.12.2
+      lefthook-linux-arm64: 1.12.2
+      lefthook-linux-x64: 1.12.2
+      lefthook-openbsd-arm64: 1.12.2
+      lefthook-openbsd-x64: 1.12.2
+      lefthook-windows-arm64: 1.12.2
+      lefthook-windows-x64: 1.12.2
+
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -5853,3 +5959,5 @@ snapshots:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
+
+  zod@4.0.5: {}

@@ -11,9 +11,9 @@ import {
 
 type Props = {
 	isOpen: boolean;
-	closeFunction: () => any;
-	creditCard: () => any;
-	bankTransfer: () => any;
+	closeFunction: () => void;
+	creditCard: () => void;
+	bankTransfer: () => void;
 };
 
 export default function ItemModal({

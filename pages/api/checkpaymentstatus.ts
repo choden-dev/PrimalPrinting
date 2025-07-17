@@ -1,15 +1,30 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
 import { updatePaymentStatus } from "../../lib/google";
 import { checkSession } from "../../lib/stripe";
+
+const CheckPaymentStatusSchema = z.object({
+	session_id: z.string(),
+});
+
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,
 ) {
 	try {
-		const success = await checkSession(req.query.session_id);
+		const parsedQuery = CheckPaymentStatusSchema.parse(req.query);
+
+		const success = await checkSession(parsedQuery.session_id);
 		const orderId = success.orderId;
 		const customer = success.customer;
 		const price = success.price;
+
+		if (!process.env.BASE_URL) {
+			return res.status(500).json({
+				message: "BASE_URL environment variable is not defined.",
+				success: false,
+			});
+		}
 
 		if (success.paid) {
 			updatePaymentStatus(orderId);
@@ -19,7 +34,7 @@ export default async function handler(
 					name: customer?.name,
 					email: customer?.email,
 					orderId: orderId,
-					price: price / 100,
+					price: price || NaN / 100,
 				}),
 			});
 			return res.redirect(307, `/success?orderId=${orderId}`);
@@ -27,9 +42,14 @@ export default async function handler(
 			return res.redirect(307, "/order");
 		}
 	} catch (error) {
-		// return the error
-		return res.json({
-			message: new Error(error).message,
+		if (error instanceof z.ZodError) {
+			return res.status(400).json({
+				message: error.issues,
+				success: false,
+			});
+		}
+		return res.status(500).json({
+			message: error instanceof Error ? error.message : "Unknown error",
 			success: false,
 		});
 	}

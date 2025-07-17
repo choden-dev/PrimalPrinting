@@ -5,9 +5,6 @@
 		"clientKind": "git",
 		"useIgnoreFile": false
 	},
-	"files": {
-		"ignoreUnknown": false
-	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
@@ -30,5 +27,20 @@
 				"organizeImports": "on"
 			}
 		}
+	},
+	"files": {
+		"includes": [
+			"**",
+			"!**/node_modules/**",
+			"!**/dist/**",
+			"!**/build/**",
+			"!**/coverage/**",
+			"!**/.git/**",
+			"!**/.vscode/**",
+			"!**/.idea/**",
+			"!**/.DS_Store",
+			"!**/Thumbs.db"
+		],
+		"ignoreUnknown": true
 	}
 }
