@@ -1,20 +1,18 @@
 .endlink {
-    position: relative;
-
+	position: relative;
 }
 
 .endlink::after {
-    height: 2px;
-    width: 0;
-    content: "";
-    background-color: #c99e87;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    transition: width 0.5s;
+	height: 2px;
+	width: 0;
+	content: "";
+	background-color: #c99e87;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	transition: width 0.5s;
 }
 
-
 .endlink:hover::after {
-    width: 100%;
+	width: 100%;
 }

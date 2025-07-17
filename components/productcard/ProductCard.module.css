@@ -1,14 +1,14 @@
 .productimage img {
-    transition: all 1s;
-    filter: brightness(0.7);
-    width: 100%;
+	transition: all 1s;
+	filter: brightness(0.7);
+	width: 100%;
 }
 
 .productimage:hover img {
-    transform: scale(1.1);
-    filter: brightness(1);
+	transform: scale(1.1);
+	filter: brightness(1);
 }
 
 .productimage:hover .innersection {
-    transform: scale(0.9);
+	transform: scale(0.9);
 }

@@ -1,86 +1,85 @@
 @keyframes glow {
-  0% {
-    filter: brightness(80%);
-  }
-  50% {
-    filter: brightness(100%);
-  }
-  100% {
-    filter: brightness(80%);
-  }
+	0% {
+		filter: brightness(80%);
+	}
+	50% {
+		filter: brightness(100%);
+	}
+	100% {
+		filter: brightness(80%);
+	}
 }
 
 @keyframes bob {
-  0% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(0, -5px);
-  }
-  100% {
-    transform: translate(0, 0);
-  }
+	0% {
+		transform: translate(0, 0);
+	}
+	50% {
+		transform: translate(0, -5px);
+	}
+	100% {
+		transform: translate(0, 0);
+	}
 }
 
 .glowing_image {
-  animation: glow 3s infinite;
+	animation: glow 3s infinite;
 }
 
 .landing_container {
-  display: grid;
-  width: 1500px;
-  overflow: visible;
-  grid-template-columns: 1fr 1fr;
-  justify-content: center;
+	display: grid;
+	width: 1500px;
+	overflow: visible;
+	grid-template-columns: 1fr 1fr;
+	justify-content: center;
 }
 .landing_text {
-  animation: bob 5s infinite;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  margin-top: auto;
-  margin-bottom: auto;
-  bottom: 0;
-  width: 40vw;
+	animation: bob 5s infinite;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	margin-top: auto;
+	margin-bottom: auto;
+	bottom: 0;
+	width: 40vw;
 }
 .info_text {
-  text-align: right;
+	text-align: right;
 }
 
 .background_gradient {
-  background: rgb(243, 235, 227);
-  background: linear-gradient(
-    160deg,
-    rgba(243, 235, 227, 1) 0%,
-    rgba(201, 158, 135, 1) 35%,
-    rgba(243, 235, 227, 1) 100%
-  );
+	background: linear-gradient(
+		160deg,
+		rgba(243, 235, 227, 1) 0%,
+		rgba(201, 158, 135, 1) 35%,
+		rgba(243, 235, 227, 1) 100%
+	);
 }
 
 @media only screen and (max-width: 790px) {
-  .landing_container {
-    grid-template-columns: 1fr;
-  }
-  .landing_text {
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    gap: 8px;
-    text-align: center;
-    top: auto;
-    bottom: 5rem;
-    justify-content: flex-end;
-    width: 85vw;
-  }
-  .info_text {
-    border-radius: 2px;
-    background-color: white;
-    opacity: 60%;
-    box-shadow: 5px 5px 20px rgb(102, 102, 102);
-    text-align: center;
-  }
+	.landing_container {
+		grid-template-columns: 1fr;
+	}
+	.landing_text {
+		margin-left: auto;
+		margin-right: auto;
+		left: 0;
+		right: 0;
+		gap: 8px;
+		text-align: center;
+		top: auto;
+		bottom: 5rem;
+		justify-content: flex-end;
+		width: 85vw;
+	}
+	.info_text {
+		border-radius: 2px;
+		background-color: white;
+		opacity: 60%;
+		box-shadow: 5px 5px 20px rgb(102, 102, 102);
+		text-align: center;
+	}
 }

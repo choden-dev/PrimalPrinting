@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    reactStrictMode: false,
-    swcMinify: true,
+const _nextConfig = {
+	reactStrictMode: false,
+	swcMinify: true,
 };
 
 module.exports = {
-    typescript: {
-        ignoreBuildErrors: true,
-    },
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 };

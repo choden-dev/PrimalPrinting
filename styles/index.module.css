@@ -1,22 +1,18 @@
-
-
 .mainimage {
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-
-@media only screen and (max-width:450px){
-    .titletext{
-        font-size:4rem;
-    }
+@media only screen and (max-width: 450px) {
+	.titletext {
+		font-size: 4rem;
+	}
 }
 
-@media only screen and (max-width:1000px) {
-    .mainimage {
-        margin: 0 -7%;
-    }
+@media only screen and (max-width: 1000px) {
+	.mainimage {
+		margin: 0 -7%;
+	}
 }
