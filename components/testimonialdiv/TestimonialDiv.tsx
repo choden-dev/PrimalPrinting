@@ -20,7 +20,7 @@ export default function TestimonialDiv({ testimonials }: Props) {
 			setIsForward(true);
 			index + 1 < testimonials.length ? setTest(index + 1) : setTest(0);
 		}, 2500);
-	}, [index]);
+	}, [index, isAutoChange, testimonials.length]);
 
 	const back = () => {
 		setIsForward(false);

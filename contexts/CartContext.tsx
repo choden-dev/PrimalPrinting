@@ -1,5 +1,5 @@
-import { createContext, useEffect, useState } from "react";
-import { getItemsWithBulkDiscount, getPercentOff } from "../lib/utils";
+import { createContext, useCallback, useEffect, useState } from "react";
+import { getItemsWithBulkDiscount } from "../lib/utils";
 import type CartItem from "../types/models/CartItem";
 import type PdfCartItem from "../types/models/PdfCartItem";
 
@@ -29,13 +29,13 @@ const defaultCartContext: ICartContext = {
 	displayPriceString: "$0.00",
 	isModalOpen: false,
 	hasDiscountApplied: false,
-	setIsModalOpen: (state) => {},
-	addCartPackage: (cartPackage) => {},
-	updateCartPackage: (cartPackage) => {},
-	removeCartPackage: (cartPackage) => {},
-	addUploadedPdf: (cartPdf) => {},
-	updateUploadedPdf: (cartPdf) => {},
-	removeUploadedPdf: (cartPdf) => {},
+	setIsModalOpen: (_state) => {},
+	addCartPackage: (_cartPackage) => {},
+	updateCartPackage: (_cartPackage) => {},
+	removeCartPackage: (_cartPackage) => {},
+	addUploadedPdf: (_cartPdf) => {},
+	updateUploadedPdf: (_cartPdf) => {},
+	removeUploadedPdf: (_cartPdf) => {},
 };
 
 export const CartContext = createContext<ICartContext>(defaultCartContext);
@@ -65,10 +65,6 @@ export function CartContextProvider(props: any) {
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [hasDiscountApplied, setHasDiscountApplied] = useState<boolean>(false);
 
-	useEffect(() => {
-		calculateTotalPrice();
-	}, [cartPackages, uploadedPdfs]);
-
 	function addCartPackage(cartPackage: CartItem) {
 		if (alreadyInArray(cartPackages, cartPackage)) {
 			return;
@@ -82,7 +78,7 @@ export function CartContextProvider(props: any) {
 		);
 	}
 
-	function checkForDiscount() {
+	function _checkForDiscount() {
 		const discountedItems = getItemsWithBulkDiscount([
 			...(uploadedPdfs as CartItem[]),
 			...cartPackages,
@@ -112,7 +108,7 @@ export function CartContextProvider(props: any) {
 		);
 	}
 
-	const calculateTotalPrice = () => {
+	const calculateTotalPrice = useCallback(() => {
 		let sum = 0;
 		uploadedPdfs.map((pdf) => {
 			sum += pdf.getDisplayPrice();
@@ -121,7 +117,11 @@ export function CartContextProvider(props: any) {
 			sum += cartPackage.getDisplayPrice();
 		});
 		setDisplayPriceString(sum.toFixed(2));
-	};
+	}, [cartPackages, uploadedPdfs]);
+
+	useEffect(() => {
+		calculateTotalPrice();
+	}, [calculateTotalPrice]);
 
 	const cartData: ICartContext = {
 		cartPackages,

@@ -1,7 +1,8 @@
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, FormControl, Heading, Input, Text } from "@chakra-ui/react";
 import * as pdfjs from "pdfjs-dist";
-import { useContext, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import PdfCartItem from "../../types/models/PdfCartItem";
 import UploadCard from "../uploadcard/UploadCard";
@@ -14,20 +15,8 @@ const DEFAULT_IS_COLOR = false;
 const PdfOrder = () => {
 	const { uploadedPdfs, addUploadedPdf, removeUploadedPdf, updateUploadedPdf } =
 		useContext(CartContext);
-	useEffect(() => {
-		const uploadZoneRef = uploadZone.current as HTMLDivElement | null; // Specify type using type assertion
-		uploadZoneRef!.addEventListener("dragover", handleDragOver);
-		uploadZoneRef!.addEventListener("drop", handleDrop);
-
-		return () => {
-			if (uploadZoneRef) {
-				uploadZoneRef.removeEventListener("dragover", handleDragOver);
-				uploadZoneRef.removeEventListener("drop", handleDrop);
-			}
-		};
-	}, []);
 	const uploadZone = useRef(null);
-	const defaultUploadZone = useRef(null);
+	const defaultUploadZone = useRef<HTMLInputElement>(null);
 
 	const handleColorChange = async (option: boolean, toFind: PdfCartItem) => {
 		const idx = uploadedPdfs.findIndex(
@@ -47,40 +36,31 @@ const PdfOrder = () => {
 				}),
 		);
 	};
-	const handleDragOver = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-	};
-	const handleDrop = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
+	const _handleDragOver = useCallback(
+		(e: { preventDefault: () => void; stopPropagation: () => void }) => {
+			e.preventDefault();
+			e.stopPropagation();
+		},
+		[],
+	);
 
-		const { files } = e.dataTransfer;
-
-		if (files && files.length) {
-			const temp = {
-				target: {
-					files: files,
-				},
-			};
-			handleFileEvent(temp);
-		}
-	};
-	const handlePdfUpload = (files: File[]) => {
-		const uploaded = [...uploadedPdfs];
-		files.some((file: File) => {
-			//file doesn't exist
-			if (uploaded.findIndex((f) => f.displayName === file.name) === -1) {
-				const src = URL.createObjectURL(file);
-				let pages: number = -1;
-				pdfjs
-					.getDocument(src)
-					.promise.then((doc) => {
-						pages = doc.numPages;
-						fetch(`/api/shop?pages=${pages}&isColor=${DEFAULT_IS_COLOR}`).then(
-							(res) =>
+	const handlePdfUpload = useCallback(
+		(files: File[]) => {
+			const uploaded = [...uploadedPdfs];
+			files.some((file: File) => {
+				//file doesn't exist
+				if (uploaded.findIndex((f) => f.displayName === file.name) === -1) {
+					const src = URL.createObjectURL(file);
+					let pages: number = -1;
+					pdfjs
+						.getDocument(src)
+						.promise.then((doc) => {
+							pages = doc.numPages;
+							fetch(
+								`/api/shop?pages=${pages}&isColor=${DEFAULT_IS_COLOR}`,
+							).then((res) =>
 								res.json().then((data) => {
-									if (isNaN(data.price)) {
+									if (Number.isNaN(data.price)) {
 										window.alert(
 											"Pdf is over 400 pages, please email us the pdf and we can arrange something.",
 										);
@@ -105,18 +85,62 @@ const PdfOrder = () => {
 										),
 									);
 								}),
-						);
-					})
-					.catch(() => console.error("invalid file type"));
-			}
-		});
-	};
+							);
+						})
+						.catch(() => console.error("invalid file type"));
+				}
+			});
+		},
+		[addUploadedPdf, uploadedPdfs],
+	);
 
-	const handleFileEvent = (e) => {
-		console.log(e.target.files);
-		const files = Array.prototype.slice.call(e.target.files);
-		handlePdfUpload(files);
-	};
+	const handleFileEvent = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			console.log(e.target.files);
+			const files = Array.from(e.target.files || []);
+			handlePdfUpload(files);
+		},
+		[handlePdfUpload],
+	);
+
+	const handleDrop = useCallback(
+		(e: DragEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+
+			const { files } = e.dataTransfer || {};
+
+			if (files?.length) {
+				const temp = {
+					target: {
+						files: files,
+					},
+				} as React.ChangeEvent<HTMLInputElement>;
+				handleFileEvent(temp);
+			}
+		},
+		[handleFileEvent],
+	);
+
+	useEffect(() => {
+		const uploadZoneRef = uploadZone.current as HTMLDivElement | null;
+
+		const handleDragOver = (e: DragEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+		};
+
+		uploadZoneRef?.addEventListener("dragover", handleDragOver);
+		uploadZoneRef?.addEventListener("drop", handleDrop);
+
+		return () => {
+			if (uploadZoneRef) {
+				uploadZoneRef.removeEventListener("dragover", handleDragOver);
+				uploadZoneRef.removeEventListener("drop", handleDrop);
+			}
+		};
+	}, [handleDrop]);
+
 	return (
 		<>
 			<Heading textAlign="center" marginBottom="1rem">
@@ -133,7 +157,7 @@ const PdfOrder = () => {
 						onChange={handleFileEvent}
 					/>
 					<Box
-						onClick={(e) => {
+						onClick={(_e) => {
 							defaultUploadZone.current?.click();
 						}}
 						zIndex="76"

@@ -15,7 +15,7 @@ export default function DescriptionDiv({ descriptions }: Props) {
 			display="flex"
 			justifyContent="center"
 		>
-			{descriptions.map((item, index) => {
+			{descriptions.map((item, _index) => {
 				return (
 					<DescriptionCard
 						key={item.title}

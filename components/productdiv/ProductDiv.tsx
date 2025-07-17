@@ -26,7 +26,7 @@ export default function ProductDiv({ products }: Props) {
 				height="50%"
 				bottom="0"
 			/>
-			{products.map((item, index) => {
+			{products.map((item) => {
 				return (
 					<ProductCard
 						key={item.title}

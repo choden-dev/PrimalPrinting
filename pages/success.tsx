@@ -1,18 +1,9 @@
-import {
-	Box,
-	Divider,
-	Heading,
-	Link,
-	List,
-	ListItem,
-	Text,
-} from "@chakra-ui/react";
+import { Box, Divider, Heading, Link, List, Text } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Footer from "../components/footer/Footer";
 import NoSsr from "../components/NoSsr";
 import NavBar from "../components/navbar/NavBar";
-import OrderContainer from "../components/ordercontainer/OrderContainer";
 
 const Success: NextPage = () => {
 	const router = useRouter();

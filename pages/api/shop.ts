@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { connectToDatabase } from "../../lib/mongo";
-import { getPriceForPages, getProducts } from "../../lib/stripe";
+import { getPriceForPages } from "../../lib/stripe";
 
 export default async function handler(
 	req: NextApiRequest,

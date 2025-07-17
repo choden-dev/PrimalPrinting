@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import React, { useState } from "react";
+import { useState } from "react";
 import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
 import { connectToDatabase } from "../lib/mongo";
@@ -27,7 +27,7 @@ export async function getStaticProps() {
 				revalidate: 24 * 60 * 60,
 			},
 		};
-	} catch (error) {
+	} catch (_error) {
 		console.log("could not fetch data");
 	}
 }
@@ -126,10 +126,10 @@ const Contact: NextPage<PageProps> = (details) => {
 					<Heading fontWeight="500">Get in Touch</Heading>
 					<Stack spacing="0">
 						<Text fontSize="xl" fontWeight="500">
-							Email: {details.details[0] && details.details[0].email}
+							Email: {details.details[0]?.email}
 						</Text>
 						<Text fontSize="xl" fontWeight="500">
-							Phone: {details.details[0] && details.details[0].phone}
+							Phone: {details.details[0]?.phone}
 						</Text>
 					</Stack>
 					{isDone ? (

@@ -1,20 +1,13 @@
 import {
 	Box,
 	Button,
-	Heading,
-	Image,
 	Modal,
 	ModalCloseButton,
 	ModalContent,
 	ModalHeader,
 	ModalOverlay,
-	Select,
-	Stack,
 	Text,
-	useDisclosure,
-	useMediaQuery,
 } from "@chakra-ui/react";
-import React from "react";
 
 type Props = {
 	isOpen: boolean;
@@ -29,7 +22,6 @@ export default function ItemModal({
 	creditCard,
 	bankTransfer,
 }: Props) {
-	const [smallScreen] = useMediaQuery("(max-width:900px)");
 	return (
 		<Modal isOpen={isOpen} onClose={closeFunction} size="xl">
 			<ModalOverlay zIndex="999" overflow="auto" />

@@ -51,7 +51,6 @@
 }
 
 .background_gradient {
-	background: rgb(243, 235, 227);
 	background: linear-gradient(
 		160deg,
 		rgba(243, 235, 227, 1) 0%,

@@ -1,7 +1,6 @@
 import { Box, Divider, Heading, Image, Text } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import React from "react";
 import { MessengerChat } from "react-messenger-chat-plugin";
 import Footer from "../components/footer/Footer";
 import IntroAnimation from "../components/intro/IntroAnimation";
@@ -119,100 +118,97 @@ By Students, For Students🚀💯"
 							gap="1.2rem"
 							position="relative"
 						>
-							{text.text[0] &&
-								text.text[0].map((item: any) => {
-									switch (item.Section) {
-										case "Heading":
-											return (
+							{text.text[0]?.map((item: any) => {
+								switch (item.Section) {
+									case "Heading":
+										return (
+											<Box
+												key={item.Text}
+												display="flex"
+												position="relative"
+												flexDir="column"
+											>
 												<Box
-													display="flex"
-													position="relative"
-													flexDir="column"
+													position="absolute"
+													transformOrigin="top right"
+													transform="rotate(90deg)"
+													h="100vw"
+													alignSelf="center"
+													w="4.5rem"
+													bgImage="binder.png"
+													top="5rem"
+													left="0"
+													bgRepeat="no-repeat"
+												></Box>
+												<Heading
+													marginTop="5.4rem"
+													color="brown.900"
+													textAlign="left"
+													fontSize="3.2rem"
 												>
-													<Box
-														position="absolute"
-														transformOrigin="top right"
-														transform="rotate(90deg)"
-														h="100vw"
-														alignSelf="center"
-														w="4.5rem"
-														bgImage="binder.png"
-														top="5rem"
-														left="0"
-														bgRepeat="no-repeat"
-													></Box>
-													<Heading
-														marginTop="5.4rem"
-														color="brown.900"
-														textAlign="left"
-														fontSize="3.2rem"
-													>
-														{item.Text}
-													</Heading>
-													<Divider borderColor="brown.900" margin="1rem 0" />
-												</Box>
-											);
-										case "Text":
-											return (
-												<>
-													<Text
-														key={item._id}
-														dangerouslySetInnerHTML={{
-															__html: item.Text,
-														}}
-														fontSize="xl"
-														textAlign="left"
-														fontWeight="300"
-														whiteSpace="pre-line"
-													/>
-												</>
-											);
-										case "Image":
-											return (
-												<Image
-													src={item.Text}
-													key={item._id}
-													alt={"about page image"}
-													width="100%"
-													objectFit="cover"
-												/>
-											);
-										default:
-											return null;
-									}
-								})}
+													{item.Text}
+												</Heading>
+												<Divider borderColor="brown.900" margin="1rem 0" />
+											</Box>
+										);
+									case "Text":
+										return (
+											<Text
+												key={item._id}
+												// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+												dangerouslySetInnerHTML={{
+													__html: item.Text,
+												}}
+												fontSize="xl"
+												textAlign="left"
+												fontWeight="300"
+												whiteSpace="pre-line"
+											/>
+										);
+									case "Image":
+										return (
+											<Image
+												src={item.Text}
+												key={item._id}
+												alt={"about page image"}
+												width="100%"
+												objectFit="cover"
+											/>
+										);
+									default:
+										return null;
+								}
+							})}
 						</Box>
 					</Box>
 				</Box>
 				{false && (
-					<>
-						<Box
-							minHeight="16rem"
-							marginTop="3rem"
-							display="flex"
-							flexDir="column"
-							position="relative"
-							justifyContent="center"
-							alignItems="center"
-						>
-							<Box className="secheading" marginTop="3rem">
-								<SectionHeading text={"Testimonials"} />
-							</Box>
-							<Box display="flex" alignItems="center" padding="3rem 0">
-								{text.text.length > 1 && (
-									<TestimonialDiv testimonials={text.text[1]} />
-								)}
-							</Box>
-							<Box
-								position="absolute"
-								bottom="5rem"
-								zIndex="-1"
-								width="70%"
-								height="10%"
-								bg="brown.700"
-							/>
+					<Box
+						minHeight="16rem"
+						marginTop="3rem"
+						display="flex"
+						flexDir="column"
+						position="relative"
+						justifyContent="center"
+						alignItems="center"
+					>
+						<Box className="secheading" marginTop="3rem">
+							<SectionHeading text={"Testimonials"} />
 						</Box>
-					</>
+						<Box display="flex" alignItems="center" padding="3rem 0">
+							{text.text.length > 1 && (
+								<TestimonialDiv testimonials={text.text[1]} />
+							)}
+						</Box>
+						<Box
+							position="absolute"
+							bottom="5rem"
+							zIndex="-1"
+							width="70%"
+							height="10%"
+							bg="brown.700"
+						/>
+					</Box>
 				)}
 				<Box>
 					<WhatNextDiv />

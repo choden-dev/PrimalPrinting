@@ -1,13 +1,11 @@
 import { HamburgerIcon } from "@chakra-ui/icons";
-import { Box, ButtonGroup, Heading, IconButton, Image } from "@chakra-ui/react";
+import { Box, Heading, IconButton, Image } from "@chakra-ui/react";
 import Link from "next/link";
 import React from "react";
 import SocialLinks from "../sociallinks/sociallinks";
 import styles from "./NavBar.module.css";
 
-type Props = {};
-
-export default function NavBar({}: Props) {
+export default function NavBar() {
 	const [menuOpened, setMenuOpened] = React.useState<boolean>(false);
 	const handleMenuOpen = () => {
 		setMenuOpened(!menuOpened);

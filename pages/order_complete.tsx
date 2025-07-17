@@ -2,7 +2,6 @@ import {
 	Box,
 	Divider,
 	Heading,
-	List,
 	ListItem,
 	Text,
 	UnorderedList,
@@ -13,21 +12,33 @@ import DiscountBadge from "../components/discountbadge/DiscountBadge";
 import Footer from "../components/footer/Footer";
 import NoSsr from "../components/NoSsr";
 import NavBar from "../components/navbar/NavBar";
-import OrderContainer from "../components/ordercontainer/OrderContainer";
 import { orderSum } from "../lib/utils";
+
+// Define the interface for order items
+interface OrderItem {
+	name: string;
+	quantity: number;
+	cost: number;
+	discounted: boolean;
+}
 
 const OrderComplete: NextPage = () => {
 	const router = useRouter();
-	const orderId = router.query.orderId;
-	const orderItems = router.query.items ? JSON.parse(router.query.items) : [];
-	const sum = () => {
+	const orderId = router.query.orderId as string;
+	const orderItems: OrderItem[] = router.query.items
+		? JSON.parse(router.query.items as string)
+		: [];
+
+	const _sum = (): string => {
 		let sum = 0;
-		orderItems.map((item) => {
+		orderItems.forEach((item: OrderItem) => {
 			sum += item.cost;
 		});
 		return sum.toFixed(2);
 	};
+
 	console.log(orderItems);
+
 	return (
 		<NoSsr>
 			<Box className="container">
@@ -48,27 +59,19 @@ const OrderComplete: NextPage = () => {
 					</Text>
 					<UnorderedList>
 						<Box display="flex" flexDir="column" alignItems="center">
-							{orderItems &&
-								orderItems.map((item) => {
-									return (
-										<ListItem
-											fontSize="1.2rem"
-											fontWeight="800"
-											key={item.name}
-										>
-											<Box display="flex" gap=".5rem">
-												<Text>
-													{item.name} x {item.quantity}
-												</Text>
-												<Text marginLeft="1rem">${item.cost.toFixed(2)}</Text>
-
-												<Box>
-													<DiscountBadge displayCondition={item.discounted} />
-												</Box>
-											</Box>
-										</ListItem>
-									);
-								})}
+							{orderItems?.map((item: OrderItem) => (
+								<ListItem fontSize="1.2rem" fontWeight="800" key={item.name}>
+									<Box display="flex" gap=".5rem">
+										<Text>
+											{item.name} x {item.quantity}
+										</Text>
+										<Text marginLeft="1rem">${item.cost.toFixed(2)}</Text>
+										<Box>
+											<DiscountBadge displayCondition={item.discounted} />
+										</Box>
+									</Box>
+								</ListItem>
+							))}
 						</Box>
 					</UnorderedList>
 					<Divider margin="1rem 0" />
@@ -89,4 +92,5 @@ const OrderComplete: NextPage = () => {
 		</NoSsr>
 	);
 };
+
 export default OrderComplete;

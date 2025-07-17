@@ -4,8 +4,6 @@ import {
 	AccordionIcon,
 	AccordionItem,
 	AccordionPanel,
-	Alert,
-	AlertIcon,
 	Box,
 	Heading,
 	Image,
@@ -85,11 +83,9 @@ const HelpAccordion = () => (
 
 const Highlighted = ({ children }: { children: ReactNode }) => {
 	return (
-		<>
-			<Text as="span" color="brown.800">
-				{children}
-			</Text>
-		</>
+		<Text as="span" color="brown.800">
+			{children}
+		</Text>
 	);
 };
 

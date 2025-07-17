@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { CartContext, CartContextProvider } from "../../contexts/CartContext";
 import storage from "../../firebase";
 import { formatItems, orderSum } from "../../lib/utils";
@@ -101,9 +101,9 @@ const OrderContainerInner = ({ packages }: Props) => {
 
 		const form = formRef.current;
 		console.log(form);
-		const name = form!.name.value;
-		const email = form!.email.value;
-		const message = form!.message.value;
+		const name = form?.name.value;
+		const email = form?.email.value;
+		const message = form?.message.value;
 		const paymentMethod = isBankTransfer ? "Bank" : "Credit Card";
 
 		uploadedPdfs.forEach((pdf) => {
@@ -234,7 +234,7 @@ const OrderContainerInner = ({ packages }: Props) => {
 			body: JSON.stringify(toPost),
 		}).then((res) => {
 			res.json().then((data) => {
-				if (data && data.paymentLink) window.location.replace(data.paymentLink);
+				if (data?.paymentLink) window.location.replace(data.paymentLink);
 				else console.log("Sorry, a package seems to have been withdrawan");
 			});
 		});

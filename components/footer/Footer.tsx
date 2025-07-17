@@ -8,12 +8,9 @@ import {
 	UnorderedList,
 	useMediaQuery,
 } from "@chakra-ui/react";
-import React from "react";
 import SocialLinks from "../sociallinks/sociallinks";
 
-type Props = {};
-
-export default function Footer({}: Props) {
+export default function Footer() {
 	const [smallScreen] = useMediaQuery("(max-width: 800px)");
 	return (
 		<Box

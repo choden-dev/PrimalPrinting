@@ -1,5 +1,5 @@
 const NotesOrder = () => {
-	return <></>;
+	return null;
 };
 
 export default NotesOrder;

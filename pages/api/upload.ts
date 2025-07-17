@@ -1,6 +1,4 @@
-import { Blob } from "buffer";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { authenticateGoogle, multer, uploadToDrive } from "../../lib/google";
 export const config = {
 	api: {
 		bodyParser: {

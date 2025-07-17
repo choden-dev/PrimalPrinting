@@ -74,6 +74,14 @@ export type CartPackage = {
 	quantity: number;
 };
 
-export type product = infoStructure & { image: any; price: string };
+export type product = infoStructure & {
+	image: {
+		title?: string;
+		price?: string;
+		description?: string;
+		image?: string;
+	};
+	price: string;
+};
 
 export type testimonial = infoStructure & { author: string };

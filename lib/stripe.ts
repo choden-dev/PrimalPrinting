@@ -74,7 +74,7 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 			isColor ? "'Colour'" : "'B/W'"
 		}`,
 	});
-	const priceId = products.data[0].default_price!.toString();
+	const priceId = products.data[0].default_price?.toString();
 	const price = await findPrice(priceId);
 	const productId = products.data[0].id;
 	return {

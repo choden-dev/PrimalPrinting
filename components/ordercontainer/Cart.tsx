@@ -1,7 +1,4 @@
 import {
-	Alert,
-	AlertIcon,
-	Badge,
 	Box,
 	Button,
 	Divider,
@@ -12,7 +9,6 @@ import {
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { CartContext } from "../../contexts/CartContext";
-import { getPercentOff } from "../../lib/utils";
 import type CartItem from "../../types/models/CartItem";
 import DiscountBadge from "../discountbadge/DiscountBadge";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
