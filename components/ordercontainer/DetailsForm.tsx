@@ -21,7 +21,7 @@ const DetailsForm = ({ formRef }: Props) => {
 					<Input name="email" type="email" borderRadius="sm" />
 				</Box>
 				<FormLabel>Extra requests</FormLabel>
-				<Textarea name="message" type="text" borderRadius="sm" />
+				<Textarea name="message" borderRadius="sm" />
 			</form>
 		</Box>
 	);
