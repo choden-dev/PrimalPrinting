@@ -1,5 +1,6 @@
-import { Box, Heading, Text, Image } from "@chakra-ui/react";
+import { Box, Heading, Image, Text } from "@chakra-ui/react";
 import styles from "./DescriptionCard.module.css";
+
 type Props = {
 	name: string;
 	description: string;

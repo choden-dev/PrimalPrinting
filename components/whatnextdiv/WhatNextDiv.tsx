@@ -1,7 +1,7 @@
-import React from "react";
-import { Box, Heading, Link } from "@chakra-ui/react";
 import { SunIcon } from "@chakra-ui/icons";
+import { Box, Heading, Link } from "@chakra-ui/react";
 import NextLink from "next/link";
+import React from "react";
 import styles from "./WhatNextDiv.module.css";
 
 export default function WhatNextDiv() {

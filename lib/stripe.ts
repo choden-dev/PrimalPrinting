@@ -1,10 +1,11 @@
 import Stripe from "stripe";
-import { StripeBackendItem } from "../types/types";
+import type { StripeBackendItem } from "../types/types";
 import {
+	getItemsWithBulkDiscount,
 	getMinimumItemsForDiscount,
 	getPercentOff,
-	getItemsWithBulkDiscount,
 } from "./utils";
+
 let stripeCached: any = null;
 
 // caches the connection or starts a new one
@@ -39,7 +40,7 @@ export const getPackages = async () => {
 
 export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	const stripe: Stripe = await makeStripeConnection();
-	let pageRange = { maxPages: -1, minPages: -1 };
+	const pageRange = { maxPages: -1, minPages: -1 };
 	const updatePageRange = (minPages: number, maxPages: number): void => {
 		pageRange.minPages = minPages;
 		pageRange.maxPages = maxPages;

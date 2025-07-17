@@ -1,6 +1,7 @@
-import DescriptionCard from "../descriptioncard/DescriptionCard";
-import { infoStructure } from "../../types/types";
 import { Box } from "@chakra-ui/react";
+import type { infoStructure } from "../../types/types";
+import DescriptionCard from "../descriptioncard/DescriptionCard";
+
 type Props = {
 	descriptions: infoStructure[];
 };

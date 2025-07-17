@@ -1,29 +1,29 @@
+import { Box, Divider, Heading, Image, Text } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Box, Image, Heading, Text, Divider } from "@chakra-ui/react";
-import NavBar from "../components/navbar/NavBar";
-import NoSsr from "../components/NoSsr";
-import TestimonialDiv from "../components/testimonialdiv/TestimonialDiv";
-import SectionHeading from "../components/sectionheading/SectionHeading";
-import WhatNextDiv from "../components/whatnextdiv/WhatNextDiv";
-import Footer from "../components/footer/Footer";
-import { connectToDatabase } from "../lib/mongo";
 import React from "react";
 import { MessengerChat } from "react-messenger-chat-plugin";
+import Footer from "../components/footer/Footer";
 import IntroAnimation from "../components/intro/IntroAnimation";
+import NoSsr from "../components/NoSsr";
+import NavBar from "../components/navbar/NavBar";
+import SectionHeading from "../components/sectionheading/SectionHeading";
+import TestimonialDiv from "../components/testimonialdiv/TestimonialDiv";
+import WhatNextDiv from "../components/whatnextdiv/WhatNextDiv";
+import { connectToDatabase } from "../lib/mongo";
 export async function getStaticProps() {
 	try {
-		let { db } = await connectToDatabase("WebsiteText");
+		const { db } = await connectToDatabase("WebsiteText");
 
-		let sections = await db
+		const sections = await db
 			.collection("AboutPage")
 			.find({})
 			.sort({ Order: 1 })
 			.toArray();
 
-		let testimonials = await db.collection("Testimonials").find({}).toArray();
+		const testimonials = await db.collection("Testimonials").find({}).toArray();
 
-		let final = [sections].concat([testimonials]);
+		const final = [sections].concat([testimonials]);
 		return {
 			props: {
 				text: JSON.parse(JSON.stringify(final)),

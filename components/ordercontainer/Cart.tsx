@@ -10,12 +10,12 @@ import {
 	ListItem,
 	Text,
 } from "@chakra-ui/react";
-import { CartContext } from "../../contexts/CartContext";
-import CartItem from "../../types/models/CartItem";
-import QuantityPicker from "../quantitypicker/QuantityPicker";
 import { useContext } from "react";
+import { CartContext } from "../../contexts/CartContext";
 import { getPercentOff } from "../../lib/utils";
+import type CartItem from "../../types/models/CartItem";
 import DiscountBadge from "../discountbadge/DiscountBadge";
+import QuantityPicker from "../quantitypicker/QuantityPicker";
 
 type Props = {
 	smallScreen: boolean;

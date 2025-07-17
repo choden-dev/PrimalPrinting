@@ -1,6 +1,6 @@
+import type { NextApiRequest, NextApiResponse } from "next";
 import { connectToDatabase } from "../../lib/mongo";
-import { NextApiRequest, NextApiResponse } from "next";
-import { getProducts, getPriceForPages } from "../../lib/stripe";
+import { getPriceForPages, getProducts } from "../../lib/stripe";
 
 export default async function handler(
 	req: NextApiRequest,
@@ -8,10 +8,10 @@ export default async function handler(
 ) {
 	try {
 		//let test = await getProducts();
-		let isColor = req.query.isColor;
+		const isColor = req.query.isColor;
 		let param = false;
 		if (isColor === "true") param = true;
-		let price = await getPriceForPages(req.query.pages, param);
+		const price = await getPriceForPages(req.query.pages, param);
 		return res.json({
 			productId: price.productId,
 			price: price.price,

@@ -1,6 +1,6 @@
 import { CloseIcon } from "@chakra-ui/icons";
 import { Box, IconButton, Select } from "@chakra-ui/react";
-import PdfCartItem from "../../types/models/PdfCartItem";
+import type PdfCartItem from "../../types/models/PdfCartItem";
 
 const UploadCard = ({
 	uploadedItem,

@@ -1,5 +1,3 @@
-import { useRouter } from "next/router";
-import { useState, useRef, useEffect, useContext } from "react";
 import {
 	Box,
 	Tab,
@@ -9,19 +7,22 @@ import {
 	Tabs,
 	useMediaQuery,
 } from "@chakra-ui/react";
-import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useRef, useState } from "react";
+import { CartContext, CartContextProvider } from "../../contexts/CartContext";
+import storage from "../../firebase";
+import { formatItems, orderSum } from "../../lib/utils";
+import type { OrderRow, StripeBackendItem } from "../../types/types";
 import Footer from "../footer/Footer";
 import ItemModal from "../itemmodal/ItemModal";
-import DetailsForm from "./DetailsForm";
-import { OrderRow, StripeBackendItem } from "../../types/types";
+import ProcessingOverlay from "../processingoverlay/ProcessingOverlay";
 import Cart from "./Cart";
+import DetailsForm from "./DetailsForm";
+import ExtraInfo from "./ExtraInfo";
 import PackageOrder from "./PackageOrder";
 import PdfOrder from "./PdfOrder";
-import { formatItems, orderSum } from "../../lib/utils";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import storage from "../../firebase";
-import { CartContext, CartContextProvider } from "../../contexts/CartContext";
-import ExtraInfo from "./ExtraInfo";
+
 type Props = {
 	packages: any;
 };
@@ -182,7 +183,7 @@ const OrderContainerInner = ({ packages }: Props) => {
 			return uploadPdf(file, fileName, index);
 		});
 
-		let tempItems: any[] = [];
+		const tempItems: any[] = [];
 		Promise.all(promises)
 			.then((res) => {
 				res.map((item) =>

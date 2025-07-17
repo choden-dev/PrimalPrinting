@@ -1,6 +1,7 @@
 import { Box } from "@chakra-ui/react";
+import type { product } from "../../types/types";
 import ProductCard from "../productcard/ProductCard";
-import { product } from "../../types/types";
+
 type Props = {
 	products: product[];
 };

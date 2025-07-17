@@ -1,5 +1,5 @@
-import { Box, Heading, Button } from "@chakra-ui/react";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { Box, Button, Heading } from "@chakra-ui/react";
 import Link from "next/link";
 import NavBar from "../components/navbar/NavBar";
 export default function errorPage() {

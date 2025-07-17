@@ -1,20 +1,20 @@
-import React from "react";
 import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalCloseButton,
-	Image,
-	Heading,
-	Text,
 	Box,
 	Button,
-	Stack,
-	useMediaQuery,
+	Heading,
+	Image,
+	Modal,
+	ModalCloseButton,
+	ModalContent,
+	ModalHeader,
+	ModalOverlay,
 	Select,
+	Stack,
+	Text,
 	useDisclosure,
+	useMediaQuery,
 } from "@chakra-ui/react";
+import React from "react";
 
 type Props = {
 	isOpen: boolean;

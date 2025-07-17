@@ -1,9 +1,10 @@
-import React from "react";
-import { Box, Heading, Image, IconButton, ButtonGroup } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
+import { Box, ButtonGroup, Heading, IconButton, Image } from "@chakra-ui/react";
 import Link from "next/link";
-import styles from "./NavBar.module.css";
+import React from "react";
 import SocialLinks from "../sociallinks/sociallinks";
+import styles from "./NavBar.module.css";
+
 type Props = {};
 
 export default function NavBar({}: Props) {

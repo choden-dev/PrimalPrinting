@@ -1,20 +1,21 @@
-import { NextPage } from "next";
-import NoSsr from "../components/NoSsr";
-import { useRouter } from "next/router";
 import {
 	Box,
+	Divider,
 	Heading,
-	Text,
 	List,
 	ListItem,
-	Divider,
+	Text,
 	UnorderedList,
 } from "@chakra-ui/react";
-import NavBar from "../components/navbar/NavBar";
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import DiscountBadge from "../components/discountbadge/DiscountBadge";
 import Footer from "../components/footer/Footer";
+import NoSsr from "../components/NoSsr";
+import NavBar from "../components/navbar/NavBar";
 import OrderContainer from "../components/ordercontainer/OrderContainer";
 import { orderSum } from "../lib/utils";
-import DiscountBadge from "../components/discountbadge/DiscountBadge";
+
 const OrderComplete: NextPage = () => {
 	const router = useRouter();
 	const orderId = router.query.orderId;

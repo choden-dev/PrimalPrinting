@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { guidGenerator } from "../../lib/utils";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { appendToSpreadSheet } from "../../lib/google";
-import { OrderRow } from "../../types/types";
+import { guidGenerator } from "../../lib/utils";
+import type { OrderRow } from "../../types/types";
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,

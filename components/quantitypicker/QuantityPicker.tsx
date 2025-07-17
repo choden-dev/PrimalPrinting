@@ -3,7 +3,7 @@ import {
 	NumberIncrementStepper,
 	NumberInput,
 	NumberInputField,
-	NumberInputProps,
+	type NumberInputProps,
 	NumberInputStepper,
 } from "@chakra-ui/react";
 

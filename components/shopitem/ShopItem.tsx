@@ -1,5 +1,5 @@
+import { Box, Button, Heading, Image } from "@chakra-ui/react";
 import React from "react";
-import { Box, Heading, Button, Image } from "@chakra-ui/react";
 
 type Props = {
 	name: string;

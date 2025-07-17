@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { sendEmailBankTransfer } from "../../lib/sendgrid";
 
 export default async function handler(

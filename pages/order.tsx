@@ -1,9 +1,9 @@
-import { NextPage } from "next";
 import { Box, Heading } from "@chakra-ui/react";
+import type { NextPage } from "next";
+import Head from "next/head";
 import NavBar from "../components/navbar/NavBar";
 import OrderContainer from "../components/ordercontainer/OrderContainer";
-import { getPackages, findPrice } from "../lib/stripe";
-import Head from "next/head";
+import { findPrice, getPackages } from "../lib/stripe";
 export async function getStaticProps() {
 	/* TODO: renable after packages are back
   let packages = await getPackages();

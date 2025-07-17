@@ -1,10 +1,9 @@
-import React from "react";
-import TestimonialCard from "../testimonialcard/TestimonialCard";
-import { IconButton, useMediaQuery } from "@chakra-ui/react";
 import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-
+import { IconButton, useMediaQuery } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { testimonial } from "../../types/types";
+import React from "react";
+import type { testimonial } from "../../types/types";
+import TestimonialCard from "../testimonialcard/TestimonialCard";
 
 type Props = {
 	testimonials: testimonial[];

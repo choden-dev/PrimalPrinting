@@ -1,8 +1,7 @@
 import { createContext, useEffect, useState } from "react";
-import { getItemsWithBulkDiscount } from "../lib/utils";
-import { getPercentOff } from "../lib/utils";
-import CartItem from "../types/models/CartItem";
-import PdfCartItem from "../types/models/PdfCartItem";
+import { getItemsWithBulkDiscount, getPercentOff } from "../lib/utils";
+import type CartItem from "../types/models/CartItem";
+import type PdfCartItem from "../types/models/PdfCartItem";
 
 type cartPackageOperation = (cartPackage: CartItem) => void;
 type cartPdfOperation = (cartPackage: PdfCartItem) => void;

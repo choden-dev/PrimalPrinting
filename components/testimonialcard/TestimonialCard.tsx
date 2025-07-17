@@ -1,6 +1,7 @@
-import { Box, Heading, Text, Image, Button } from "@chakra-ui/react";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { testimonial } from "../../types/types";
+import { Box, Button, Heading, Image, Text } from "@chakra-ui/react";
+import type { testimonial } from "../../types/types";
+
 type Props = {
 	toDisplay: testimonial;
 };

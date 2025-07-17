@@ -1,14 +1,14 @@
-import React from "react";
 import {
 	Box,
 	Divider,
+	Image,
 	Link,
-	UnorderedList,
 	ListItem,
 	Text,
-	Image,
+	UnorderedList,
 	useMediaQuery,
 } from "@chakra-ui/react";
+import React from "react";
 import SocialLinks from "../sociallinks/sociallinks";
 
 type Props = {};

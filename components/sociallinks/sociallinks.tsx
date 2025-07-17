@@ -1,6 +1,6 @@
-import { IconButton, ButtonGroup } from "@chakra-ui/react";
-import InstagramIcon from "../Icons/InstagramIcon";
+import { ButtonGroup, IconButton } from "@chakra-ui/react";
 import FacebookIcon from "../Icons/FacebookIcon";
+import InstagramIcon from "../Icons/InstagramIcon";
 export default function SocialLinks() {
 	return (
 		<>

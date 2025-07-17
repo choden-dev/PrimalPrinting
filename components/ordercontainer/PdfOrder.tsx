@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef, useContext } from "react";
-import * as pdfjs from "pdfjs-dist";
-import { Box, FormControl, Heading, Input, Text } from "@chakra-ui/react";
-import UploadCard from "../uploadcard/UploadCard";
 import { AddIcon } from "@chakra-ui/icons";
+import { Box, FormControl, Heading, Input, Text } from "@chakra-ui/react";
+import * as pdfjs from "pdfjs-dist";
+import { useContext, useEffect, useRef, useState } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import PdfCartItem from "../../types/models/PdfCartItem";
+import UploadCard from "../uploadcard/UploadCard";
+
 // solution from https://github.com/wojtekmaj/react-pdf/issues/321
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -32,7 +33,7 @@ const PdfOrder = () => {
 		const idx = uploadedPdfs.findIndex(
 			(pdf) => pdf.displayName === toFind.displayName,
 		);
-		let temp = [...uploadedPdfs];
+		const temp = [...uploadedPdfs];
 		const toChange = temp[idx];
 		console.log(option);
 		fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`).then(
@@ -54,7 +55,7 @@ const PdfOrder = () => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		let { files } = e.dataTransfer;
+		const { files } = e.dataTransfer;
 
 		if (files && files.length) {
 			const temp = {

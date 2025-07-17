@@ -1,13 +1,13 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { checkSession } from "../../lib/stripe";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { updatePaymentStatus } from "../../lib/google";
+import { checkSession } from "../../lib/stripe";
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,
 ) {
 	try {
 		const success = await checkSession(req.query.session_id);
-		let orderId = success.orderId;
+		const orderId = success.orderId;
 		const customer = success.customer;
 		const price = success.price;
 

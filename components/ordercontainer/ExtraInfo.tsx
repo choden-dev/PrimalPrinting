@@ -15,8 +15,9 @@ import {
 	UnorderedList,
 	useMediaQuery,
 } from "@chakra-ui/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { getMinimumItemsForDiscount, getPercentOff } from "../../lib/utils";
+
 const AccordionItemComponent = ({
 	children,
 	title,

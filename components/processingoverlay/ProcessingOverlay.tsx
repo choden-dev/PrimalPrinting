@@ -1,5 +1,6 @@
 import { Box, Heading, Spinner, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+
 type Props = {
 	show: boolean;
 	items: { name: string; percent: number }[];

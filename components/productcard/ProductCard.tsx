@@ -1,17 +1,18 @@
-import React, { useRef, useState } from "react";
 import {
 	Box,
-	Heading,
 	Button,
-	Text,
-	ListItem,
-	UnorderedList,
 	ButtonGroup,
+	Heading,
+	ListItem,
+	Text,
+	UnorderedList,
 } from "@chakra-ui/react";
-import styles from "./ProductCard.module.css";
-import { StripeProduct } from "../../types/types";
-import { IAddOrder } from "../../types/helper";
+import React, { useRef, useState } from "react";
+import type { IAddOrder } from "../../types/helper";
+import type { StripeProduct } from "../../types/types";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
+import styles from "./ProductCard.module.css";
+
 type Props = {
 	orderPackage: StripeProduct;
 	image: string;

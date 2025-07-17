@@ -1,26 +1,26 @@
-import Head from "next/head";
-import React, { useState } from "react";
-import { NextPage } from "next";
 import {
 	Box,
-	Heading,
+	Button,
 	FormControl,
 	FormLabel,
-	Input,
-	Textarea,
-	Text,
-	Button,
+	Heading,
 	Image,
+	Input,
 	Stack,
+	Text,
+	Textarea,
 } from "@chakra-ui/react";
-import NavBar from "../components/navbar/NavBar";
+import type { NextPage } from "next";
+import Head from "next/head";
+import React, { useState } from "react";
 import Footer from "../components/footer/Footer";
+import NavBar from "../components/navbar/NavBar";
 import { connectToDatabase } from "../lib/mongo";
 
 export async function getStaticProps() {
 	try {
-		let { db } = await connectToDatabase("WebsiteInfo");
-		let details = await db.collection("Contacts").find({}).toArray();
+		const { db } = await connectToDatabase("WebsiteInfo");
+		const details = await db.collection("Contacts").find({}).toArray();
 		return {
 			props: {
 				details: JSON.parse(JSON.stringify(details)),
