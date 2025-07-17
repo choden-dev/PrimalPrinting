@@ -36,7 +36,7 @@ const Success: NextPage = () => {
                     </Text>
                     <Heading textAlign="center">{orderId}</Heading>
                     <Text marginTop="1rem" textAlign="center">
-                        Please check your email for order confirmation + details
+                        Please check your email for order confirmation + details (<strong>Note that the email may appear in your spam folder.</strong>)
                         and email{" "}
                         <Link
                             fontWeight="700"

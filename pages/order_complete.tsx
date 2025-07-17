@@ -79,7 +79,7 @@ const OrderComplete: NextPage = () => {
             Please transfer this to the account{" "}
             <strong>{process.env.NEXT_PUBLIC_BANK_ACCOUNT}</strong> with the
             reference <strong>{orderId}</strong> and check your email for the
-            next steps!
+            next steps! <strong>Note that the email may appear in your spam folder.</strong>
           </Text>
         </Box>
         <Footer />
