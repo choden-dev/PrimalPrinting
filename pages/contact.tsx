@@ -33,14 +33,14 @@ export async function getStaticProps() {
 }
 
 type PageProps = {
-	details: any[];
+	details: { name: string; value: string }[];
 };
 
 const Contact: NextPage<PageProps> = (details) => {
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 	const [isDone, setIsDone] = useState<boolean>(false);
 
-	const submit = async (event: any) => {
+	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		setIsProcessing(true);
 		const name = event.target.name.value;

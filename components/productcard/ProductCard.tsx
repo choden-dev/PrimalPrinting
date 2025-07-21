@@ -15,14 +15,12 @@ import styles from "./ProductCard.module.css";
 
 type Props = {
 	orderPackage: StripeProduct;
-	image: string;
 	hasButton: boolean;
 	addFunction: IAddOrder;
 };
 
 export default function ProductCard({
 	orderPackage,
-	image,
 	hasButton,
 	addFunction,
 }: Props) {

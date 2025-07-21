@@ -40,7 +40,7 @@ export async function getStaticProps() {
 }
 
 type PageProps = {
-	text: any[];
+	text: { Section: string; Text: string; _id: string }[];
 };
 
 const Home: NextPage<PageProps> = (text) => {
@@ -118,67 +118,69 @@ By Students, For Students🚀💯"
 							gap="1.2rem"
 							position="relative"
 						>
-							{text.text[0]?.map((item: any) => {
-								switch (item.Section) {
-									case "Heading":
-										return (
-											<Box
-												key={item.Text}
-												display="flex"
-												position="relative"
-												flexDir="column"
-											>
+							{text.text[0]?.map(
+								(item: { Section: string; Text: string; _id: string }) => {
+									switch (item.Section) {
+										case "Heading":
+											return (
 												<Box
-													position="absolute"
-													transformOrigin="top right"
-													transform="rotate(90deg)"
-													h="100vw"
-													alignSelf="center"
-													w="4.5rem"
-													bgImage="binder.png"
-													top="5rem"
-													left="0"
-													bgRepeat="no-repeat"
-												></Box>
-												<Heading
-													marginTop="5.4rem"
-													color="brown.900"
-													textAlign="left"
-													fontSize="3.2rem"
+													key={item.Text}
+													display="flex"
+													position="relative"
+													flexDir="column"
 												>
-													{item.Text}
-												</Heading>
-												<Divider borderColor="brown.900" margin="1rem 0" />
-											</Box>
-										);
-									case "Text":
-										return (
-											<Text
-												key={item._id}
-												// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-												dangerouslySetInnerHTML={{
-													__html: item.Text,
-												}}
-												fontSize="xl"
-												textAlign="left"
-												fontWeight="300"
-												whiteSpace="pre-line"
-											/>
-										);
-									case "Image":
-										return (
-											<Image
-												src={item.Text}
-												key={item._id}
-												alt={"about page image"}
-												width="100%"
-												objectFit="cover"
-											/>
-										);
-									default:
-										return null;
-								}
-							})}
+													<Box
+														position="absolute"
+														transformOrigin="top right"
+														transform="rotate(90deg)"
+														h="100vw"
+														alignSelf="center"
+														w="4.5rem"
+														bgImage="binder.png"
+														top="5rem"
+														left="0"
+														bgRepeat="no-repeat"
+													></Box>
+													<Heading
+														marginTop="5.4rem"
+														color="brown.900"
+														textAlign="left"
+														fontSize="3.2rem"
+													>
+														{item.Text}
+													</Heading>
+													<Divider borderColor="brown.900" margin="1rem 0" />
+												</Box>
+											);
+										case "Text":
+											return (
+												<Text
+													key={item._id}
+													// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+													dangerouslySetInnerHTML={{
+														__html: item.Text,
+													}}
+													fontSize="xl"
+													textAlign="left"
+													fontWeight="300"
+													whiteSpace="pre-line"
+												/>
+											);
+										case "Image":
+											return (
+												<Image
+													src={item.Text}
+													key={item._id}
+													alt={"about page image"}
+													width="100%"
+													objectFit="cover"
+												/>
+											);
+										default:
+											return null;
+									}
+								},
+							)}
 						</Box>
 					</Box>
 				</Box>
