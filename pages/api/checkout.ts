@@ -9,7 +9,6 @@ import {
 const CheckoutSchema = z.object({
 	items: z.array(
 		z.object({
-			id: z.string(),
 			quantity: z.number().min(1),
 			name: z.string(),
 			price: z.string(), // Changed to string to match expected type
@@ -18,7 +17,7 @@ const CheckoutSchema = z.object({
 		}),
 	),
 	orderId: z.string(),
-	email: z.string().email(),
+	email: z.email(),
 });
 
 export default async function handler(
