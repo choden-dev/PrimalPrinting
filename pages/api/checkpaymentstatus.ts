@@ -34,7 +34,7 @@ export default async function handler(
 					name: customer?.name,
 					email: customer?.email,
 					orderId: orderId,
-					price: price || NaN / 100,
+					price: (price || NaN) / 100,
 				}),
 			});
 			return res.redirect(307, `/success?orderId=${orderId}`);
