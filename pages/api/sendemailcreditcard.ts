@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { sendEmailStripePayment } from "../../lib/nodemailer";
 import { z } from "zod";
+import { sendEmailStripePayment } from "../../lib/nodemailer";
 
 const schema = z.object({
 	email: z.email(),
