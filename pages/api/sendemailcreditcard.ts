@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { sendEmailStripePayment } from "../../lib/sendgrid";
+import { sendEmailStripePayment } from "../../lib/nodemailer";
 
 export default async function handler(
 	req: NextApiRequest,

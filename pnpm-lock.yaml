@@ -23,6 +23,12 @@ importers:
       '@sendgrid/mail':
         specifier: ^7.7.0
         version: 7.7.0
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.17
+      '@types/pug':
+        specifier: ^2.0.10
+        version: 2.0.10
       fetch-blob:
         specifier: ^3.2.0
         version: 3.2.0
@@ -47,9 +53,15 @@ importers:
       nextjs-google-analytics:
         specifier: ^2.3.3
         version: 2.3.3(next@12.2.3(@babel/core@7.18.9)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+      nodemailer:
+        specifier: ^7.0.5
+        version: 7.0.5
       pdfjs-dist:
         specifier: ^3.5.141
         version: 3.5.141
+      pug:
+        specifier: ^3.0.3
+        version: 3.0.3
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1073,11 +1085,17 @@ packages:
   '@types/node@18.6.2':
     resolution: {integrity: sha512-KcfkBq9H4PI6Vpu5B/KoPeuVDAbmi+2mDBqGPGUgoL7yXQtcWGu2vJWmmRkneWK3Rh0nIAX192Aa87AqKHYChQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/node/-/node-18.6.2.tgz}
 
+  '@types/nodemailer@6.4.17':
+    resolution: {integrity: sha512-I9CCaIp6DTldEg7vyUTZi8+9Vo0hi1/T8gv3C89yk1rSAAzoKQ8H8ki/jBYJSFoH/BisgLP8tkZMlQ91CIquww==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/nodemailer/-/nodemailer-6.4.17.tgz}
+
   '@types/parse-json@4.0.0':
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/parse-json/-/parse-json-4.0.0.tgz}
 
   '@types/prop-types@15.7.5':
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/prop-types/-/prop-types-15.7.5.tgz}
+
+  '@types/pug@2.0.10':
+    resolution: {integrity: sha512-Sk/uYFOBAB7mb74XcpizmH0KOR2Pv3D2Hmrh1Dmy5BmK3MpdSa5kqZcg6EKBdklU0bFXX9gCfzvpnyUehrPIuA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/pug/-/pug-2.0.10.tgz}
 
   '@types/react-dom@18.0.6':
     resolution: {integrity: sha512-/5OFZgfIPSwy+YuIBP/FgJnQnsxhZhjjrnxudMddeblOouIodEQ75X14Rr4wGSG/bknL+Omy9iWlLo1u/9GzAA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/react-dom/-/react-dom-18.0.6.tgz}
@@ -1135,6 +1153,11 @@ packages:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/acorn-jsx/-/acorn-jsx-5.3.2.tgz}
     peerDependencies:
       acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
+
+  acorn@7.4.1:
+    resolution: {integrity: sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/acorn/-/acorn-7.4.1.tgz}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
 
   acorn@8.8.0:
     resolution: {integrity: sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/acorn/-/acorn-8.8.0.tgz}
@@ -1202,6 +1225,12 @@ packages:
     resolution: {integrity: sha512-3duEwti880xqi4eAMN8AyR4a0ByT90zoYdLlevfrvU43vb0YZwZVfxOgxWrLXXXpyugL0hNZc9G6BiB5B3nUug==, tarball: https://packages.atlassian.com/api/npm/npm-remote/arrify/-/arrify-2.0.1.tgz}
     engines: {node: '>=8'}
 
+  asap@2.0.6:
+    resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/asap/-/asap-2.0.6.tgz}
+
+  assert-never@1.4.0:
+    resolution: {integrity: sha512-5oJg84os6NMQNl27T9LnZkvvqzvAnHu03ShCnoj6bsJwS7L8AO4lf+C/XjK/nvzEqQB744moC6V128RucQd1jA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/assert-never/-/assert-never-1.4.0.tgz}
+
   ast-types-flow@0.0.7:
     resolution: {integrity: sha512-eBvWn1lvIApYMhzQMsu9ciLfkBY499mFZlNqG+/9WR7PVlroQw0vG30cOQQbaKz3sCEc44TAOu2ykzqXSNnwag==, tarball: https://packages.atlassian.com/api/npm/npm-remote/ast-types-flow/-/ast-types-flow-0.0.7.tgz}
 
@@ -1218,6 +1247,10 @@ packages:
   babel-plugin-macros@3.1.0:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/babel-plugin-macros/-/babel-plugin-macros-3.1.0.tgz}
     engines: {node: '>=10', npm: '>=6'}
+
+  babel-walk@3.0.0-canary-5:
+    resolution: {integrity: sha512-GAwkz0AihzY5bkwIY5QDR+LvsRQgB/B+1foMPvi0FZPMl5fjD7ICiznUiBdLYMH1QYe6vqu4gWYytZOccLouFw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/babel-walk/-/babel-walk-3.0.0-canary-5.tgz}
+    engines: {node: '>= 10.0.0'}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/balanced-match/-/balanced-match-1.0.2.tgz}
@@ -1279,6 +1312,9 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/chalk/-/chalk-4.1.2.tgz}
     engines: {node: '>=10'}
 
+  character-parser@2.2.0:
+    resolution: {integrity: sha512-+UqJQjFEFaTAs3bNsF2j2kEN1baG/zghZbdqoYEDxGZtJo9LBzl1A+m0D4n3qKx8N2FNv8/Xp6yV9mQmBuptaw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/character-parser/-/character-parser-2.2.0.tgz}
+
   chownr@2.0.0:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/chownr/-/chownr-2.0.0.tgz}
     engines: {node: '>=10'}
@@ -1319,6 +1355,9 @@ packages:
 
   console-control-strings@1.1.0:
     resolution: {integrity: sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/console-control-strings/-/console-control-strings-1.1.0.tgz}
+
+  constantinople@4.0.1:
+    resolution: {integrity: sha512-vCrqcSIq4//Gx74TXXCGnHpulY1dskqLTFGDmhrGxzeXL8lF8kvXv6mpNWlJj1uD4DW23D4ljAqbY4RRaaUZIw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/constantinople/-/constantinople-4.0.1.tgz}
 
   convert-source-map@1.8.0:
     resolution: {integrity: sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/convert-source-map/-/convert-source-map-1.8.0.tgz}
@@ -1414,6 +1453,9 @@ packages:
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/doctrine/-/doctrine-3.0.0.tgz}
     engines: {node: '>=6.0.0'}
+
+  doctypes@1.1.0:
+    resolution: {integrity: sha512-LLBi6pEqS6Do3EKQ3J0NqHWV5hhb78Pi8vvESYwyOy2c31ZEZVdtitdzsQsKb7878PEERhzUk0ftqGhG6Mz+pQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/doctypes/-/doctypes-1.1.0.tgz}
 
   ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz}
@@ -1850,6 +1892,9 @@ packages:
     resolution: {integrity: sha512-9YQaSxsAiSwcvS33MBk3wTCVnWK+HhF8VZR2jRxehM16QcVOdHqPn4VPHmRK4lSr38n9JriurInLcP90xsYNfQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/is-date-object/-/is-date-object-1.0.5.tgz}
     engines: {node: '>= 0.4'}
 
+  is-expression@4.0.0:
+    resolution: {integrity: sha512-zMIXX63sxzG3XrkHkrAPvm/OVZVSCPNkwMHU8oTX7/U3AL78I0QXCEICXUM13BIa8TYGZ68PiTKfQz3yaTNr4A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/is-expression/-/is-expression-4.0.0.tgz}
+
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/is-extglob/-/is-extglob-2.1.1.tgz}
     engines: {node: '>=0.10.0'}
@@ -1873,6 +1918,9 @@ packages:
   is-number@7.0.0:
     resolution: {integrity: sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==, tarball: https://packages.atlassian.com/api/npm/npm-remote/is-number/-/is-number-7.0.0.tgz}
     engines: {node: '>=0.12.0'}
+
+  is-promise@2.2.2:
+    resolution: {integrity: sha512-+lP4/6lKUBfQjZ2pdxThZvLUAafmZb8OAxFb8XXtiQmS35INgr85hdOGoEs124ez1FCnZJt6jau/T+alh58QFQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/is-promise/-/is-promise-2.2.2.tgz}
 
   is-regex@1.1.4:
     resolution: {integrity: sha512-kvRdxDsxZjhzUX07ZnLydzS1TU/TJlTUHHY4YLL87e37oUA49DfkLqgy+VjFocowy29cKvcSiu+kIv728jTTVg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/is-regex/-/is-regex-1.1.4.tgz}
@@ -1901,6 +1949,9 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/isexe/-/isexe-2.0.0.tgz}
+
+  js-stringify@1.0.2:
+    resolution: {integrity: sha512-rtS5ATOo2Q5k1G+DADISilDA6lv79zIiwFd6CcjuIxGKLFm5C+RLImRscVap9k55i+MOZwgliw+NejvkLuGD5g==, tarball: https://packages.atlassian.com/api/npm/npm-remote/js-stringify/-/js-stringify-1.0.2.tgz}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/js-tokens/-/js-tokens-4.0.0.tgz}
@@ -1934,6 +1985,9 @@ packages:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/json5/-/json5-2.2.3.tgz}
     engines: {node: '>=6'}
     hasBin: true
+
+  jstransformer@1.0.0:
+    resolution: {integrity: sha512-C9YK3Rf8q6VAPDCCU9fnqo3mAfOH6vUGnMcP4AQAYIEpWtfGLpwOTmZ+igtdK5y+VvI2n3CyYSzy4Qh34eq24A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/jstransformer/-/jstransformer-1.0.0.tgz}
 
   jsx-ast-utils@3.3.2:
     resolution: {integrity: sha512-4ZCADZHRkno244xlNnn4AOG6sRQ7iBZ5BbgZ4vW4y5IZw7cVUD1PPeblm1xx/nfmMxPdt/LHsXZW8z/j58+l9Q==, tarball: https://packages.atlassian.com/api/npm/npm-remote/jsx-ast-utils/-/jsx-ast-utils-3.3.2.tgz}
@@ -2180,6 +2234,10 @@ packages:
   node-releases@2.0.6:
     resolution: {integrity: sha512-PiVXnNuFm5+iYkLBNeq5211hvO38y63T0i2KKh2KnUs3RpzJ+JtODFjkD8yjLwnDkTYF1eKXheUwdssR+NRZdg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/node-releases/-/node-releases-2.0.6.tgz}
 
+  nodemailer@7.0.5:
+    resolution: {integrity: sha512-nsrh2lO3j4GkLLXoeEksAMgAOqxOv6QumNRVQTJwKH4nuiww6iC2y7GyANs9kRAxCexg3+lTWM3PZ91iLlVjfg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/nodemailer/-/nodemailer-7.0.5.tgz}
+    engines: {node: '>=6.0.0'}
+
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/nopt/-/nopt-5.0.0.tgz}
     engines: {node: '>=6'}
@@ -2294,6 +2352,9 @@ packages:
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==, tarball: https://packages.atlassian.com/api/npm/npm-remote/process-nextick-args/-/process-nextick-args-2.0.1.tgz}
 
+  promise@7.3.1:
+    resolution: {integrity: sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/promise/-/promise-7.3.1.tgz}
+
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/prop-types/-/prop-types-15.8.1.tgz}
 
@@ -2304,6 +2365,42 @@ packages:
   protobufjs@7.2.3:
     resolution: {integrity: sha512-TtpvOqwB5Gdz/PQmOjgsrGH1nHjAQVCN7JG4A6r1sXRWESL5rNMAiRcBQlCAdKxZcAbstExQePYG8xof/JVRgg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/protobufjs/-/protobufjs-7.2.3.tgz}
     engines: {node: '>=12.0.0'}
+
+  pug-attrs@3.0.0:
+    resolution: {integrity: sha512-azINV9dUtzPMFQktvTXciNAfAuVh/L/JCl0vtPCwvOA21uZrC08K/UnmrL+SXGEVc1FwzjW62+xw5S/uaLj6cA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-attrs/-/pug-attrs-3.0.0.tgz}
+
+  pug-code-gen@3.0.3:
+    resolution: {integrity: sha512-cYQg0JW0w32Ux+XTeZnBEeuWrAY7/HNE6TWnhiHGnnRYlCgyAUPoyh9KzCMa9WhcJlJ1AtQqpEYHc+vbCzA+Aw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-code-gen/-/pug-code-gen-3.0.3.tgz}
+
+  pug-error@2.1.0:
+    resolution: {integrity: sha512-lv7sU9e5Jk8IeUheHata6/UThZ7RK2jnaaNztxfPYUY+VxZyk/ePVaNZ/vwmH8WqGvDz3LrNYt/+gA55NDg6Pg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-error/-/pug-error-2.1.0.tgz}
+
+  pug-filters@4.0.0:
+    resolution: {integrity: sha512-yeNFtq5Yxmfz0f9z2rMXGw/8/4i1cCFecw/Q7+D0V2DdtII5UvqE12VaZ2AY7ri6o5RNXiweGH79OCq+2RQU4A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-filters/-/pug-filters-4.0.0.tgz}
+
+  pug-lexer@5.0.1:
+    resolution: {integrity: sha512-0I6C62+keXlZPZkOJeVam9aBLVP2EnbeDw3An+k0/QlqdwH6rv8284nko14Na7c0TtqtogfWXcRoFE4O4Ff20w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-lexer/-/pug-lexer-5.0.1.tgz}
+
+  pug-linker@4.0.0:
+    resolution: {integrity: sha512-gjD1yzp0yxbQqnzBAdlhbgoJL5qIFJw78juN1NpTLt/mfPJ5VgC4BvkoD3G23qKzJtIIXBbcCt6FioLSFLOHdw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-linker/-/pug-linker-4.0.0.tgz}
+
+  pug-load@3.0.0:
+    resolution: {integrity: sha512-OCjTEnhLWZBvS4zni/WUMjH2YSUosnsmjGBB1An7CsKQarYSWQ0GCVyd4eQPMFJqZ8w9xgs01QdiZXKVjk92EQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-load/-/pug-load-3.0.0.tgz}
+
+  pug-parser@6.0.0:
+    resolution: {integrity: sha512-ukiYM/9cH6Cml+AOl5kETtM9NR3WulyVP2y4HOU45DyMim1IeP/OOiyEWRr6qk5I5klpsBnbuHpwKmTx6WURnw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-parser/-/pug-parser-6.0.0.tgz}
+
+  pug-runtime@3.0.1:
+    resolution: {integrity: sha512-L50zbvrQ35TkpHwv0G6aLSuueDRwc/97XdY8kL3tOT0FmhgG7UypU3VztfV/LATAvmUfYi4wNxSajhSAeNN+Kg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-runtime/-/pug-runtime-3.0.1.tgz}
+
+  pug-strip-comments@2.0.0:
+    resolution: {integrity: sha512-zo8DsDpH7eTkPHCXFeAk1xZXJbyoTfdPlNR0bK7rpOMuhBYb0f5qUVCO1xlsitYd3w5FQTK7zpNVKb3rZoUrrQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-strip-comments/-/pug-strip-comments-2.0.0.tgz}
+
+  pug-walk@2.0.0:
+    resolution: {integrity: sha512-yYELe9Q5q9IQhuvqsZNwA5hfPkMJ8u92bQLIMcsMxf/VADjNtEYptU+inlufAFYcWdHlwNfZOEnOOQrZrcyJCQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug-walk/-/pug-walk-2.0.0.tgz}
+
+  pug@3.0.3:
+    resolution: {integrity: sha512-uBi6kmc9f3SZ3PXxqcHiUZLmIXgfgWooKWXcwSGwQd2Zi5Rb0bT14+8CJjJgI8AB+nndLaNgHGrcc6bPIB665g==, tarball: https://packages.atlassian.com/api/npm/npm-remote/pug/-/pug-3.0.3.tgz}
 
   punycode@2.1.1:
     resolution: {integrity: sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/punycode/-/punycode-2.1.1.tgz}
@@ -2583,6 +2680,9 @@ packages:
   toggle-selection@1.0.6:
     resolution: {integrity: sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/toggle-selection/-/toggle-selection-1.0.6.tgz}
 
+  token-stream@1.0.0:
+    resolution: {integrity: sha512-VSsyNPPW74RpHwR8Fc21uubwHY7wMDeJLys2IX5zJNih+OnAnaifKHo+1LHT7DAdloQ7apeaaWg8l7qnf/TnEg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/token-stream/-/token-stream-1.0.0.tgz}
+
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/tr46/-/tr46-0.0.3.tgz}
 
@@ -2675,6 +2775,10 @@ packages:
   v8-compile-cache@2.3.0:
     resolution: {integrity: sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz}
 
+  void-elements@3.1.0:
+    resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/void-elements/-/void-elements-3.1.0.tgz}
+    engines: {node: '>=0.10.0'}
+
   web-streams-polyfill@3.2.1:
     resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==, tarball: https://packages.atlassian.com/api/npm/npm-remote/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz}
     engines: {node: '>= 8'}
@@ -2711,6 +2815,10 @@ packages:
 
   wide-align@1.1.5:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/wide-align/-/wide-align-1.1.5.tgz}
+
+  with@7.0.2:
+    resolution: {integrity: sha512-RNGKj82nUPg3g5ygxkQl0R937xLyho1J24ItRCBTr/m1YnZkzJy1hUiHUJrc/VlsDQzsCnInEGSg3bci0Lmd4w==, tarball: https://packages.atlassian.com/api/npm/npm-remote/with/-/with-7.0.2.tgz}
+    engines: {node: '>= 10.0.0'}
 
   word-wrap@1.2.3:
     resolution: {integrity: sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/word-wrap/-/word-wrap-1.2.3.tgz}
@@ -4092,9 +4200,15 @@ snapshots:
 
   '@types/node@18.6.2': {}
 
+  '@types/nodemailer@6.4.17':
+    dependencies:
+      '@types/node': 18.6.2
+
   '@types/parse-json@4.0.0': {}
 
   '@types/prop-types@15.7.5': {}
+
+  '@types/pug@2.0.10': {}
 
   '@types/react-dom@18.0.6':
     dependencies:
@@ -4161,6 +4275,8 @@ snapshots:
   acorn-jsx@5.3.2(acorn@8.8.0):
     dependencies:
       acorn: 8.8.0
+
+  acorn@7.4.1: {}
 
   acorn@8.8.0: {}
 
@@ -4235,6 +4351,10 @@ snapshots:
 
   arrify@2.0.1: {}
 
+  asap@2.0.6: {}
+
+  assert-never@1.4.0: {}
+
   ast-types-flow@0.0.7: {}
 
   axe-core@4.4.3: {}
@@ -4252,6 +4372,10 @@ snapshots:
       '@babel/runtime': 7.18.9
       cosmiconfig: 7.0.1
       resolve: 1.22.1
+
+  babel-walk@3.0.0-canary-5:
+    dependencies:
+      '@babel/types': 7.24.5
 
   balanced-match@1.0.2: {}
 
@@ -4322,6 +4446,10 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
+  character-parser@2.2.0:
+    dependencies:
+      is-regex: 1.1.4
+
   chownr@2.0.0:
     optional: true
 
@@ -4365,6 +4493,11 @@ snapshots:
 
   console-control-strings@1.1.0:
     optional: true
+
+  constantinople@4.0.1:
+    dependencies:
+      '@babel/parser': 7.24.5
+      '@babel/types': 7.24.5
 
   convert-source-map@1.8.0:
     dependencies:
@@ -4447,6 +4580,8 @@ snapshots:
   doctrine@3.0.0:
     dependencies:
       esutils: 2.0.3
+
+  doctypes@1.1.0: {}
 
   ecdsa-sig-formatter@1.0.11:
     dependencies:
@@ -5049,6 +5184,11 @@ snapshots:
     dependencies:
       has-tostringtag: 1.0.0
 
+  is-expression@4.0.0:
+    dependencies:
+      acorn: 7.4.1
+      object-assign: 4.1.1
+
   is-extglob@2.1.1: {}
 
   is-fullwidth-code-point@3.0.0: {}
@@ -5064,6 +5204,8 @@ snapshots:
       has-tostringtag: 1.0.0
 
   is-number@7.0.0: {}
+
+  is-promise@2.2.2: {}
 
   is-regex@1.1.4:
     dependencies:
@@ -5092,6 +5234,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  js-stringify@1.0.2: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@4.1.0:
@@ -5115,6 +5259,11 @@ snapshots:
       minimist: 1.2.6
 
   json5@2.2.3: {}
+
+  jstransformer@1.0.0:
+    dependencies:
+      is-promise: 2.2.2
+      promise: 7.3.1
 
   jsx-ast-utils@3.3.2:
     dependencies:
@@ -5348,6 +5497,8 @@ snapshots:
 
   node-releases@2.0.6: {}
 
+  nodemailer@7.0.5: {}
+
   nopt@5.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -5474,6 +5625,10 @@ snapshots:
 
   process-nextick-args@2.0.1: {}
 
+  promise@7.3.1:
+    dependencies:
+      asap: 2.0.6
+
   prop-types@15.8.1:
     dependencies:
       loose-envify: 1.4.0
@@ -5510,6 +5665,73 @@ snapshots:
       '@protobufjs/utf8': 1.1.0
       '@types/node': 18.6.2
       long: 5.2.3
+
+  pug-attrs@3.0.0:
+    dependencies:
+      constantinople: 4.0.1
+      js-stringify: 1.0.2
+      pug-runtime: 3.0.1
+
+  pug-code-gen@3.0.3:
+    dependencies:
+      constantinople: 4.0.1
+      doctypes: 1.1.0
+      js-stringify: 1.0.2
+      pug-attrs: 3.0.0
+      pug-error: 2.1.0
+      pug-runtime: 3.0.1
+      void-elements: 3.1.0
+      with: 7.0.2
+
+  pug-error@2.1.0: {}
+
+  pug-filters@4.0.0:
+    dependencies:
+      constantinople: 4.0.1
+      jstransformer: 1.0.0
+      pug-error: 2.1.0
+      pug-walk: 2.0.0
+      resolve: 1.22.1
+
+  pug-lexer@5.0.1:
+    dependencies:
+      character-parser: 2.2.0
+      is-expression: 4.0.0
+      pug-error: 2.1.0
+
+  pug-linker@4.0.0:
+    dependencies:
+      pug-error: 2.1.0
+      pug-walk: 2.0.0
+
+  pug-load@3.0.0:
+    dependencies:
+      object-assign: 4.1.1
+      pug-walk: 2.0.0
+
+  pug-parser@6.0.0:
+    dependencies:
+      pug-error: 2.1.0
+      token-stream: 1.0.0
+
+  pug-runtime@3.0.1: {}
+
+  pug-strip-comments@2.0.0:
+    dependencies:
+      pug-error: 2.1.0
+
+  pug-walk@2.0.0: {}
+
+  pug@3.0.3:
+    dependencies:
+      pug-code-gen: 3.0.3
+      pug-filters: 4.0.0
+      pug-lexer: 5.0.1
+      pug-linker: 4.0.0
+      pug-load: 3.0.0
+      pug-parser: 6.0.0
+      pug-runtime: 3.0.1
+      pug-strip-comments: 2.0.0
 
   punycode@2.1.1: {}
 
@@ -5796,6 +6018,8 @@ snapshots:
 
   toggle-selection@1.0.6: {}
 
+  token-stream@1.0.0: {}
+
   tr46@0.0.3: {}
 
   tr46@3.0.0:
@@ -5877,6 +6101,8 @@ snapshots:
 
   v8-compile-cache@2.3.0: {}
 
+  void-elements@3.1.0: {}
+
   web-streams-polyfill@3.2.1: {}
 
   webidl-conversions@3.0.1: {}
@@ -5917,6 +6143,13 @@ snapshots:
     dependencies:
       string-width: 4.2.3
     optional: true
+
+  with@7.0.2:
+    dependencies:
+      '@babel/parser': 7.24.5
+      '@babel/types': 7.24.5
+      assert-never: 1.4.0
+      babel-walk: 3.0.0-canary-5
 
   word-wrap@1.2.3: {}
 

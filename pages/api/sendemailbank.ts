@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { sendEmailBankTransfer } from "../../lib/sendgrid";
+import { sendEmailBankTransfer } from "../../lib/nodemailer";
 
 export default async function handler(
 	req: NextApiRequest,
