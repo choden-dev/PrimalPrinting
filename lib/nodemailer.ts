@@ -65,7 +65,7 @@ export const sendEmailStripePayment = async (
 		name,
 		orderId,
 		price,
-		items: items.join(", ")
+		items: items.join(", "),
 	});
 	const mailOptions = {
 		from: process.env.GMAIL_USER,

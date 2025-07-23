@@ -177,8 +177,7 @@ const generateCustomerFriendlyStripeItems = (
 	items: StripeBackendItem[],
 ): CustomerFriendlyStripeItem[] => {
 	return items.map(
-		(item) =>
-			`${item.name} x ${item.quantity}` as CustomerFriendlyStripeItem,
+		(item) => `${item.name} x ${item.quantity}` as CustomerFriendlyStripeItem,
 	);
 };
 

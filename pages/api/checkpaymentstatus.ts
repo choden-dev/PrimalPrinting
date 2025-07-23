@@ -30,8 +30,10 @@ export default async function handler(
 		}
 
 		if (sessionData.paid) {
-			await updatePaymentStatus(orderId || "Unknown Order ID - please contact us");
-			console.log(sessionData)
+			await updatePaymentStatus(
+				orderId || "Unknown Order ID - please contact us",
+			);
+			console.log(sessionData);
 			await fetch(`${process.env.BASE_URL}/api/sendemailcreditcard`, {
 				method: "POST",
 				body: JSON.stringify({
@@ -39,7 +41,9 @@ export default async function handler(
 					email: customer?.email,
 					orderId: orderId,
 					price: String((price || NaN) / 100),
-					items: JSON.parse(sessionData[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY] || "[]"),
+					items: JSON.parse(
+						sessionData[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY] || "[]",
+					),
 				}),
 			});
 			return res.redirect(307, `/success?orderId=${orderId}`);

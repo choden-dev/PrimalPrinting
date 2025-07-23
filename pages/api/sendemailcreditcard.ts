@@ -32,7 +32,7 @@ export default async function handler(
 		body.name,
 		body.orderId,
 		body.price,
-		body.items
+		body.items,
 	);
 	res.status(200).json({ success: success });
 }
