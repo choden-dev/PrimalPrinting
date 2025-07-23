@@ -61,7 +61,7 @@ export const updatePaymentStatus = async (orderId: string) => {
 		auth: auth,
 	});
 
-	const updatedValues = values.map((row) => {
+	const updatedValues = values?.map((row) => {
 		if (row.includes(orderId)) {
 			row[10] = "yes";
 		}

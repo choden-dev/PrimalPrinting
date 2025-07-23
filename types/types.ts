@@ -30,6 +30,9 @@ export type StripeBackendItem = {
 	priceId: string;
 };
 
+export type CustomerFriendlyStripeItem =
+	`${StripeBackendItem["name"]} x ${StripeBackendItem["quantity"]}`;
+
 export type OrderRow = {
 	orderId?: string;
 	name: string;
