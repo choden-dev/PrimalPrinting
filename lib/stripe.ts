@@ -1,12 +1,18 @@
 import Stripe from "stripe";
-import type { StripeBackendItem } from "../types/types";
+import type {
+	CustomerFriendlyStripeItem,
+	StripeBackendItem,
+} from "../types/types";
 import {
 	getItemsWithBulkDiscount,
 	getMinimumItemsForDiscount,
 	getPercentOff,
 } from "./utils";
 
-let stripeCached: any = null;
+let stripeCached: Stripe;
+
+export const CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY =
+	"customerFriendlyStripeItems" as const;
 
 // caches the connection or starts a new one
 const makeStripeConnection = async () => {
@@ -75,7 +81,7 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 		}`,
 	});
 	const priceId = products.data[0].default_price?.toString();
-	const price = await findPrice(priceId);
+	const price = await findPrice(priceId || "");
 	const productId = products.data[0].id;
 	return {
 		price: price,
@@ -157,9 +163,23 @@ export const createSession = async (
 		customer_email: email,
 		cancel_url: `${process.env
 			.STRIPE_CANCEL_URL!}?session_id={CHECKOUT_SESSION_ID}`,
-		metadata: { orderId: orderId },
+		metadata: {
+			orderId: orderId,
+			[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY]: JSON.stringify(
+				generateCustomerFriendlyStripeItems(items),
+			),
+		},
 	});
 	return session;
+};
+
+const generateCustomerFriendlyStripeItems = (
+	items: StripeBackendItem[],
+): CustomerFriendlyStripeItem[] => {
+	return items.map(
+		(item) =>
+			`${item.name} x ${item.quantity}` as CustomerFriendlyStripeItem,
+	);
 };
 
 export const checkSession = async (sessionId: string) => {
@@ -170,6 +190,9 @@ export const checkSession = async (sessionId: string) => {
 		price: session.amount_total,
 		customer: session.customer_details,
 		paid: session.status === "complete",
-		orderId: session.metadata.orderId,
+		orderId: session.metadata?.orderId,
+		// This is the RAW JSON string from the metadata
+		[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY]:
+			session.metadata?.[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY],
 	};
 };

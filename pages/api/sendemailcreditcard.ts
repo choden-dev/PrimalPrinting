@@ -7,6 +7,7 @@ const schema = z.object({
 	name: z.string().min(1),
 	orderId: z.string().min(1),
 	price: z.string().min(1),
+	items: z.array(z.string()),
 });
 
 export default async function handler(
@@ -31,6 +32,7 @@ export default async function handler(
 		body.name,
 		body.orderId,
 		body.price,
+		body.items
 	);
 	res.status(200).json({ success: success });
 }

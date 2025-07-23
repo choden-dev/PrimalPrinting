@@ -59,8 +59,14 @@ export const sendEmailStripePayment = async (
 	name: string,
 	orderId: string,
 	price: string,
+	items: string[] = [],
 ): Promise<boolean> => {
-	const html = pug.renderFile(creditCardTemplatePath, { name, orderId, price });
+	const html = pug.renderFile(creditCardTemplatePath, {
+		name,
+		orderId,
+		price,
+		items: items.join(", ")
+	});
 	const mailOptions = {
 		from: process.env.GMAIL_USER,
 		to: email,
@@ -68,6 +74,7 @@ export const sendEmailStripePayment = async (
 		html,
 	};
 	try {
+		console.log("Sending email to:", email, html);
 		await transporter.sendMail(mailOptions);
 		return true;
 	} catch (error) {

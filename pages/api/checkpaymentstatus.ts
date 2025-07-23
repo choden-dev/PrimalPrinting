@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import { updatePaymentStatus } from "../../lib/google";
-import { checkSession } from "../../lib/stripe";
+import {
+	CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY,
+	checkSession,
+} from "../../lib/stripe";
 
 const CheckPaymentStatusSchema = z.object({
 	session_id: z.string(),
@@ -14,10 +17,10 @@ export default async function handler(
 	try {
 		const parsedQuery = CheckPaymentStatusSchema.parse(req.query);
 
-		const success = await checkSession(parsedQuery.session_id);
-		const orderId = success.orderId;
-		const customer = success.customer;
-		const price = success.price;
+		const sessionData = await checkSession(parsedQuery.session_id);
+		const orderId = sessionData.orderId;
+		const customer = sessionData.customer;
+		const price = sessionData.price;
 
 		if (!process.env.BASE_URL) {
 			return res.status(500).json({
@@ -26,15 +29,17 @@ export default async function handler(
 			});
 		}
 
-		if (success.paid) {
-			updatePaymentStatus(orderId);
+		if (sessionData.paid) {
+			await updatePaymentStatus(orderId || "Unknown Order ID - please contact us");
+			console.log(sessionData)
 			await fetch(`${process.env.BASE_URL}/api/sendemailcreditcard`, {
 				method: "POST",
 				body: JSON.stringify({
 					name: customer?.name,
 					email: customer?.email,
 					orderId: orderId,
-					price: (price || NaN) / 100,
+					price: String((price || NaN) / 100),
+					items: JSON.parse(sessionData[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY] || "[]"),
 				}),
 			});
 			return res.redirect(307, `/success?orderId=${orderId}`);
