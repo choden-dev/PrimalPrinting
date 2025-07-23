@@ -74,7 +74,6 @@ export const sendEmailStripePayment = async (
 		html,
 	};
 	try {
-		console.log("Sending email to:", email, html);
 		await transporter.sendMail(mailOptions);
 		return true;
 	} catch (error) {
