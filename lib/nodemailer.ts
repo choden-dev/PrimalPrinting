@@ -1,5 +1,5 @@
+import path from "node:path";
 import nodemailer from "nodemailer";
-import path from "path";
 import pug from "pug";
 
 const transporter = nodemailer.createTransport({

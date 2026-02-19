@@ -158,11 +158,13 @@ export const createSession = async (
 		}),
 		...(coupon === undefined && { allow_promotion_codes: true }),
 
-		success_url: `${process.env
-			.STRIPE_SUCCESS_URL!}?session_id={CHECKOUT_SESSION_ID}`,
+		success_url: `${
+			process.env.STRIPE_SUCCESS_URL
+		}?session_id={CHECKOUT_SESSION_ID}`,
 		customer_email: email,
-		cancel_url: `${process.env
-			.STRIPE_CANCEL_URL!}?session_id={CHECKOUT_SESSION_ID}`,
+		cancel_url: `${
+			process.env.STRIPE_CANCEL_URL
+		}?session_id={CHECKOUT_SESSION_ID}`,
 		metadata: {
 			orderId: orderId,
 			[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY]: JSON.stringify(

@@ -30,7 +30,9 @@ export const authenticateGoogle = () => {
 	return auth;
 };
 //adapted from https://gist.github.com/iaincollins/43302ea047d4a77e6605350598d160c1
-export const appendToSpreadSheet = async (toAppend: any[][]) => {
+export const appendToSpreadSheet = async (
+	toAppend: (string | number | boolean | null | undefined)[][],
+) => {
 	const auth = authenticateGoogle();
 	const sheets = google.sheets("v4");
 
