@@ -5,8 +5,18 @@ import type { IAddOrder } from "../../types/helper";
 import CartItem from "../../types/models/CartItem";
 import ProductCard from "../productcard/ProductCard";
 
+type DisplayPackage = {
+	name: string;
+	id: string;
+	default_price: string;
+	description: string;
+	price: number;
+	features: { name: string }[];
+	updated: string | number;
+};
+
 type Props = {
-	displayPackages: any;
+	displayPackages: DisplayPackage[];
 	smallScreen: boolean;
 };
 
@@ -25,7 +35,7 @@ const PackageOrder = ({ displayPackages, smallScreen }: Props) => {
 		<Box display="flex" flexDir="column" gap="1rem">
 			<Heading textAlign="center">Choose a Package</Heading>
 			<Box display="grid" gridTemplateColumns={smallScreen ? "1fr" : "1fr 1fr"}>
-				{displayPackages?.map((displayPackage: any) => {
+				{displayPackages?.map((displayPackage: DisplayPackage) => {
 					const { name, id, default_price, description, price, features } =
 						displayPackage;
 					return (

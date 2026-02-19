@@ -156,7 +156,7 @@ By Students, For Students🚀💯"
 											return (
 												<Text
 													key={item._id}
-													// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+													// biome-ignore lint/security/noDangerouslySetInnerHtml: need to do this to allow for newlines in the text from the database
 													dangerouslySetInnerHTML={{
 														__html: item.Text,
 													}}
