@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
 	createCoupons,
 	createSession,
-	createUniqueProductsForDuplicates,
+	createUniqueProducts,
 } from "../../lib/stripe";
 
 const CheckoutSchema = z.object({
@@ -27,7 +27,7 @@ export default async function handler(
 	try {
 		const parsedBody = CheckoutSchema.parse(JSON.parse(req.body));
 
-		const updatedItems = await createUniqueProductsForDuplicates(
+		const updatedItems = await createUniqueProducts(
 			parsedBody.items,
 		);
 		const coupon = await createCoupons(updatedItems);
