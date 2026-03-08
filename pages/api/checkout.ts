@@ -27,9 +27,7 @@ export default async function handler(
 	try {
 		const parsedBody = CheckoutSchema.parse(JSON.parse(req.body));
 
-		const updatedItems = await createUniqueProducts(
-			parsedBody.items,
-		);
+		const updatedItems = await createUniqueProducts(parsedBody.items);
 		const coupon = await createCoupons(updatedItems);
 
 		const session = await createSession(

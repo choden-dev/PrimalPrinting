@@ -97,20 +97,20 @@ export const createUniqueProducts = async (
 
 	return await Promise.all(
 		items.map(async (item) => {
-				const price = await stripe.prices.retrieve(item.priceId);
-				const product = await stripe.products.create({
-					name: item.name,
-					default_price_data: {
-						unit_amount_decimal: price.unit_amount_decimal as string,
-						currency: price.currency,
-					},
-				});
+			const price = await stripe.prices.retrieve(item.priceId);
+			const product = await stripe.products.create({
+				name: item.name,
+				default_price_data: {
+					unit_amount_decimal: price.unit_amount_decimal as string,
+					currency: price.currency,
+				},
+			});
 
-				return {
-					...item,
-					productId: product.id,
-					price: product.default_price as string
-				}
+			return {
+				...item,
+				productId: product.id,
+				price: product.default_price as string,
+			};
 		}),
 	);
 };
@@ -124,7 +124,7 @@ export const createCoupons = async <T extends StripeBackendItem>(
 	if (itemsWithBulkDiscount.length === 0) return undefined;
 	if (getPercentOff() === 0) return undefined;
 
-return await stripe.coupons.create({
+	return await stripe.coupons.create({
 		percent_off: getPercentOff(),
 		applies_to: {
 			products: itemsWithBulkDiscount.map((item) => item.productId),
