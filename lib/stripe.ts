@@ -90,36 +90,29 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	};
 };
 
-export const createUniqueProductsForDuplicates = async (
+export const createUniqueProducts = async (
 	items: (StripeBackendItem & { name: string })[],
 ) => {
 	const stripe: Stripe = await makeStripeConnection();
 
-	await Promise.all(
-		items.map(async (item, index) => {
-			const duplicateIndex = items.findIndex(
-				(otherItem, otherIndex) =>
-					otherIndex !== index && otherItem.price === item.price,
-			);
+	return await Promise.all(
+		items.map(async (item) => {
+			const price = await stripe.prices.retrieve(item.priceId);
+			const product = await stripe.products.create({
+				name: item.name,
+				default_price_data: {
+					unit_amount_decimal: price.unit_amount_decimal as string,
+					currency: price.currency,
+				},
+			});
 
-			if (duplicateIndex !== -1) {
-				const duplicate = items[duplicateIndex];
-				const price = await stripe.prices.retrieve(duplicate.priceId);
-				const product = await stripe.products.create({
-					name: duplicate.name,
-					default_price_data: {
-						unit_amount_decimal: price.unit_amount_decimal as string,
-						currency: price.currency,
-					},
-				});
-
-				items[index].productId = product.id;
-				items[index].price = product.default_price as string;
-			}
+			return {
+				...item,
+				productId: product.id,
+				price: product.default_price as string,
+			};
 		}),
 	);
-
-	return items;
 };
 
 export const createCoupons = async <T extends StripeBackendItem>(
@@ -129,8 +122,9 @@ export const createCoupons = async <T extends StripeBackendItem>(
 
 	const itemsWithBulkDiscount = getItemsWithBulkDiscount(items);
 	if (itemsWithBulkDiscount.length === 0) return undefined;
+	if (getPercentOff() === 0) return undefined;
 
-	const coupon = await stripe.coupons.create({
+	return await stripe.coupons.create({
 		percent_off: getPercentOff(),
 		applies_to: {
 			products: itemsWithBulkDiscount.map((item) => item.productId),
@@ -138,7 +132,6 @@ export const createCoupons = async <T extends StripeBackendItem>(
 		duration: "once",
 		name: `${getMinimumItemsForDiscount()} or more discount!`,
 	});
-	return coupon;
 };
 
 export const createSession = async (
