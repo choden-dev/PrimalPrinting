@@ -1,4 +1,5 @@
-import { Box, Divider, Heading, Image, Text } from "@chakra-ui/react";
+import { Box, Divider, Heading } from "@chakra-ui/react";
+import type { SerializedEditorState } from "lexical";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { MessengerChat } from "react-messenger-chat-plugin";
@@ -6,51 +7,85 @@ import Footer from "../components/footer/Footer";
 import IntroAnimation from "../components/intro/IntroAnimation";
 import NoSsr from "../components/NoSsr";
 import NavBar from "../components/navbar/NavBar";
-import SectionHeading from "../components/sectionheading/SectionHeading";
-import TestimonialDiv from "../components/testimonialdiv/TestimonialDiv";
 import WhatNextDiv from "../components/whatnextdiv/WhatNextDiv";
-import { connectToDatabase } from "../lib/mongo";
+import { getPayloadClient } from "../lib/payload";
+
 export async function getStaticProps() {
 	try {
-		const { db } = await connectToDatabase("WebsiteText");
+		const payload = await getPayloadClient();
 
-		const sections = await db
-			.collection("AboutPage")
-			.find({})
-			.sort({ Order: 1 })
-			.toArray();
+		const { docs: sections } = await payload.find({
+			collection: "about-sections",
+			limit: 100,
+		});
 
-		const testimonials = await db.collection("Testimonials").find({}).toArray();
+		const contactInfo = await payload.findGlobal({
+			slug: "contact-info",
+		});
 
-		const final = [sections].concat([testimonials]);
+		// Convert Lexical rich text to HTML at build time
+		const { convertLexicalToHTML } = await import(
+			"@payloadcms/richtext-lexical/html"
+		);
+
+		const sectionsWithHtml = await Promise.all(
+			sections.map(async (section) => {
+				let html = "";
+				if (section.content) {
+					html = await convertLexicalToHTML({
+						data: section.content as SerializedEditorState,
+					});
+				}
+				return {
+					id: section.id,
+					title: section.title,
+					html,
+				};
+			}),
+		);
+
 		return {
 			props: {
-				text: JSON.parse(JSON.stringify(final)),
-				revalidate: 60 * 60,
+				sections: sectionsWithHtml,
+				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
 			},
+			revalidate: 60 * 60,
 		};
 	} catch (error) {
 		console.log(error);
 		return {
 			props: {
-				text: {},
+				sections: [],
+				contactInfo: { email: "", phone: "" },
 			},
 		};
 	}
 }
 
-type PageProps = {
-	text: { Section: string; Text: string; _id: string }[];
+type AboutSection = {
+	id: string;
+	title: string;
+	html: string;
 };
 
-const Home: NextPage<PageProps> = (text) => {
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type PageProps = {
+	sections: AboutSection[];
+	contactInfo: ContactInfoData;
+};
+
+const Home: NextPage<PageProps> = ({ sections, contactInfo }) => {
 	return (
 		<>
 			<Head>
 				<title>Primal Printing - All your printing needs</title>
 				<meta
 					name="description"
-					content="We’re THE student run print shop at University of Auckland. 
+					content="We're THE student run print shop at University of Auckland. 
 We offer affordable printing and binding services, providing students with course books and manuals for as little as $9.99 
 By Students, For Students💯🚀"
 				/>
@@ -61,7 +96,7 @@ By Students, For Students💯🚀"
 				/>
 				<meta
 					property="og:description"
-					content="We’re a student run print shop at University of Auckland, providing students with course books, lab manuals & more for a fraction of the usual cost!
+					content="We're a student run print shop at University of Auckland, providing students with course books, lab manuals & more for a fraction of the usual cost!
 By Students, For Students🚀💯"
 				/>
 				<meta property="og:url" content="https://primalprinting.co.nz" />
@@ -112,110 +147,49 @@ By Students, For Students🚀💯"
 						</Heading>
 						<Divider borderColor="brown.900" margin="1rem 0" />
 						<Box
-							textAlign="center"
+							textAlign="left"
 							display="flex"
 							flexDir="column"
 							gap="1.2rem"
 							position="relative"
-						>
-							{text.text[0]?.map(
-								(item: { Section: string; Text: string; _id: string }) => {
-									switch (item.Section) {
-										case "Heading":
-											return (
-												<Box
-													key={item.Text}
-													display="flex"
-													position="relative"
-													flexDir="column"
-												>
-													<Box
-														position="absolute"
-														transformOrigin="top right"
-														transform="rotate(90deg)"
-														h="100vw"
-														alignSelf="center"
-														w="4.5rem"
-														bgImage="binder.png"
-														top="5rem"
-														left="0"
-														bgRepeat="no-repeat"
-													></Box>
-													<Heading
-														marginTop="5.4rem"
-														color="brown.900"
-														textAlign="left"
-														fontSize="3.2rem"
-													>
-														{item.Text}
-													</Heading>
-													<Divider borderColor="brown.900" margin="1rem 0" />
-												</Box>
-											);
-										case "Text":
-											return (
-												<Text
-													key={item._id}
-													// biome-ignore lint/security/noDangerouslySetInnerHtml: need to do this to allow for newlines in the text from the database
-													dangerouslySetInnerHTML={{
-														__html: item.Text,
-													}}
-													fontSize="xl"
-													textAlign="left"
-													fontWeight="300"
-													whiteSpace="pre-line"
-												/>
-											);
-										case "Image":
-											return (
-												<Image
-													src={item.Text}
-													key={item._id}
-													alt={"about page image"}
-													width="100%"
-													objectFit="cover"
-												/>
-											);
-										default:
-											return null;
-									}
+							className="rich-text-content"
+							sx={{
+								"& h1, & h2, & h3": {
+									color: "brown.900",
+									fontWeight: "bold",
+									marginTop: "2rem",
 								},
-							)}
+								"& h2": { fontSize: "3.2rem" },
+								"& h3": { fontSize: "2rem" },
+								"& p": {
+									fontSize: "xl",
+									fontWeight: "300",
+									whiteSpace: "pre-line",
+								},
+								"& img": {
+									width: "100%",
+									objectFit: "cover",
+									borderRadius: "sm",
+								},
+								"& b, & strong": {
+									fontWeight: "600",
+								},
+							}}
+						>
+							{sections.map((section) => (
+								<Box
+									key={section.id}
+									// biome-ignore lint/security/noDangerouslySetInnerHtml: Rich text HTML is generated server-side by Payload's Lexical converter
+									dangerouslySetInnerHTML={{ __html: section.html }}
+								/>
+							))}
 						</Box>
 					</Box>
 				</Box>
-				{false && (
-					<Box
-						minHeight="16rem"
-						marginTop="3rem"
-						display="flex"
-						flexDir="column"
-						position="relative"
-						justifyContent="center"
-						alignItems="center"
-					>
-						<Box className="secheading" marginTop="3rem">
-							<SectionHeading text={"Testimonials"} />
-						</Box>
-						<Box display="flex" alignItems="center" padding="3rem 0">
-							{text.text.length > 1 && (
-								<TestimonialDiv testimonials={text.text[1]} />
-							)}
-						</Box>
-						<Box
-							position="absolute"
-							bottom="5rem"
-							zIndex="-1"
-							width="70%"
-							height="10%"
-							bg="brown.700"
-						/>
-					</Box>
-				)}
 				<Box>
 					<WhatNextDiv />
 				</Box>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</Box>
 
 			<NoSsr>

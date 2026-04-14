@@ -10,8 +10,20 @@ import {
 } from "@chakra-ui/react";
 import SocialLinks from "../sociallinks/sociallinks";
 
-export default function Footer() {
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type Props = {
+	contactInfo?: ContactInfoData;
+};
+
+export default function Footer({ contactInfo }: Props) {
 	const [smallScreen] = useMediaQuery("(max-width: 800px)");
+	const email = contactInfo?.email || "";
+	const phone = contactInfo?.phone || "";
+
 	return (
 		<Box
 			width="100vw"
@@ -82,8 +94,8 @@ export default function Footer() {
 					textAlign={smallScreen ? "center" : "left"}
 					paddingBottom="0.5rem"
 				>
-					<strong>&copy; Copyright Primal Printing 2023</strong> | 02108678038 |
-					primalprintingnz@gmail.com
+					<strong>&copy; Copyright Primal Printing 2023</strong> | {phone} |{" "}
+					{email}
 				</Text>
 			</Box>
 		</Box>

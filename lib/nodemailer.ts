@@ -38,6 +38,8 @@ export const sendEmailBankTransfer = async (
 		orderId,
 		items,
 		price,
+		contactEmail: process.env.CONTACT_EMAIL || "",
+		contactPhone: process.env.CONTACT_PHONE || "",
 	});
 	const mailOptions = {
 		from: process.env.GMAIL_USER,
@@ -66,6 +68,8 @@ export const sendEmailStripePayment = async (
 		orderId,
 		price,
 		items: items.join(", "),
+		contactEmail: process.env.CONTACT_EMAIL || "",
+		contactPhone: process.env.CONTACT_PHONE || "",
 	});
 	const mailOptions = {
 		from: process.env.GMAIL_USER,
