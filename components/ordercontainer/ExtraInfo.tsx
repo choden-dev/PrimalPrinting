@@ -36,7 +36,7 @@ const AccordionItemComponent = ({
 
 const HelpAccordion = () => (
 	<Accordion marginTop=".5rem" allowToggle allowMultiple>
-		<AccordionItemComponent title="I want to send a PDF (coursebook, lab manual etc) for printing">
+		<AccordionItemComponent title="I want to send a PDF (notes, study material, practice problems etc) for printing">
 			<UnorderedList>
 				<ListItem>
 					Click on <strong>Upload Pdf</strong>
@@ -113,7 +113,7 @@ const ExtraInfo = () => {
 						</Heading>
 						<Text>
 							Get a <Highlighted>{getPercentOff()}%</Highlighted> discount off
-							coursebooks you order{" "}
+							notes you order{" "}
 							<Highlighted>{getMinimumItemsForDiscount()}</Highlighted> or more
 							of...{" "}
 						</Text>
