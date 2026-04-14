@@ -1,18 +1,6 @@
-import {
-	Box,
-	Button,
-	FormControl,
-	FormLabel,
-	Heading,
-	Image,
-	Input,
-	Stack,
-	Text,
-	Textarea,
-} from "@chakra-ui/react";
+import { Box, Heading, Stack, Text } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
 import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
 import { connectToDatabase } from "../lib/mongo";
@@ -37,49 +25,6 @@ type PageProps = {
 };
 
 const Contact: NextPage<PageProps> = (details) => {
-	const [isProcessing, setIsProcessing] = useState<boolean>(false);
-	const [isDone, setIsDone] = useState<boolean>(false);
-
-	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		setIsProcessing(true);
-		const name = event.target.name.value;
-		const message = event.target.message.value;
-		const email = event.target.email.value;
-		const res = await fetch("https://formspree.io/f/mqkoebvo", {
-			body: JSON.stringify({
-				name: name,
-				email: email,
-				message: message,
-			}),
-			headers: {
-				"Content-Type": "application/json",
-			},
-			method: "POST",
-		});
-		if (res.ok) {
-			alert(`Submitted!`);
-			setIsProcessing(false);
-			setIsDone(true);
-		} else {
-			alert(`something went wrong`);
-			console.warn("Something went wrong");
-			setIsProcessing(false);
-		}
-	};
-
-	const submitted = (
-		<>
-			<Heading fontWeight="400" textAlign="center">
-				Thank You!
-				<br /> We will get back to you soon.
-			</Heading>
-			<Button variant="browned" onClick={() => setIsDone(false)}>
-				Submit Another
-			</Button>
-		</>
-	);
-
 	return (
 		<>
 			<Head>
@@ -119,10 +64,6 @@ const Contact: NextPage<PageProps> = (details) => {
 					border="1px"
 					borderColor="brown.200"
 				>
-					<Box width="100%" height="15rem" borderRadius="sm" overflow="hidden">
-						<Image src="photo.png" alt="" filter="brightness(0.5)" />
-					</Box>
-
 					<Heading fontWeight="500">Get in Touch</Heading>
 					<Stack spacing="0">
 						<Text fontSize="xl" fontWeight="500">
@@ -132,42 +73,10 @@ const Contact: NextPage<PageProps> = (details) => {
 							Phone: {details.details[0]?.phone}
 						</Text>
 					</Stack>
-					{isDone ? (
-						submitted
-					) : (
-						<>
-							<Text>If you have any questions or queries, ask away!</Text>
-							<form
-								onSubmit={submit}
-								style={
-									isProcessing
-										? {
-												pointerEvents: "none",
-												filter: "blur(1rem)",
-											}
-										: {}
-								}
-							>
-								<FormControl isRequired>
-									<FormLabel>Name</FormLabel>
-									<Input name="name" borderRadius="sm" type="text" />
-									<FormLabel>Email</FormLabel>
-									<Input name="email" borderRadius="sm" type="email" />
-									<FormLabel>Message</FormLabel>
-									<Textarea name="message" borderRadius="sm" size="lg" />
-								</FormControl>
-								<Button
-									marginTop="1.5rem"
-									width="100%"
-									type="submit"
-									variant="browned"
-									size="md"
-								>
-									Send
-								</Button>
-							</form>
-						</>
-					)}
+					<Text>
+						If you have any questions or queries, feel free to reach out via
+						email or phone!
+					</Text>
 				</Box>
 				<Footer />
 			</Box>
