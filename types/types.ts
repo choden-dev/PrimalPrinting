@@ -1,18 +1,3 @@
-export type ShopItem = {
-	name: string;
-	price: string;
-	image: string;
-};
-
-export type WebsiteText = {
-	text: string;
-};
-
-export type infoStructure = {
-	title: string;
-	description: string;
-};
-
 export type StripeProduct = {
 	id: string;
 	priceId: string;
@@ -76,15 +61,3 @@ export type CartPackage = {
 	priceId: string;
 	quantity: number;
 };
-
-export type product = infoStructure & {
-	image: {
-		title?: string;
-		price?: string;
-		description?: string;
-		image?: string;
-	};
-	price: string;
-};
-
-export type testimonial = infoStructure & { author: string };
