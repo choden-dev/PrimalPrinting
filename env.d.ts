@@ -14,15 +14,16 @@ declare namespace NodeJS {
 		 */
 		BASE_URL: string;
 		/**
-		 * @env MONGODB_URI
-		 * MongoDB connection string. Obtain from MongoDB Atlas or your MongoDB server.
+		 * @env DATABASE_URI
+		 * MongoDB connection string used by Payload CMS. Obtain from MongoDB Atlas or your MongoDB server.
 		 */
-		MONGODB_URI: string;
+		DATABASE_URI: string;
 		/**
-		 * @env MONGODB_DB
-		 * Name of the MongoDB database to use.
+		 * @env PAYLOAD_SECRET
+		 * Secret key used by Payload CMS for authentication and encryption.
+		 * Generate a strong random string for production use.
 		 */
-		MONGODB_DB: string;
+		PAYLOAD_SECRET: string;
 		/**
 		 * @env type
 		 * Google service account field. Obtain from your Google Cloud service account JSON.
