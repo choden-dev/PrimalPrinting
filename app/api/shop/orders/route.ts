@@ -7,6 +7,29 @@ import { calculateOrderTotal } from "../../../../lib/stripe";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB per file
 
 /**
+ * Count PDF pages by scanning for /Type /Page markers in the raw buffer.
+ * Lightweight — no external dependencies, no Object.defineProperty issues.
+ */
+function countPdfPages(buffer: Buffer): number {
+	const text = buffer.toString("latin1");
+	let count = 0;
+	let pos = 0;
+
+	while (true) {
+		const idx = text.indexOf("/Type", pos);
+		if (idx === -1) break;
+
+		const after = text.substring(idx + 5, idx + 30).trimStart();
+		if (after.startsWith("/Page") && !after.startsWith("/Pages")) {
+			count++;
+		}
+		pos = idx + 5;
+	}
+
+	return Math.max(count, 0);
+}
+
+/**
  * POST /api/shop/orders — Create a new DRAFT order.
  *
  * Accepts multipart/form-data with:
@@ -70,8 +93,6 @@ export async function POST(request: NextRequest) {
 		const tempOrderNumber = `DRAFT-${customer.customerId}-${Date.now()}`;
 
 		// Process each file: validate, upload to R2, count pages
-		const pdfParse = (await import("pdf-parse")).default;
-
 		const orderFiles = await Promise.all(
 			fileEntries.map(async (file, i) => {
 				if (file.type !== "application/pdf") {
@@ -86,11 +107,8 @@ export async function POST(request: NextRequest) {
 				const buffer = Buffer.from(await file.arrayBuffer());
 
 				// Count pages in memory — authoritative, no client input
-				let pageCount: number;
-				try {
-					const parsed = await pdfParse(buffer);
-					pageCount = parsed.numpages;
-				} catch {
+				const pageCount = countPdfPages(buffer);
+				if (pageCount < 1) {
 					throw new Error(
 						`${file.name}: Unable to read PDF. Please ensure it's a valid PDF file.`,
 					);
