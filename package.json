@@ -18,6 +18,7 @@
 		"@payloadcms/db-mongodb": "^3.82.1",
 		"@payloadcms/next": "^3.82.1",
 		"@payloadcms/richtext-lexical": "^3.82.1",
+		"@payloadcms/storage-s3": "^3.82.1",
 		"@types/nodemailer": "^6.4.17",
 		"@types/pug": "^2.0.10",
 		"fetch-blob": "^3.2.0",

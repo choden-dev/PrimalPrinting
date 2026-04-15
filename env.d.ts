@@ -74,6 +74,32 @@ declare namespace NodeJS {
 		 * Google service account field. Obtain from your Google Cloud service account JSON.
 		 */
 		client_x509_cert_url: string;
+		/**
+		 * @env R2_BUCKET
+		 * Cloudflare R2 bucket name for Payload CMS media uploads.
+		 */
+		R2_BUCKET: string;
+		/**
+		 * @env R2_S3_ENDPOINT
+		 * S3-compatible endpoint for the R2 bucket.
+		 * Format: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+		 */
+		R2_S3_ENDPOINT: string;
+		/**
+		 * @env R2_ACCESS_KEY_ID
+		 * R2 API token access key ID. Generate from the Cloudflare dashboard under R2 > Manage R2 API Tokens.
+		 */
+		R2_ACCESS_KEY_ID: string;
+		/**
+		 * @env R2_SECRET_ACCESS_KEY
+		 * R2 API token secret access key. Generate from the Cloudflare dashboard under R2 > Manage R2 API Tokens.
+		 */
+		R2_SECRET_ACCESS_KEY: string;
+		/**
+		 * @env R2_PUBLIC_URL
+		 * Public URL for serving R2 media (e.g. R2.dev subdomain or custom domain).
+		 */
+		R2_PUBLIC_URL: string;
 		// Add other environment variables here as needed
 	}
 }
