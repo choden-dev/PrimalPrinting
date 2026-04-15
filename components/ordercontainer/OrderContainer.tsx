@@ -56,7 +56,7 @@ const OrderContainerInner = () => {
 			files: { fileName: string }[];
 		}[]
 	>([]);
-	const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+	const { isAuthenticated } = useAuth();
 
 	const router = useRouter();
 	const resumeOrderId = router.query.resume as string | undefined;
@@ -207,48 +207,6 @@ const OrderContainerInner = () => {
 					onPaymentSuccess={handlePaymentSuccess}
 					onPickupConfirmed={handlePickupConfirmed}
 				/>
-				<Footer />
-			</>
-		);
-	}
-
-	// Auth gate — must sign in before uploading
-	if (!authLoading && !isAuthenticated) {
-		return (
-			<>
-				<Box
-					maxWidth="600px"
-					margin="2rem auto"
-					bg="white"
-					padding="2rem"
-					borderRadius="8px"
-					textAlign="center"
-				>
-					<Text fontSize="3xl" mb={3}>
-						🔑
-					</Text>
-					<Text fontSize="xl" fontWeight={700} mb={2}>
-						Sign in to get started
-					</Text>
-					<Text color="gray.600" mb={6}>
-						Sign in with your Google account to upload documents and place an
-						order.
-					</Text>
-					<Button colorScheme="blue" size="lg" onClick={login}>
-						Sign in with Google
-					</Button>
-				</Box>
-				<Footer />
-			</>
-		);
-	}
-
-	if (authLoading) {
-		return (
-			<>
-				<Box textAlign="center" py={16}>
-					<Spinner size="xl" color="brown.700" />
-				</Box>
 				<Footer />
 			</>
 		);
