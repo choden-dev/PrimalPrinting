@@ -4,11 +4,6 @@ declare namespace NodeJS {
 		GMAIL_USER: string;
 		GMAIL_PASS: string;
 		/**
-		 * @env UPLOAD_SCRIPT_URL
-		 * URL of the upload script endpoint. Obtain from your backend or file handling service provider.
-		 */
-		UPLOAD_SCRIPT_URL: string;
-		/**
 		 * @env BASE_URL
 		 * The base URL of your application (e.g., https://yourdomain.com).
 		 */
