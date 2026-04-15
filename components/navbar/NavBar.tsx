@@ -1,9 +1,63 @@
 import { HamburgerIcon } from "@chakra-ui/icons";
-import { Box, Heading, IconButton, Image } from "@chakra-ui/react";
+import {
+	Avatar,
+	Box,
+	Button,
+	Heading,
+	IconButton,
+	Image,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
+	Text,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import React from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import SocialLinks from "../sociallinks/sociallinks";
 import styles from "./NavBar.module.css";
+
+function UserMenu() {
+	const { isAuthenticated, isLoading, name, image, login, logout } = useAuth();
+
+	if (isLoading) return null;
+
+	if (!isAuthenticated) {
+		return (
+			<Button
+				size="sm"
+				variant="outline"
+				colorScheme="brown"
+				ml={3}
+				onClick={login}
+			>
+				Sign in
+			</Button>
+		);
+	}
+
+	return (
+		<Menu>
+			<MenuButton ml={3}>
+				<Avatar size="sm" name={name || ""} src={image || undefined} />
+			</MenuButton>
+			<MenuList zIndex={10000}>
+				<Box px={3} py={2}>
+					<Text fontWeight={600} fontSize="sm">
+						{name}
+					</Text>
+				</Box>
+				<Link href="/my-orders">
+					<MenuItem fontSize="sm">My Orders</MenuItem>
+				</Link>
+				<MenuItem fontSize="sm" onClick={logout} color="red.500">
+					Sign out
+				</MenuItem>
+			</MenuList>
+		</Menu>
+	);
+}
 
 export default function NavBar() {
 	const [menuOpened, setMenuOpened] = React.useState<boolean>(false);
@@ -46,7 +100,7 @@ export default function NavBar() {
 					}}
 				/>
 			</span>
-			<Box marginLeft="auto" display="flex">
+			<Box marginLeft="auto" display="flex" alignItems="center">
 				<ul
 					className={`${styles.navigationitems} ${menuOpened && styles.opened}`}
 				>
@@ -74,6 +128,7 @@ export default function NavBar() {
 					</li>
 				</ul>
 				<SocialLinks />
+				<UserMenu />
 			</Box>
 		</Box>
 	);
