@@ -7,7 +7,7 @@ import { getToken } from "next-auth/jwt";
  *
  * Public routes (no auth required):
  * - GET  /api/timeslots          – list available pickup slots
- * - POST /api/orders/upload      – upload files (auth checked in handler for flexibility)
+ * - POST /api/shop/upload      – upload files (auth checked in handler for flexibility)
  * - /api/auth/*                  – NextAuth routes
  * - /api/webhooks/*              – Stripe webhooks
  * - /api/cron/*                  – Cron jobs (protected by CRON_SECRET instead)
@@ -15,9 +15,9 @@ import { getToken } from "next-auth/jwt";
  * - All non-API routes           – public pages
  *
  * Protected routes (require NextAuth session):
- * - POST/PATCH /api/orders       – create / update orders
- * - GET /api/orders/my-orders    – user's order history
- * - POST /api/orders/:id/*       – payment, timeslot selection
+ * - POST/PATCH /api/shop       – create / update orders
+ * - GET /api/shop/my-orders    – user's order history
+ * - POST /api/shop/:id/*       – payment, timeslot selection
  */
 
 // Routes that require authentication
@@ -58,5 +58,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/api/orders/:path*"],
+	matcher: ["/api/shop/:path*"],
 };

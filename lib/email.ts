@@ -27,7 +27,7 @@ const TEMPLATE_DIR = path.resolve(process.cwd(), "lib/templates");
 
 function renderTemplate(
 	templateName: string,
-	locals: Record<string, any>,
+	locals: Record<string, unknown>,
 ): string {
 	const templatePath = path.join(TEMPLATE_DIR, `${templateName}.pug`);
 	return pug.renderFile(templatePath, locals);

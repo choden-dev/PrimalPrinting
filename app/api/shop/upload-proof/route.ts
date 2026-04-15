@@ -3,7 +3,7 @@ import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { uploadBankTransferProof } from "../../../../lib/r2";
 
 /**
- * POST /api/orders/upload-proof — Upload a bank transfer proof image.
+ * POST /api/shop/upload-proof — Upload a bank transfer proof image.
  *
  * Accepts multipart/form-data with:
  * - `image` (JPEG/PNG/WebP file, max 10MB)

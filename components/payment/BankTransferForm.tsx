@@ -89,7 +89,7 @@ export function BankTransferForm({
 				uploadFormData.append("image", selectedFile);
 				uploadFormData.append("orderNumber", orderNumber);
 
-				const uploadRes = await fetch("/api/orders/upload-proof", {
+				const uploadRes = await fetch("/api/shop/upload-proof", {
 					method: "POST",
 					body: uploadFormData,
 				});
@@ -103,7 +103,7 @@ export function BankTransferForm({
 
 				// Step 2: Submit bank transfer with proof key
 				const submitRes = await fetch(
-					`/api/orders/${orderId}/submit-bank-transfer`,
+					`/api/shop/${orderId}/submit-bank-transfer`,
 					{
 						method: "POST",
 						headers: { "Content-Type": "application/json" },

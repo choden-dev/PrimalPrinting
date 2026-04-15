@@ -80,7 +80,7 @@ const MyOrders: NextPage = () => {
 	const fetchOrders = useCallback(async () => {
 		try {
 			setLoading(true);
-			const res = await fetch("/api/orders/my-orders");
+			const res = await fetch("/api/shop/my-orders");
 			if (!res.ok) throw new Error("Failed to fetch orders.");
 			const data = await res.json();
 			setOrders(data.orders || []);

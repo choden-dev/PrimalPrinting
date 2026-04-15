@@ -3,7 +3,7 @@ import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
 
 /**
- * GET /api/orders/my-orders — Fetch all orders for the authenticated customer.
+ * GET /api/shop/my-orders — Fetch all orders for the authenticated customer.
  *
  * Query params:
  * - `page` (number, default 1)
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
 		const payload = await getPayloadClient();
 
-		const where: any = {
+		const where: Record<string, unknown> = {
 			customer: { equals: customer.customerId },
 		};
 

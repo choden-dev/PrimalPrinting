@@ -103,7 +103,10 @@ export const authOptions: NextAuthOptions = {
 		 */
 		async session({ session, token }) {
 			if (token.customerId) {
-				(session as any).customerId = token.customerId;
+				const extendedSession = session as typeof session & {
+					customerId: string;
+				};
+				extendedSession.customerId = token.customerId;
 			}
 			return session;
 		},

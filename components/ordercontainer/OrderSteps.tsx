@@ -58,7 +58,7 @@ export default function OrderSteps({
 	useEffect(() => {
 		async function fetchOrder() {
 			try {
-				const res = await fetch(`/api/orders/${orderId}`);
+				const res = await fetch(`/api/shop/${orderId}`);
 				if (res.ok) {
 					const data = await res.json();
 					setOrderDetails(data.order);
@@ -89,7 +89,7 @@ export default function OrderSteps({
 		if (!pollForPayment) return;
 		const interval = setInterval(async () => {
 			try {
-				const res = await fetch(`/api/orders/${orderId}`);
+				const res = await fetch(`/api/shop/${orderId}`);
 				if (res.ok) {
 					const data = await res.json();
 					if (data.order.status === "PAID") {

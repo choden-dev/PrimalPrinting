@@ -73,13 +73,27 @@ export async function POST(request: NextRequest) {
 			// Transfer files from staging → permanent
 			const files = order.files || [];
 			const transferMap = await transferOrderFiles(
-				files.map((f: any) => ({ stagingKey: f.stagingKey })),
+				files.map((f: { stagingKey: string }) => ({
+					stagingKey: f.stagingKey,
+				})),
 			);
 
-			const updatedFiles = files.map((f: any) => ({
-				...f,
-				permanentKey: transferMap.get(f.stagingKey) || f.stagingKey,
-			}));
+			const updatedFiles = files.map(
+				(f: {
+					stagingKey: string;
+					permanentKey?: string;
+					fileName?: string;
+					pageCount?: number;
+					copies?: number;
+					colorMode?: string;
+					paperSize?: string;
+					doubleSided?: boolean;
+					fileSize?: number;
+				}) => ({
+					...f,
+					permanentKey: transferMap.get(f.stagingKey) || f.stagingKey,
+				}),
+			);
 
 			// Transition to PAID
 			await payload.update({

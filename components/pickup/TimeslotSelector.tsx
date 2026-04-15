@@ -43,7 +43,7 @@ export function TimeslotSelector({
 	useEffect(() => {
 		async function fetchTimeslots() {
 			try {
-				const res = await fetch("/api/timeslots");
+				const res = await fetch("/api/pickup-slots");
 				const data = await res.json();
 				if (!res.ok)
 					throw new Error(data.error || "Failed to fetch timeslots.");
@@ -66,7 +66,7 @@ export function TimeslotSelector({
 		setError(null);
 
 		try {
-			const res = await fetch(`/api/orders/${orderId}/select-timeslot`, {
+			const res = await fetch(`/api/shop/${orderId}/select-timeslot`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ timeslotId: selectedId }),

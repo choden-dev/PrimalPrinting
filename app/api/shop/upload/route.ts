@@ -3,7 +3,7 @@ import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { generateStagingKey, uploadToStaging } from "../../../../lib/r2";
 
 /**
- * POST /api/orders/upload — Upload a PDF file to the R2 staging bucket.
+ * POST /api/shop/upload — Upload a PDF file to the R2 staging bucket.
  *
  * Accepts multipart/form-data with:
  * - `file` (PDF file, max 20MB)

@@ -144,10 +144,9 @@ export function StripePaymentForm({
 	useEffect(() => {
 		async function createIntent() {
 			try {
-				const res = await fetch(
-					`/api/orders/${orderId}/create-payment-intent`,
-					{ method: "POST" },
-				);
+				const res = await fetch(`/api/shop/${orderId}/create-payment-intent`, {
+					method: "POST",
+				});
 				const data = await res.json();
 
 				if (!res.ok) {

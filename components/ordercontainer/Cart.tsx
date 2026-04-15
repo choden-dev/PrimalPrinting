@@ -198,7 +198,7 @@ const Cart = ({
 				const formData = new FormData();
 				formData.append("file", pdf.file);
 
-				const uploadRes = await fetch("/api/orders/upload", {
+				const uploadRes = await fetch("/api/shop/upload", {
 					method: "POST",
 					body: formData,
 				});
@@ -235,7 +235,7 @@ const Cart = ({
 			const totalCents = subtotalCents + taxCents;
 
 			// Step 3: Create the order in Payload
-			const orderRes = await fetch("/api/orders", {
+			const orderRes = await fetch("/api/shop/orders", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({

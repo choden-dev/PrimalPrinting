@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedCustomer } from "../../../lib/auth";
-import { getPayloadClient } from "../../../lib/payload";
+import { getAuthenticatedCustomer } from "../../../../lib/auth";
+import { getPayloadClient } from "../../../../lib/payload";
 
 /**
  * POST /api/orders — Create a new DRAFT order.
@@ -62,16 +62,27 @@ export async function POST(request: NextRequest) {
 			data: {
 				customer: customer.customerId,
 				status: "DRAFT",
-				files: files.map((f: any) => ({
-					fileName: f.fileName,
-					stagingKey: f.stagingKey,
-					pageCount: f.pageCount,
-					copies: f.copies || 1,
-					colorMode: f.colorMode || "BW",
-					paperSize: f.paperSize || "A4",
-					doubleSided: f.doubleSided || false,
-					fileSize: f.fileSize || 0,
-				})),
+				files: files.map(
+					(f: {
+						fileName: string;
+						stagingKey: string;
+						pageCount: number;
+						copies?: number;
+						colorMode?: string;
+						paperSize?: string;
+						doubleSided?: boolean;
+						fileSize?: number;
+					}) => ({
+						fileName: f.fileName,
+						stagingKey: f.stagingKey,
+						pageCount: f.pageCount,
+						copies: f.copies || 1,
+						colorMode: f.colorMode || "BW",
+						paperSize: f.paperSize || "A4",
+						doubleSided: f.doubleSided || false,
+						fileSize: f.fileSize || 0,
+					}),
+				),
 				pricing: {
 					subtotal: pricing.subtotal,
 					tax: pricing.tax,
@@ -151,7 +162,7 @@ export async function PATCH(request: NextRequest) {
 			);
 		}
 
-		const updateData: Record<string, any> = {};
+		const updateData: Record<string, unknown> = {};
 		if (files) updateData.files = files;
 		if (pricing) updateData.pricing = pricing;
 

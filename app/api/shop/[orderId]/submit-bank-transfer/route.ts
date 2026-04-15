@@ -12,7 +12,7 @@ type RouteContext = { params: Promise<{ orderId: string }> };
  *
  * Body: `{ "proofKey": "proofs/ORD-20260415-A3F8/uuid.webp" }`
  *
- * The `proofKey` should come from the `/api/orders/upload-proof` endpoint.
+ * The `proofKey` should come from the `/api/shop/upload-proof` endpoint.
  */
 export async function POST(request: NextRequest, context: RouteContext) {
 	const { orderId } = await context.params;

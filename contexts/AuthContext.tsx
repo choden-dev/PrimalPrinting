@@ -1,3 +1,4 @@
+import type { Session } from "next-auth";
 import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
 import {
 	createContext,
@@ -7,6 +8,12 @@ import {
 } from "react";
 
 // ── Extended session type ────────────────────────────────────────────────
+
+declare module "next-auth" {
+	interface Session {
+		customerId?: string;
+	}
+}
 
 interface CustomerSession {
 	/** Whether the user is currently authenticated */
@@ -50,7 +57,7 @@ function AuthContextInner({ children }: PropsWithChildren) {
 		return {
 			isAuthenticated,
 			isLoading,
-			customerId: (session as any)?.customerId ?? null,
+			customerId: (session as Session)?.customerId ?? null,
 			name: session?.user?.name ?? null,
 			email: session?.user?.email ?? null,
 			image: session?.user?.image ?? null,

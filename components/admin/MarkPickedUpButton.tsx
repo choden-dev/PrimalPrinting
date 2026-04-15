@@ -3,6 +3,10 @@
 import { useDocumentInfo } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
 
+interface OrderDocumentData {
+	status?: string;
+}
+
 /**
  * Payload admin custom component: "Mark as Picked Up" button.
  *
@@ -15,7 +19,7 @@ export const MarkPickedUpButton: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState(false);
 
-	const status = (initialData as any)?.status;
+	const status = (initialData as OrderDocumentData)?.status;
 
 	const handleMarkPickedUp = useCallback(async () => {
 		if (!id) return;
@@ -31,7 +35,7 @@ export const MarkPickedUpButton: React.FC = () => {
 		setError(null);
 
 		try {
-			const response = await fetch(`/api/orders/${id}`, {
+			const response = await fetch(`/api/shop/${id}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ status: "PICKED_UP" }),

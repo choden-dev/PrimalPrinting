@@ -3,6 +3,10 @@
 import { useDocumentInfo } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
 
+interface OrderDocumentData {
+	status?: string;
+}
+
 /**
  * Payload admin custom component: "Approve Payment" button.
  *
@@ -15,7 +19,7 @@ export const ApprovePaymentButton: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState(false);
 
-	const status = (initialData as any)?.status;
+	const status = (initialData as OrderDocumentData)?.status;
 
 	const handleApprove = useCallback(async () => {
 		if (!id) return;
@@ -31,7 +35,7 @@ export const ApprovePaymentButton: React.FC = () => {
 		setError(null);
 
 		try {
-			const response = await fetch(`/api/orders/${id}/approve-payment`, {
+			const response = await fetch(`/api/shop/${id}/approve-payment`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 			});

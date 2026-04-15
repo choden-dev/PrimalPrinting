@@ -52,7 +52,9 @@ export async function POST(request: NextRequest) {
 				if (files.length > 0) {
 					try {
 						await cleanupStagingFiles(
-							files.map((f: any) => ({ stagingKey: f.stagingKey })),
+							files.map((f: { stagingKey: string }) => ({
+								stagingKey: f.stagingKey,
+							})),
 						);
 					} catch (cleanupError) {
 						console.error(

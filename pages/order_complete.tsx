@@ -45,7 +45,7 @@ const OrderComplete: NextPage = () => {
 
 		async function fetchOrder() {
 			try {
-				const res = await fetch(`/api/orders/${orderId}`);
+				const res = await fetch(`/api/shop/${orderId}`);
 				if (!res.ok) throw new Error("Failed to load order.");
 				const data = await res.json();
 				setOrder(data.order);

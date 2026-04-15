@@ -65,11 +65,11 @@ export const Orders: CollectionConfig = {
 		],
 		description: "Customer print orders with full lifecycle tracking.",
 		components: {
-			// Custom action buttons shown at the top of the order edit view
 			edit: {
 				beforeDocumentControls: [
-					"components/admin/ApprovePaymentButton",
-					"components/admin/MarkPickedUpButton",
+					"@/components/admin/ApprovePaymentButton",
+					"@/components/admin/MarkPickedUpButton",
+					"@/components/admin/OrderFilesViewer",
 				],
 			},
 		},
