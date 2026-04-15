@@ -79,7 +79,7 @@ export const Timeslots: CollectionConfig = {
 						if (value) return value;
 						// Auto-generate a label from date + times
 						const date = data?.date
-							? new Date(data.date).toLocaleDateString("en-AU", {
+							? new Date(data.date).toLocaleDateString("en-NZ", {
 									weekday: "short",
 									day: "numeric",
 									month: "short",

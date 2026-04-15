@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { OrderStatus } from "../../types/orderStatus";
+import BackToDashboard from "./BackToDashboard";
 
 interface TimeslotData {
 	id: string;
@@ -173,12 +174,14 @@ export default function OrdersByTimeslotView() {
 
 	return (
 		<div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+			<BackToDashboard />
 			<div
 				style={{
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
 					marginBottom: "24px",
+					marginTop: "8px",
 					flexWrap: "wrap",
 					gap: "12px",
 				}}
@@ -273,7 +276,7 @@ export default function OrdersByTimeslotView() {
 
 			{data.map(({ timeslot, orders }) => {
 				const dateLabel = timeslot.date
-					? new Date(timeslot.date).toLocaleDateString("en-AU", {
+					? new Date(timeslot.date).toLocaleDateString("en-NZ", {
 							weekday: "long",
 							day: "numeric",
 							month: "long",
@@ -505,7 +508,7 @@ export default function OrdersByTimeslotView() {
 														✓{" "}
 														{order.pickedUpAt
 															? new Date(order.pickedUpAt).toLocaleDateString(
-																	"en-AU",
+																	"en-NZ",
 																)
 															: "Done"}
 													</span>

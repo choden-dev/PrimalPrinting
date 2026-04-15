@@ -1,4 +1,9 @@
 import type { CollectionConfig } from "payload";
+import {
+	cleanupStagingFiles,
+	deleteFromPermanent,
+	deleteFromStaging,
+} from "../lib/r2";
 
 // ── Order status enum ────────────────────────────────────────────────────
 export const ORDER_STATUSES = [
@@ -95,6 +100,51 @@ export const Orders: CollectionConfig = {
 		},
 	},
 	hooks: {
+		afterDelete: [
+			// Clean up all associated R2 files when an order is deleted
+			async ({ doc }) => {
+				if (!doc) return;
+				const files = doc.files || [];
+
+				try {
+					// Clean up staging files
+					const stagingFiles = files
+						.filter((f: { stagingKey?: string }) => f.stagingKey)
+						.map((f: { stagingKey: string }) => ({
+							stagingKey: f.stagingKey,
+						}));
+					if (stagingFiles.length > 0) {
+						await cleanupStagingFiles(stagingFiles);
+					}
+
+					// Clean up permanent files (if transferred)
+					for (const file of files) {
+						const f = file as { permanentKey?: string };
+						if (f.permanentKey) {
+							try {
+								await deleteFromPermanent(f.permanentKey);
+							} catch {
+								// Best effort — file may already be gone
+							}
+						}
+					}
+
+					// Clean up bank transfer proof (stored in staging bucket)
+					if (doc.bankTransferProofKey) {
+						try {
+							await deleteFromStaging(doc.bankTransferProofKey as string);
+						} catch {
+							// Best effort
+						}
+					}
+				} catch (error) {
+					console.error(
+						`Failed to clean up files for order ${doc.orderNumber}:`,
+						error,
+					);
+				}
+			},
+		],
 		beforeChange: [
 			// Auto-generate orderNumber on create
 			({ operation, data }) => {

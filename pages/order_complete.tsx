@@ -177,7 +177,7 @@ const OrderComplete: NextPage = () => {
 										<Text>
 											<strong>Date:</strong>{" "}
 											{new Date(order.pickupTimeslot.date).toLocaleDateString(
-												"en-AU",
+												"en-NZ",
 												{
 													weekday: "long",
 													day: "numeric",

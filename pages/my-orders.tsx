@@ -6,7 +6,6 @@ import {
 	Heading,
 	Spinner,
 	Text,
-	useMediaQuery,
 } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -76,7 +75,6 @@ const MyOrders: NextPage = () => {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [smallScreen] = useMediaQuery("(max-width: 768px)");
 
 	const fetchOrders = useCallback(async () => {
 		try {
@@ -240,7 +238,7 @@ const MyOrders: NextPage = () => {
 											</Badge>
 										</Box>
 										<Text fontSize="xs" color="gray.400">
-											{new Date(order.createdAt).toLocaleDateString("en-AU", {
+											{new Date(order.createdAt).toLocaleDateString("en-NZ", {
 												day: "numeric",
 												month: "short",
 												year: "numeric",
@@ -275,7 +273,7 @@ const MyOrders: NextPage = () => {
 													Pickup:{" "}
 													{new Date(
 														order.pickupTimeslot.date,
-													).toLocaleDateString("en-AU", {
+													).toLocaleDateString("en-NZ", {
 														day: "numeric",
 														month: "short",
 													})}{" "}

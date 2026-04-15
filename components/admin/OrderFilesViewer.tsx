@@ -246,6 +246,8 @@ function ProofViewer({
 				</button>
 			) : (
 				<div>
+					ttttt
+					{/* biome-ignore lint/performance/noImgElement: Presigned R2 URLs are dynamic and incompatible with next/image */}
 					<img
 						src={imageUrl}
 						alt="Bank transfer proof"

@@ -58,6 +58,7 @@ export default function OrderSteps({
 	);
 	const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
 	const [pollForPayment, setPollForPayment] = useState(false);
+	const [waitingForStripe, setWaitingForStripe] = useState(false);
 
 	// Fetch order details
 	useEffect(() => {
@@ -94,7 +95,7 @@ export default function OrderSteps({
 		fetchOrder();
 	}, [orderId, step, onPaymentSuccess, onPickupConfirmed]);
 
-	// Poll for payment status after bank transfer submission
+	// Poll for payment status (after Stripe confirmation or bank transfer submission)
 	useEffect(() => {
 		if (!pollForPayment) return;
 		const interval = setInterval(async () => {
@@ -104,13 +105,14 @@ export default function OrderSteps({
 					const data = await res.json();
 					if (data.order.status === OrderStatus.PAID) {
 						clearInterval(interval);
+						setWaitingForStripe(false);
 						onPaymentSuccess();
 					}
 				}
 			} catch {
 				// ignore polling errors
 			}
-		}, 5000);
+		}, 2000);
 		return () => clearInterval(interval);
 	}, [pollForPayment, orderId, onPaymentSuccess]);
 
@@ -136,16 +138,18 @@ export default function OrderSteps({
 			flexWrap="wrap"
 		>
 			{[
-				{ key: OrderStep.UPLOAD, label: "📄 1. Upload" },
-				{ key: OrderStep.PAYMENT, label: "💳 2. Payment" },
-				{ key: OrderStep.PICKUP, label: "📍 3. Pickup" },
-				{ key: OrderStep.COMPLETE, label: "✅ 4. Done" },
+				{ key: OrderStep.UPLOAD, label: "Upload" },
+				{ key: OrderStep.PAYMENT, label: "Payment" },
+				{ key: OrderStep.PICKUP, label: "Pickup" },
+				{ key: OrderStep.COMPLETE, label: "Done" },
 			].map((s) => {
 				const isCurrent = s.key === step;
 				const isPast =
-					[OrderStep.UPLOAD].includes(s.key) ||
+					s.key === OrderStep.UPLOAD ||
 					(s.key === OrderStep.PAYMENT &&
-						[OrderStep.PICKUP, OrderStep.COMPLETE].includes(step)) ||
+						([OrderStep.PICKUP, OrderStep.COMPLETE] as string[]).includes(
+							step,
+						)) ||
 					(s.key === OrderStep.PICKUP && step === OrderStep.COMPLETE);
 				return (
 					<Box
@@ -234,12 +238,39 @@ export default function OrderSteps({
 						>
 							← Back to payment options
 						</Button>
-						<StripePaymentForm
-							orderId={orderId}
-							totalCents={totalCents}
-							onSuccess={() => onPaymentSuccess()}
-							onError={(err) => console.error("Stripe error:", err)}
-						/>
+						{waitingForStripe ? (
+							<Box textAlign="center" py={8}>
+								<Text fontSize="lg" fontWeight={600} color="green.600" mb={2}>
+									✅ Payment received!
+								</Text>
+								<Text color="gray.500" mb={4}>
+									Confirming your order — this will only take a moment…
+								</Text>
+								<Box
+									display="inline-block"
+									w="24px"
+									h="24px"
+									border="3px solid"
+									borderColor="green.200"
+									borderTopColor="green.600"
+									borderRadius="50%"
+									animation="spin 0.8s linear infinite"
+									sx={{
+										"@keyframes spin": { to: { transform: "rotate(360deg)" } },
+									}}
+								/>
+							</Box>
+						) : (
+							<StripePaymentForm
+								orderId={orderId}
+								totalCents={totalCents}
+								onSuccess={() => {
+									setWaitingForStripe(true);
+									setPollForPayment(true);
+								}}
+								onError={(err) => console.error("Stripe error:", err)}
+							/>
+						)}
 					</Box>
 				) : (
 					<Box>

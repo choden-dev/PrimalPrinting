@@ -48,12 +48,22 @@ function PaymentForm({
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const handleSubmit = useCallback(
-		async (e: React.FormEvent) => {
+		async (e: React.SubmitEvent<HTMLFormElement>) => {
 			e.preventDefault();
 			if (!stripe || !elements) return;
 
 			setLoading(true);
 			setErrorMessage(null);
+
+			// Validate the form fields first
+			const { error: submitError } = await elements.submit();
+			if (submitError) {
+				const msg = submitError.message || "Please check your payment details.";
+				setErrorMessage(msg);
+				onError?.(msg);
+				setLoading(false);
+				return;
+			}
 
 			const { error, paymentIntent } = await stripe.confirmPayment({
 				elements,

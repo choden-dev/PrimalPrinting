@@ -129,7 +129,7 @@ export function TimeslotSelector({
 			{Object.entries(grouped)
 				.sort(([a], [b]) => a.localeCompare(b))
 				.map(([dateKey, slots]) => {
-					const dateLabel = new Date(dateKey).toLocaleDateString("en-AU", {
+					const dateLabel = new Date(dateKey).toLocaleDateString("en-NZ", {
 						weekday: "long",
 						day: "numeric",
 						month: "long",

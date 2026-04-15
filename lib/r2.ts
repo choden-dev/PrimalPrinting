@@ -169,6 +169,19 @@ export async function deleteFromStaging(key: string): Promise<void> {
 }
 
 /**
+ * Delete a single object from the permanent bucket.
+ */
+export async function deleteFromPermanent(key: string): Promise<void> {
+	const client = getS3Client();
+	await client.send(
+		new DeleteObjectCommand({
+			Bucket: getPermanentBucket(),
+			Key: key,
+		}),
+	);
+}
+
+/**
  * Delete all staging files for an order.
  */
 export async function cleanupStagingFiles(

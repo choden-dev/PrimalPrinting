@@ -92,7 +92,7 @@ export async function sendOrderConfirmationEmail(params: {
 	const { to, customerName, orderNumber, files, pricing, timeslot } = params;
 
 	const formattedDate = timeslot.date
-		? new Date(timeslot.date).toLocaleDateString("en-AU", {
+		? new Date(timeslot.date).toLocaleDateString("en-NZ", {
 				weekday: "long",
 				day: "numeric",
 				month: "long",

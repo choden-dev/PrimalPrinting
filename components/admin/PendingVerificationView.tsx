@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import BackToDashboard from "./BackToDashboard";
 
 interface OrderData {
 	id: string;
@@ -109,12 +110,14 @@ export default function PendingVerificationView() {
 
 	return (
 		<div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+			<BackToDashboard />
 			<div
 				style={{
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
 					marginBottom: "24px",
+					marginTop: "8px",
 					flexWrap: "wrap",
 					gap: "12px",
 				}}
@@ -235,7 +238,7 @@ export default function PendingVerificationView() {
 									${((order.pricing?.total || 0) / 100).toFixed(2)}
 								</span>
 								<span style={{ fontSize: "12px", color: "#999" }}>
-									{new Date(order.createdAt).toLocaleDateString("en-AU", {
+									{new Date(order.createdAt).toLocaleDateString("en-NZ", {
 										day: "numeric",
 										month: "short",
 										hour: "2-digit",
@@ -295,6 +298,8 @@ export default function PendingVerificationView() {
 										</button>
 									) : (
 										<div>
+											ttttttttttt
+											{/* biome-ignore lint/performance/noImgElement: Presigned R2 URLs are dynamic and incompatible with next/image */}
 											<img
 												src={proofUrl}
 												alt="Bank transfer proof"

@@ -70,43 +70,60 @@ export async function POST(request: NextRequest) {
 				return NextResponse.json({ received: true });
 			}
 
-			// Transfer files from staging → permanent
-			const files = order.files || [];
-			const transferMap = await transferOrderFiles(
-				files.map((f: { stagingKey: string }) => ({
-					stagingKey: f.stagingKey,
-				})),
-			);
-
-			const updatedFiles = files.map(
-				(f: {
-					stagingKey: string;
-					permanentKey?: string;
-					fileName?: string;
-					pageCount?: number;
-					copies?: number;
-					colorMode?: string;
-					paperSize?: string;
-					doubleSided?: boolean;
-					fileSize?: number;
-				}) => ({
-					...f,
-					permanentKey: transferMap.get(f.stagingKey) || f.stagingKey,
-				}),
-			);
-
-			// Transition to PAID
+			// Mark as PAID immediately so the user sees the update fast
 			await payload.update({
 				collection: "orders",
 				id: orderId,
 				data: {
 					status: "PAID",
 					stripePaymentId: paymentIntent.id,
-					files: updatedFiles,
 				},
 			});
 
 			console.log(`Stripe webhook: Order ${order.orderNumber} marked as PAID.`);
+
+			// Transfer files from staging → permanent in the background
+			const files = order.files || [];
+			try {
+				const transferMap = await transferOrderFiles(
+					files.map((f: { stagingKey: string }) => ({
+						stagingKey: f.stagingKey,
+					})),
+				);
+
+				const updatedFiles = files.map(
+					(f: {
+						stagingKey: string;
+						permanentKey?: string;
+						fileName?: string;
+						pageCount?: number;
+						copies?: number;
+						colorMode?: string;
+						paperSize?: string;
+						doubleSided?: boolean;
+						fileSize?: number;
+					}) => ({
+						...f,
+						permanentKey: transferMap.get(f.stagingKey) || f.stagingKey,
+					}),
+				);
+
+				await payload.update({
+					collection: "orders",
+					id: orderId,
+					data: { files: updatedFiles },
+				});
+
+				console.log(
+					`Stripe webhook: Files transferred for order ${order.orderNumber}.`,
+				);
+			} catch (transferError) {
+				// Log but don't fail — order is already PAID, files can be retried
+				console.error(
+					`Stripe webhook: File transfer failed for order ${order.orderNumber}:`,
+					transferError,
+				);
+			}
 		} catch (error) {
 			console.error("Stripe webhook: Error processing payment:", error);
 			// Return 500 so Stripe retries
