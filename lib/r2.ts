@@ -3,6 +3,7 @@ import {
 	CopyObjectCommand,
 	DeleteObjectCommand,
 	GetObjectCommand,
+	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
@@ -74,48 +75,68 @@ export function generateProofKey(orderNumber: string): string {
 // ── PDF page counting ────────────────────────────────────────────────────
 
 /**
- * Count the number of pages in a PDF stored in the staging bucket.
- * Used to verify client-reported page counts and prevent pricing manipulation.
+ * Get the verified page count from R2 object metadata (set at upload time).
+ * Uses a cheap HeadObject call — no file download needed.
+ * Returns null if metadata is not available.
  */
-export async function countPdfPages(stagingKey: string): Promise<number> {
+export async function getPageCountFromMetadata(
+	stagingKey: string,
+): Promise<number | null> {
 	const client = getS3Client();
-	const response = await client.send(
-		new GetObjectCommand({
-			Bucket: getStagingBucket(),
-			Key: stagingKey,
-		}),
-	);
-
-	const chunks: Uint8Array[] = [];
-	const stream = response.Body as AsyncIterable<Uint8Array>;
-	for await (const chunk of stream) {
-		chunks.push(chunk);
+	try {
+		const response = await client.send(
+			new HeadObjectCommand({
+				Bucket: getStagingBucket(),
+				Key: stagingKey,
+			}),
+		);
+		const pageCountStr = response.Metadata?.["page-count"];
+		if (pageCountStr) {
+			const parsed = Number.parseInt(pageCountStr, 10);
+			return Number.isNaN(parsed) ? null : parsed;
+		}
+	} catch (err) {
+		console.error("Failed to read metadata for", stagingKey, err);
 	}
-	const buffer = Buffer.concat(chunks);
-
-	const parsed = await pdfParse(buffer);
-	return parsed.numpages;
+	return null;
 }
 
 // ── Upload operations ────────────────────────────────────────────────────
 
 /**
  * Upload a file buffer to the staging R2 bucket.
+ * If the file is a PDF, page count is extracted and stored as custom metadata.
  */
 export async function uploadToStaging(
 	key: string,
 	body: Buffer | Uint8Array,
 	contentType: string,
-): Promise<void> {
+): Promise<{ pageCount?: number }> {
 	const client = getS3Client();
+
+	let pageCount: number | undefined;
+
+	// Count PDF pages at upload time and store as metadata
+	if (contentType === "application/pdf") {
+		try {
+			const parsed = await pdfParse(Buffer.from(body));
+			pageCount = parsed.numpages;
+		} catch (err) {
+			console.error("Failed to count PDF pages at upload:", err);
+		}
+	}
+
 	await client.send(
 		new PutObjectCommand({
 			Bucket: getStagingBucket(),
 			Key: key,
 			Body: body,
 			ContentType: contentType,
+			Metadata: pageCount ? { "page-count": String(pageCount) } : undefined,
 		}),
 	);
+
+	return { pageCount };
 }
 
 /**

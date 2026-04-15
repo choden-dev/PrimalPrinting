@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
-import { countPdfPages } from "../../../../lib/r2";
+import { getPageCountFromMetadata } from "../../../../lib/r2";
 import { calculateOrderTotal } from "../../../../lib/stripe";
 
 /**
@@ -59,16 +59,11 @@ export async function POST(request: NextRequest) {
 					colorMode?: string;
 					fileSize?: number;
 				}) => {
-					// Verify page count from the actual PDF — never trust the client
-					let verifiedPageCount = f.pageCount;
-					try {
-						verifiedPageCount = await countPdfPages(f.stagingKey);
-					} catch (err) {
-						console.error(
-							`Failed to verify page count for ${f.fileName}, using client value:`,
-							err,
-						);
-					}
+					// Verify page count from R2 metadata (set at upload time)
+					const metadataPageCount = await getPageCountFromMetadata(
+						f.stagingKey,
+					);
+					const verifiedPageCount = metadataPageCount ?? f.pageCount;
 
 					return {
 						fileName: f.fileName,

@@ -54,13 +54,14 @@ export async function POST(request: NextRequest) {
 		const stagingKey = generateStagingKey(effectiveOrderNumber, file.name);
 
 		const buffer = Buffer.from(await file.arrayBuffer());
-		await uploadToStaging(stagingKey, buffer, file.type);
+		const { pageCount } = await uploadToStaging(stagingKey, buffer, file.type);
 
 		return NextResponse.json({
 			success: true,
 			stagingKey,
 			fileName: file.name,
 			fileSize: file.size,
+			pageCount,
 		});
 	} catch (error) {
 		console.error("Error uploading file:", error);
