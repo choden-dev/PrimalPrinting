@@ -5,9 +5,11 @@ import {
 	Heading,
 	List,
 	ListItem,
+	Spinner,
 	Text,
 } from "@chakra-ui/react";
-import { useContext } from "react";
+import { useCallback, useContext, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import { CartContext } from "../../contexts/CartContext";
 import type CartItem from "../../types/models/CartItem";
 import DiscountBadge from "../discountbadge/DiscountBadge";
@@ -15,7 +17,11 @@ import QuantityPicker from "../quantitypicker/QuantityPicker";
 
 type Props = {
 	smallScreen: boolean;
-	formRef: React.RefObject<HTMLFormElement>;
+	onProceedToPayment: (orderId: string, orderNumber: string) => void;
+	setIsProcessing: (value: boolean) => void;
+	setCurrentlyUploading: React.Dispatch<
+		React.SetStateAction<{ name: string; percent: number }[]>
+	>;
 };
 
 const CartItemContainer = () => {
@@ -136,23 +142,141 @@ const PdfItemContainer = () => {
 	);
 };
 
-const Cart = ({ smallScreen, formRef }: Props) => {
-	const { cartPackages, uploadedPdfs, displayPriceString, setIsModalOpen } =
+const Cart = ({
+	smallScreen,
+	onProceedToPayment,
+	setIsProcessing,
+	setCurrentlyUploading,
+}: Props) => {
+	const { cartPackages, uploadedPdfs, displayPriceString } =
 		useContext(CartContext);
-	const checkFormValidity = () => {
-		const form = formRef.current;
-		const formValid = form?.checkValidity();
-		if (!formValid) window.alert("Please check your submission details.");
-		return formValid;
-	};
+	const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+	const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
-	const checkCartValidity = () => {
+	/**
+	 * Upload all PDFs to the R2 staging bucket, then create a DRAFT order
+	 * in Payload and proceed to the payment step.
+	 */
+	const handleOrderNow = useCallback(async () => {
 		const cartValid =
 			(cartPackages && cartPackages.length !== 0) ||
 			(uploadedPdfs && uploadedPdfs.length !== 0);
-		if (!cartValid) window.alert("Please choose a package or upload a pdf.");
-		return cartValid;
-	};
+		if (!cartValid) {
+			window.alert("Please choose a package or upload a pdf.");
+			return;
+		}
+
+		if (!isAuthenticated) {
+			login();
+			return;
+		}
+
+		setIsCreatingOrder(true);
+		setIsProcessing(true);
+
+		try {
+			// Step 1: Upload PDFs to R2 staging bucket
+			const uploadedFiles: {
+				fileName: string;
+				stagingKey: string;
+				pageCount: number;
+				copies: number;
+				colorMode: string;
+				paperSize: string;
+				doubleSided: boolean;
+				fileSize: number;
+			}[] = [];
+
+			for (let i = 0; i < uploadedPdfs.length; i++) {
+				const pdf = uploadedPdfs[i];
+				setCurrentlyUploading((prev) => {
+					const updated = [...prev];
+					updated[i] = { name: pdf.displayName, percent: 0 };
+					return updated;
+				});
+
+				const formData = new FormData();
+				formData.append("file", pdf.file);
+
+				const uploadRes = await fetch("/api/orders/upload", {
+					method: "POST",
+					body: formData,
+				});
+
+				if (!uploadRes.ok) {
+					const err = await uploadRes.json();
+					throw new Error(err.error || `Failed to upload ${pdf.displayName}`);
+				}
+
+				const { stagingKey, fileSize } = await uploadRes.json();
+
+				setCurrentlyUploading((prev) => {
+					const updated = [...prev];
+					updated[i] = { name: pdf.displayName, percent: 100 };
+					return updated;
+				});
+
+				uploadedFiles.push({
+					fileName: pdf.displayName,
+					stagingKey,
+					pageCount: pdf.getPages(),
+					copies: pdf.getQuantity(),
+					colorMode: pdf.isColor ? "COLOR" : "BW",
+					paperSize: "A4",
+					doubleSided: false,
+					fileSize: fileSize || pdf.file.size,
+				});
+			}
+
+			// Step 2: Calculate pricing (in cents)
+			const totalDollars = Number.parseFloat(displayPriceString);
+			const subtotalCents = Math.round(totalDollars * 100);
+			const taxCents = Math.round(subtotalCents * 0.15); // 15% GST for NZ
+			const totalCents = subtotalCents + taxCents;
+
+			// Step 3: Create the order in Payload
+			const orderRes = await fetch("/api/orders", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					files: uploadedFiles,
+					pricing: {
+						subtotal: subtotalCents,
+						tax: taxCents,
+						total: totalCents,
+					},
+				}),
+			});
+
+			if (!orderRes.ok) {
+				const err = await orderRes.json();
+				throw new Error(err.error || "Failed to create order.");
+			}
+
+			const { order } = await orderRes.json();
+
+			setIsProcessing(false);
+			setCurrentlyUploading([]);
+			onProceedToPayment(order.id, order.orderNumber);
+		} catch (error) {
+			setIsProcessing(false);
+			setCurrentlyUploading([]);
+			setIsCreatingOrder(false);
+			window.alert(
+				error instanceof Error ? error.message : "Something went wrong.",
+			);
+		}
+	}, [
+		uploadedPdfs,
+		cartPackages,
+		cartPackages.length,
+		displayPriceString,
+		isAuthenticated,
+		login,
+		onProceedToPayment,
+		setIsProcessing,
+		setCurrentlyUploading,
+	]);
 
 	return (
 		<Box
@@ -183,15 +307,31 @@ const Cart = ({ smallScreen, formRef }: Props) => {
 							<strong>Estimated Price: ${displayPriceString}</strong>
 						</Text>
 					</ListItem>
-					<Button
-						variant="browned"
-						onClick={() => {
-							if (checkCartValidity() && checkFormValidity())
-								setIsModalOpen(true);
-						}}
-					>
-						Order Now
-					</Button>
+
+					{/* Auth-aware order button */}
+					{authLoading ? (
+						<Button variant="browned" isDisabled>
+							<Spinner size="sm" mr={2} /> Loading…
+						</Button>
+					) : isAuthenticated ? (
+						<Button
+							variant="browned"
+							onClick={handleOrderNow}
+							isLoading={isCreatingOrder}
+							loadingText="Creating order…"
+						>
+							Proceed to Payment
+						</Button>
+					) : (
+						<Box display="flex" flexDir="column" gap={2}>
+							<Button variant="browned" onClick={login}>
+								Sign in to Order
+							</Button>
+							<Text fontSize="xs" color="gray.500" textAlign="center">
+								Sign in with Google to proceed with your order
+							</Text>
+						</Box>
+					)}
 				</List>
 			</Box>
 		</Box>
