@@ -309,7 +309,7 @@ const Cart = ({
 					) : (
 						<Box display="flex" flexDir="column" gap={2}>
 							<Button variant="browned" onClick={login}>
-								🔑 Sign in to Order
+								Sign in to Order
 							</Button>
 							<Text fontSize="xs" color="gray.500" textAlign="center">
 								Sign in with Google to proceed with your order
