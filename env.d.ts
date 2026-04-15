@@ -161,18 +161,5 @@ declare namespace NodeJS {
 		 * Shared secret to authenticate cron job requests (e.g. order expiry).
 		 */
 		CRON_SECRET: string;
-
-		// ── Cloudflare Queue ─────────────────────────────────────────────
-		/**
-		 * @env CF_QUEUE_URL
-		 * Cloudflare Queue HTTP API URL for pushing PDF processing messages.
-		 * Format: https://api.cloudflare.com/client/v4/accounts/<account_id>/queues/<queue_id>/messages
-		 */
-		CF_QUEUE_URL: string;
-		/**
-		 * @env CF_QUEUE_TOKEN
-		 * Cloudflare API token with Queue write permissions.
-		 */
-		CF_QUEUE_TOKEN: string;
 	}
 }

@@ -75,72 +75,30 @@ export function generateProofKey(orderNumber: string): string {
 // ── PDF page counting ────────────────────────────────────────────────────
 
 /**
- * Get the verified page count for a staged PDF.
+ * Get the verified page count for a staged PDF from R2 metadata.
+ * Metadata is set at upload time (inline parsing — file already in memory).
  *
- * 1. Polls R2 metadata (set by the queue worker) with retries
- * 2. Falls back to downloading and parsing the PDF if queue hasn't processed yet
- * 3. Never returns a client-provided value
- *
- * Returns null only if the file is inaccessible or unparseable.
+ * Returns null only if the file is inaccessible or metadata wasn't set.
  */
 export async function getVerifiedPageCount(
 	stagingKey: string,
-	options?: { maxRetries?: number; retryDelayMs?: number },
 ): Promise<number | null> {
 	const client = getS3Client();
-	const maxRetries = options?.maxRetries ?? 5;
-	const retryDelayMs = options?.retryDelayMs ?? 1000;
 
-	// Poll metadata with retries (queue worker may still be processing)
-	for (let attempt = 0; attempt < maxRetries; attempt++) {
-		try {
-			const headResponse = await client.send(
-				new HeadObjectCommand({
-					Bucket: getStagingBucket(),
-					Key: stagingKey,
-				}),
-			);
-			const pageCountStr = headResponse.Metadata?.["page-count"];
-			if (pageCountStr) {
-				const parsed = Number.parseInt(pageCountStr, 10);
-				if (!Number.isNaN(parsed) && parsed > 0) return parsed;
-			}
-		} catch (err) {
-			console.error(
-				`HeadObject attempt ${attempt + 1} failed for`,
-				stagingKey,
-				err,
-			);
-		}
-
-		// Wait before retrying (queue worker might still be processing)
-		if (attempt < maxRetries - 1) {
-			await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
-		}
-	}
-
-	// Fallback: download and parse the PDF directly
-	console.warn(
-		`Queue hasn't processed ${stagingKey} after ${maxRetries} retries, falling back to direct parse`,
-	);
 	try {
-		const getResponse = await client.send(
-			new GetObjectCommand({
+		const headResponse = await client.send(
+			new HeadObjectCommand({
 				Bucket: getStagingBucket(),
 				Key: stagingKey,
 			}),
 		);
-
-		const chunks: Uint8Array[] = [];
-		const stream = getResponse.Body as AsyncIterable<Uint8Array>;
-		for await (const chunk of stream) {
-			chunks.push(chunk);
+		const pageCountStr = headResponse.Metadata?.["page-count"];
+		if (pageCountStr) {
+			const parsed = Number.parseInt(pageCountStr, 10);
+			if (!Number.isNaN(parsed) && parsed > 0) return parsed;
 		}
-
-		const parsed = await pdfParse(Buffer.concat(chunks));
-		return parsed.numpages;
 	} catch (err) {
-		console.error("Failed to parse PDF for page count:", stagingKey, err);
+		console.error("HeadObject failed for", stagingKey, err);
 	}
 
 	return null;
@@ -150,15 +108,27 @@ export async function getVerifiedPageCount(
 
 /**
  * Upload a file buffer to the staging R2 bucket.
- * If the file is a PDF, a message is pushed to the processing queue
- * for async page counting — no inline parsing.
+ * If the file is a PDF, pages are counted inline (file is already in memory
+ * from the upload — negligible cost) and stored as R2 custom metadata.
  */
 export async function uploadToStaging(
 	key: string,
 	body: Buffer | Uint8Array,
 	contentType: string,
-): Promise<void> {
+): Promise<{ pageCount?: number }> {
 	const client = getS3Client();
+
+	let pageCount: number | undefined;
+
+	// Count pages inline — file is already in memory from the upload
+	if (contentType === "application/pdf") {
+		try {
+			const parsed = await pdfParse(Buffer.from(body));
+			pageCount = parsed.numpages;
+		} catch (err) {
+			console.error("Failed to count PDF pages at upload:", err);
+		}
+	}
 
 	await client.send(
 		new PutObjectCommand({
@@ -166,48 +136,11 @@ export async function uploadToStaging(
 			Key: key,
 			Body: body,
 			ContentType: contentType,
+			Metadata: pageCount ? { "page-count": String(pageCount) } : undefined,
 		}),
 	);
 
-	// Push to processing queue for async page counting
-	if (contentType === "application/pdf") {
-		await pushToPageCountQueue(key);
-	}
-}
-
-/**
- * Push a message to the Cloudflare Queue for async PDF page counting.
- */
-async function pushToPageCountQueue(stagingKey: string): Promise<void> {
-	const queueUrl = process.env.CF_QUEUE_URL;
-	const queueToken = process.env.CF_QUEUE_TOKEN;
-
-	if (!queueUrl || !queueToken) {
-		console.warn(
-			"CF_QUEUE_URL or CF_QUEUE_TOKEN not set — skipping queue push for",
-			stagingKey,
-		);
-		return;
-	}
-
-	try {
-		const res = await fetch(queueUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${queueToken}`,
-			},
-			body: JSON.stringify({
-				messages: [{ body: { stagingKey } }],
-			}),
-		});
-
-		if (!res.ok) {
-			console.error("Failed to push to queue:", res.status, await res.text());
-		}
-	} catch (err) {
-		console.error("Queue push error:", err);
-	}
+	return { pageCount };
 }
 
 /**
