@@ -20,3 +20,21 @@ variable "r2_location" {
   type        = string
   default     = "APAC"
 }
+
+variable "r2_staging_bucket_name" {
+  description = "Name of the R2 bucket for staging order files (temporary, auto-expired)"
+  type        = string
+  default     = "primalprinting-staging"
+}
+
+variable "r2_permanent_bucket_name" {
+  description = "Name of the R2 bucket for permanent order files (retained after payment)"
+  type        = string
+  default     = "primalprinting-orders"
+}
+
+variable "r2_staging_expiry_days" {
+  description = "Number of days before staging bucket objects are auto-deleted"
+  type        = number
+  default     = 7
+}

@@ -6,7 +6,10 @@ import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { AboutSections } from "./collections/AboutSections";
+import { Customers } from "./collections/Customers";
 import { Media } from "./collections/Media";
+import { Orders } from "./collections/Orders";
+import { Timeslots } from "./collections/Timeslots";
 import { Users } from "./collections/Users";
 import { ContactInfo } from "./globals/ContactInfo";
 
@@ -19,7 +22,7 @@ export default buildConfig({
 		url: process.env.DATABASE_URI || process.env.MONGODB_URI || "",
 	}),
 	editor: lexicalEditor(),
-	collections: [Users, AboutSections, Media],
+	collections: [Users, Customers, Orders, Timeslots, AboutSections, Media],
 	globals: [ContactInfo],
 	sharp,
 	plugins: [

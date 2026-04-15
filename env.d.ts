@@ -100,6 +100,66 @@ declare namespace NodeJS {
 		 * Public URL for serving R2 media (e.g. R2.dev subdomain or custom domain).
 		 */
 		R2_PUBLIC_URL: string;
-		// Add other environment variables here as needed
+
+		// ── Order system R2 buckets ──────────────────────────────────────
+		/**
+		 * @env R2_STAGING_BUCKET
+		 * R2 bucket name for temporary order file storage (auto-expired after ~7 days).
+		 */
+		R2_STAGING_BUCKET: string;
+		/**
+		 * @env R2_PERMANENT_BUCKET
+		 * R2 bucket name for permanent order file storage (retained after payment).
+		 */
+		R2_PERMANENT_BUCKET: string;
+
+		// ── NextAuth / OAuth ─────────────────────────────────────────────
+		/**
+		 * @env NEXTAUTH_URL
+		 * Canonical URL of the site. Used by NextAuth for callbacks.
+		 * e.g. https://yourdomain.com
+		 */
+		NEXTAUTH_URL: string;
+		/**
+		 * @env NEXTAUTH_SECRET
+		 * Random secret used by NextAuth to encrypt JWTs and cookies.
+		 * Generate with: openssl rand -base64 32
+		 */
+		NEXTAUTH_SECRET: string;
+		/**
+		 * @env GOOGLE_CLIENT_ID
+		 * Google OAuth 2.0 client ID. Obtain from Google Cloud Console > Credentials.
+		 */
+		GOOGLE_CLIENT_ID: string;
+		/**
+		 * @env GOOGLE_CLIENT_SECRET
+		 * Google OAuth 2.0 client secret. Obtain from Google Cloud Console > Credentials.
+		 */
+		GOOGLE_CLIENT_SECRET: string;
+
+		// ── Stripe ───────────────────────────────────────────────────────
+		/**
+		 * @env STRIPE_PRIVATE_KEY
+		 * Stripe secret key for server-side API calls.
+		 */
+		STRIPE_PRIVATE_KEY: string;
+		/**
+		 * @env NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+		 * Stripe publishable key for client-side Stripe Elements.
+		 */
+		NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
+		/**
+		 * @env STRIPE_WEBHOOK_SECRET
+		 * Stripe webhook signing secret for verifying webhook events.
+		 * Obtain from Stripe Dashboard > Webhooks > Signing secret.
+		 */
+		STRIPE_WEBHOOK_SECRET: string;
+
+		// ── Order system ─────────────────────────────────────────────────
+		/**
+		 * @env CRON_SECRET
+		 * Shared secret to authenticate cron job requests (e.g. order expiry).
+		 */
+		CRON_SECRET: string;
 	}
 }
