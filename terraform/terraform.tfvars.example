@@ -10,3 +10,7 @@ r2_location           = "APAC"
 r2_staging_bucket_name   = "primalprinting-staging"
 r2_permanent_bucket_name = "primalprinting-orders"
 r2_staging_expiry_days   = 7
+
+# PDF processing queue
+queue_pdf_page_count_name = "primalprinting-pdf-page-count"
+queue_worker_script_name  = "primalprinting-pdf-processor"

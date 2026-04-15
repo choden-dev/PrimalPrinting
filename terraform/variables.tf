@@ -38,3 +38,15 @@ variable "r2_staging_expiry_days" {
   type        = number
   default     = 7
 }
+
+variable "queue_pdf_page_count_name" {
+  description = "Name of the Cloudflare Queue for async PDF page counting"
+  type        = string
+  default     = "primalprinting-pdf-page-count"
+}
+
+variable "queue_worker_script_name" {
+  description = "Name of the Cloudflare Worker that processes the PDF page count queue"
+  type        = string
+  default     = "primalprinting-pdf-processor"
+}

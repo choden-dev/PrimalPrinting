@@ -71,3 +71,31 @@ resource "cloudflare_r2_bucket" "order_permanent" {
   name       = var.r2_permanent_bucket_name
   location   = var.r2_location
 }
+
+# ---------------------------------------------------------------------------
+# Cloudflare Queue for async PDF page counting.
+# When a PDF is uploaded to the staging bucket, a message is pushed to this
+# queue. A Worker consumer processes it, counts pages, and writes the result
+# back to the R2 object's metadata.
+# ---------------------------------------------------------------------------
+resource "cloudflare_queue" "pdf_page_count" {
+  account_id = var.cloudflare_account_id
+  queue_name = var.queue_pdf_page_count_name
+}
+
+# ---------------------------------------------------------------------------
+# Cloudflare Worker that consumes the PDF page count queue.
+# Deployed via `wrangler deploy` — Terraform manages the binding only.
+# ---------------------------------------------------------------------------
+resource "cloudflare_queue_consumer" "pdf_page_count_consumer" {
+  account_id = var.cloudflare_account_id
+  queue_id   = cloudflare_queue.pdf_page_count.queue_id
+  type       = "worker"
+  script_name = var.queue_worker_script_name
+
+  settings = {
+    batch_size     = 10
+    max_retries    = 3
+    max_wait_time_ms = 5000
+  }
+}

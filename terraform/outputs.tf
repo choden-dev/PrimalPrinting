@@ -22,3 +22,13 @@ output "r2_staging_expiry_days" {
   description = "Auto-expiry period (days) for objects in the staging bucket"
   value       = var.r2_staging_expiry_days
 }
+
+output "queue_pdf_page_count_name" {
+  description = "Name of the Cloudflare Queue for PDF page counting"
+  value       = cloudflare_queue.pdf_page_count.queue_name
+}
+
+output "queue_pdf_page_count_id" {
+  description = "ID of the Cloudflare Queue for PDF page counting"
+  value       = cloudflare_queue.pdf_page_count.queue_id
+}
