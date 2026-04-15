@@ -182,8 +182,6 @@ const Cart = ({
 				pageCount: number;
 				copies: number;
 				colorMode: string;
-				paperSize: string;
-				doubleSided: boolean;
 				fileSize: number;
 			}[] = [];
 
@@ -222,8 +220,6 @@ const Cart = ({
 					pageCount: pdf.getPages(),
 					copies: pdf.getQuantity(),
 					colorMode: pdf.isColor ? "COLOR" : "BW",
-					paperSize: "A4",
-					doubleSided: false,
 					fileSize: fileSize || pdf.file.size,
 				});
 			}

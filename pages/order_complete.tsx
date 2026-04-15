@@ -15,7 +15,6 @@ interface OrderDetails {
 		pageCount: number;
 		copies: number;
 		colorMode: string;
-		paperSize: string;
 	}[];
 	pickupTimeslot: {
 		date: string;
@@ -119,8 +118,7 @@ const OrderComplete: NextPage = () => {
 									<Text color="gray.600">
 										{file.pageCount} pages · {file.copies}{" "}
 										{file.copies === 1 ? "copy" : "copies"} ·{" "}
-										{file.colorMode === "COLOR" ? "Colour" : "B&W"} ·{" "}
-										{file.paperSize}
+										{file.colorMode === "COLOR" ? "Colour" : "B&W"}
 									</Text>
 								</Box>
 							))}

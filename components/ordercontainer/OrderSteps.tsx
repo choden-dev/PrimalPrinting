@@ -30,7 +30,6 @@ interface OrderDetails {
 		fileName: string;
 		copies: number;
 		colorMode: string;
-		paperSize: string;
 		pageCount: number;
 	}[];
 }
@@ -139,7 +138,7 @@ export default function OrderSteps({
 						<Text>📄 {file.fileName}</Text>
 						<Text color="gray.500">
 							{file.pageCount} pg · {file.copies}x ·{" "}
-							{file.colorMode === "COLOR" ? "Colour" : "B&W"} · {file.paperSize}
+							{file.colorMode === "COLOR" ? "Colour" : "B&W"}
 						</Text>
 					</Box>
 				))}
@@ -415,8 +414,7 @@ export default function OrderSteps({
 								<Text color="gray.600">
 									{file.pageCount} pages · {file.copies}{" "}
 									{file.copies === 1 ? "copy" : "copies"} ·{" "}
-									{file.colorMode === "COLOR" ? "Colour" : "B&W"} ·{" "}
-									{file.paperSize}
+									{file.colorMode === "COLOR" ? "Colour" : "B&W"}
 								</Text>
 							</Box>
 						))}
