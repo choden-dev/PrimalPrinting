@@ -7,6 +7,7 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import pdfParse from "pdf-parse";
 import sharp from "sharp";
 
 // ── S3-compatible client (shared across all R2 buckets) ──────────────────
@@ -68,6 +69,32 @@ export function generatePermanentKey(stagingKey: string): string {
  */
 export function generateProofKey(orderNumber: string): string {
 	return `proofs/${orderNumber}/${randomUUID()}.webp`;
+}
+
+// ── PDF page counting ────────────────────────────────────────────────────
+
+/**
+ * Count the number of pages in a PDF stored in the staging bucket.
+ * Used to verify client-reported page counts and prevent pricing manipulation.
+ */
+export async function countPdfPages(stagingKey: string): Promise<number> {
+	const client = getS3Client();
+	const response = await client.send(
+		new GetObjectCommand({
+			Bucket: getStagingBucket(),
+			Key: stagingKey,
+		}),
+	);
+
+	const chunks: Uint8Array[] = [];
+	const stream = response.Body as AsyncIterable<Uint8Array>;
+	for await (const chunk of stream) {
+		chunks.push(chunk);
+	}
+	const buffer = Buffer.concat(chunks);
+
+	const parsed = await pdfParse(buffer);
+	return parsed.numpages;
 }
 
 // ── Upload operations ────────────────────────────────────────────────────

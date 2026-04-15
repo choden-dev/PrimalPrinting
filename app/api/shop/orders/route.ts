@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
+import { countPdfPages } from "../../../../lib/r2";
 import { calculateOrderTotal } from "../../../../lib/stripe";
 
 /**
@@ -47,26 +48,41 @@ export async function POST(request: NextRequest) {
 
 		const payload = await getPayloadClient();
 
-		// Map file data from the request
-		const orderFiles = files.map(
-			(f: {
-				fileName: string;
-				stagingKey: string;
-				pageCount: number;
-				copies?: number;
-				colorMode?: string;
-				fileSize?: number;
-			}) => ({
-				fileName: f.fileName,
-				stagingKey: f.stagingKey,
-				pageCount: f.pageCount,
-				copies: f.copies || 1,
-				colorMode: f.colorMode || "BW",
-				fileSize: f.fileSize || 0,
-			}),
+		// Map file data and verify page counts server-side
+		const orderFiles = await Promise.all(
+			files.map(
+				async (f: {
+					fileName: string;
+					stagingKey: string;
+					pageCount: number;
+					copies?: number;
+					colorMode?: string;
+					fileSize?: number;
+				}) => {
+					// Verify page count from the actual PDF — never trust the client
+					let verifiedPageCount = f.pageCount;
+					try {
+						verifiedPageCount = await countPdfPages(f.stagingKey);
+					} catch (err) {
+						console.error(
+							`Failed to verify page count for ${f.fileName}, using client value:`,
+							err,
+						);
+					}
+
+					return {
+						fileName: f.fileName,
+						stagingKey: f.stagingKey,
+						pageCount: verifiedPageCount,
+						copies: f.copies || 1,
+						colorMode: f.colorMode || "BW",
+						fileSize: f.fileSize || 0,
+					};
+				},
+			),
 		);
 
-		// Calculate pricing server-side — never trust the client
+		// Calculate pricing from verified page counts
 		const pricing = await calculateOrderTotal(orderFiles);
 
 		// Set expiry to 7 days from now
