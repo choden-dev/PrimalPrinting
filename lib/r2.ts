@@ -8,7 +8,6 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import pdfParse from "pdf-parse";
 import sharp from "sharp";
 
 // ── S3-compatible client (shared across all R2 buckets) ──────────────────
@@ -123,6 +122,8 @@ export async function uploadToStaging(
 	// Count pages inline — file is already in memory from the upload
 	if (contentType === "application/pdf") {
 		try {
+			// Dynamic import to avoid pdf-parse breaking RSC bundling
+			const pdfParse = (await import("pdf-parse")).default;
 			const parsed = await pdfParse(Buffer.from(body));
 			pageCount = parsed.numpages;
 		} catch (err) {

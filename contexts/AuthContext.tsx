@@ -61,7 +61,18 @@ function AuthContextInner({ children }: PropsWithChildren) {
 			name: session?.user?.name ?? null,
 			email: session?.user?.email ?? null,
 			image: session?.user?.image ?? null,
-			login: () => signIn("google"),
+			login: () => {
+				// Open OAuth in a popup so the current page state (uploaded files) is preserved
+				const width = 500;
+				const height = 600;
+				const left = window.screenX + (window.outerWidth - width) / 2;
+				const top = window.screenY + (window.outerHeight - height) / 2;
+				window.open(
+					`/api/auth/signin/google?callbackUrl=${encodeURIComponent(window.location.href)}`,
+					"google-signin",
+					`width=${width},height=${height},left=${left},top=${top}`,
+				);
+			},
 			logout: () => signOut({ callbackUrl: "/" }),
 		};
 	}, [session, status]);
