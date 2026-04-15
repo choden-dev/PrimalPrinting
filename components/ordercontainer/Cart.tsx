@@ -224,21 +224,12 @@ const Cart = ({
 				});
 			}
 
-			// Step 2: Calculate pricing (in cents)
-			const totalDollars = Number.parseFloat(displayPriceString);
-			const totalCents = Math.round(totalDollars * 100);
-
-			// Step 3: Create the order in Payload
+			// Step 2: Create the order in Payload (pricing calculated server-side)
 			const orderRes = await fetch("/api/shop/orders", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					files: uploadedFiles,
-					pricing: {
-						subtotal: totalCents,
-						tax: 0,
-						total: totalCents,
-					},
 				}),
 			});
 
@@ -264,7 +255,6 @@ const Cart = ({
 		uploadedPdfs,
 		cartPackages,
 		cartPackages.length,
-		displayPriceString,
 		isAuthenticated,
 		login,
 		onProceedToPayment,
@@ -293,13 +283,12 @@ const Cart = ({
 					click the <strong>X</strong> on the right of an item to remove
 				</p>
 				<List>
-					{false && <Text fontWeight="800">Packages</Text>}
 					<Divider marginBottom=".5rem" />
 					<CartItemContainer />
 					<PdfItemContainer />
 					<ListItem>
 						<Text fontSize="1.5rem">
-							<strong>💵 Estimated Price: ${displayPriceString}</strong>
+							<strong>Estimated Price: ${displayPriceString}</strong>
 						</Text>
 					</ListItem>
 
@@ -315,7 +304,7 @@ const Cart = ({
 							isLoading={isCreatingOrder}
 							loadingText="Creating order…"
 						>
-							💳 Proceed to Payment
+							Proceed to Payment
 						</Button>
 					) : (
 						<Box display="flex" flexDir="column" gap={2}>

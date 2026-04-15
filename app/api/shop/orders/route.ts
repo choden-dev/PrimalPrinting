@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
+import { calculateOrderTotal } from "../../../../lib/stripe";
 
 /**
  * POST /api/orders — Create a new DRAFT order.
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
 
 	try {
 		const body = await request.json();
-		const { files, pricing } = body;
+		const { files } = body;
 
 		if (!files || !Array.isArray(files) || files.length === 0) {
 			return NextResponse.json(
@@ -44,14 +45,29 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		if (!pricing || typeof pricing.total !== "number") {
-			return NextResponse.json(
-				{ error: "Pricing information is required." },
-				{ status: 400 },
-			);
-		}
-
 		const payload = await getPayloadClient();
+
+		// Map file data from the request
+		const orderFiles = files.map(
+			(f: {
+				fileName: string;
+				stagingKey: string;
+				pageCount: number;
+				copies?: number;
+				colorMode?: string;
+				fileSize?: number;
+			}) => ({
+				fileName: f.fileName,
+				stagingKey: f.stagingKey,
+				pageCount: f.pageCount,
+				copies: f.copies || 1,
+				colorMode: f.colorMode || "BW",
+				fileSize: f.fileSize || 0,
+			}),
+		);
+
+		// Calculate pricing server-side — never trust the client
+		const pricing = await calculateOrderTotal(orderFiles);
 
 		// Set expiry to 7 days from now
 		const expiresAt = new Date();
@@ -62,30 +78,10 @@ export async function POST(request: NextRequest) {
 			data: {
 				customer: customer.customerId,
 				status: "DRAFT",
-				files: files.map(
-					(f: {
-						fileName: string;
-						stagingKey: string;
-						pageCount: number;
-						copies?: number;
-						colorMode?: string;
-						paperSize?: string;
-						doubleSided?: boolean;
-						fileSize?: number;
-					}) => ({
-						fileName: f.fileName,
-						stagingKey: f.stagingKey,
-						pageCount: f.pageCount,
-						copies: f.copies || 1,
-						colorMode: f.colorMode || "BW",
-						paperSize: f.paperSize || "A4",
-						doubleSided: f.doubleSided || false,
-						fileSize: f.fileSize || 0,
-					}),
-				),
+				files: orderFiles,
 				pricing: {
 					subtotal: pricing.subtotal,
-					tax: pricing.tax,
+					tax: 0,
 					total: pricing.total,
 				},
 				expiresAt: expiresAt.toISOString(),

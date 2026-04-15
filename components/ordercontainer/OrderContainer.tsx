@@ -335,7 +335,7 @@ const OrderContainerInner = () => {
 					/>
 					<Tabs variant="enclosed" colorScheme="brown">
 						<TabList padding="0 1rem">
-							<Tab fontWeight="700">📄 Upload PDF</Tab>
+							<Tab fontWeight="700">Upload PDF</Tab>
 						</TabList>
 						<TabPanels>
 							<TabPanel>
