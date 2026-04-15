@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../../lib/auth";
+import { checkBankTransferEligibility } from "../../../../../lib/bankTransfer";
 import { getPayloadClient } from "../../../../../lib/payload";
 
 type RouteContext = { params: Promise<{ orderId: string }> };
@@ -46,20 +47,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			return NextResponse.json({ error: "Order not found." }, { status: 404 });
 		}
 
-		// Verify ownership
-		const orderCustomerId =
-			typeof order.customer === "object" ? order.customer.id : order.customer;
-		if (orderCustomerId !== customer.customerId) {
-			return NextResponse.json({ error: "Order not found." }, { status: 404 });
-		}
-
-		// Must be in DRAFT or AWAITING_PAYMENT
-		if (order.status !== "DRAFT" && order.status !== "AWAITING_PAYMENT") {
+		// Verify eligibility: owns the order, correct status, no pending verification
+		const check = await checkBankTransferEligibility(customer.customerId, {
+			orderId,
+		});
+		if (!check.eligible) {
 			return NextResponse.json(
-				{
-					error: `Cannot submit bank transfer for order in ${order.status} status.`,
-				},
-				{ status: 400 },
+				{ error: check.error },
+				{ status: check.status },
 			);
 		}
 

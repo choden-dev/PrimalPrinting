@@ -123,7 +123,7 @@ export function TimeslotSelector({
 	return (
 		<div>
 			<h3 style={{ margin: "0 0 16px", fontSize: "18px" }}>
-				Select a Pickup Time
+				📅 Select a Pickup Time
 			</h3>
 
 			{Object.entries(grouped)
@@ -201,7 +201,7 @@ export function TimeslotSelector({
 					cursor: !selectedId || submitting ? "not-allowed" : "pointer",
 				}}
 			>
-				{submitting ? "Confirming…" : "Confirm Pickup Time"}
+				{submitting ? "⏳ Confirming…" : "✅ Confirm Pickup Time"}
 			</button>
 		</div>
 	);

@@ -24,7 +24,10 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { default as default_cf5df0bc440da11fabc68c09ebfaadac } from '@/components/admin/ApprovePaymentButton'
 import { default as default_1c77336337a4e79b4b5cb9debbef4b54 } from '@/components/admin/MarkPickedUpButton'
 import { default as default_e67e040884f73da757168d32ed5b3a48 } from '@/components/admin/OrderFilesViewer'
+import { default as default_f5da5fa50c48fc2ef14afcb84f969fcf } from '@/components/admin/AdminNavLinks'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { default as default_2a932438fc60530ff9cbda67fae50c5e } from '@/components/admin/OrdersByTimeslotView'
+import { default as default_ae6d727f69bea18ad23ef405314d6459 } from '@/components/admin/PendingVerificationView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -54,6 +57,9 @@ export const importMap = {
   "@/components/admin/ApprovePaymentButton#default": default_cf5df0bc440da11fabc68c09ebfaadac,
   "@/components/admin/MarkPickedUpButton#default": default_1c77336337a4e79b4b5cb9debbef4b54,
   "@/components/admin/OrderFilesViewer#default": default_e67e040884f73da757168d32ed5b3a48,
+  "@/components/admin/AdminNavLinks#default": default_f5da5fa50c48fc2ef14afcb84f969fcf,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "@/components/admin/OrdersByTimeslotView#default": default_2a932438fc60530ff9cbda67fae50c5e,
+  "@/components/admin/PendingVerificationView#default": default_ae6d727f69bea18ad23ef405314d6459,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

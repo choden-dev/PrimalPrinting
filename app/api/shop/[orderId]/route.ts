@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  * PATCH /api/orders/:orderId — Admin-only order updates.
  *
  * Used for:
- * - Updating status (e.g. READY_FOR_PICKUP → PICKED_UP)
+ * - Updating status (e.g. PRINTED → PICKED_UP (after admin prints))
  * - Adding admin notes
  *
  * Body: `{ "status": "PICKED_UP", "adminNotes": "..." }`

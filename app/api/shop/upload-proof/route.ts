@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
+import { checkBankTransferEligibility } from "../../../../lib/bankTransfer";
 import { uploadBankTransferProof } from "../../../../lib/r2";
 
 /**
@@ -48,6 +49,17 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json(
 				{ error: "orderNumber is required." },
 				{ status: 400 },
+			);
+		}
+
+		// Verify eligibility: owns the order, correct status, no pending verification
+		const check = await checkBankTransferEligibility(customer.customerId, {
+			orderNumber,
+		});
+		if (!check.eligible) {
+			return NextResponse.json(
+				{ error: check.error },
+				{ status: check.status },
 			);
 		}
 

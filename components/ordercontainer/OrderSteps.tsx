@@ -4,12 +4,17 @@ import { Box, Button, Divider, Heading, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { OrderStatus } from "../../types/orderStatus";
+import { OrderStep } from "../../types/orderSteps";
 import { BankTransferForm } from "../payment/BankTransferForm";
 import { StripePaymentForm } from "../payment/StripePaymentForm";
 import { TimeslotSelector } from "../pickup/TimeslotSelector";
 
 interface OrderStepsProps {
-	step: "payment" | "pickup" | "complete";
+	step:
+		| typeof OrderStep.PAYMENT
+		| typeof OrderStep.PICKUP
+		| typeof OrderStep.COMPLETE;
 	orderId: string;
 	orderNumber: string;
 	onPaymentSuccess: () => void;
@@ -64,15 +69,20 @@ export default function OrderSteps({
 					setOrderDetails(data.order);
 
 					// If order is already PAID, jump to pickup
-					if (data.order.status === "PAID" && step === "payment") {
+					if (
+						data.order.status === OrderStatus.PAID &&
+						step === OrderStep.PAYMENT
+					) {
 						onPaymentSuccess();
 					}
 					// If already has a timeslot, jump to complete
 					if (
-						["AWAITING_PICKUP", "READY_FOR_PICKUP", "PICKED_UP"].includes(
-							data.order.status,
-						) &&
-						step !== "complete"
+						[
+							OrderStatus.AWAITING_PICKUP,
+							OrderStatus.PRINTED,
+							OrderStatus.PICKED_UP,
+						].includes(data.order.status) &&
+						step !== OrderStep.COMPLETE
 					) {
 						onPickupConfirmed();
 					}
@@ -92,7 +102,7 @@ export default function OrderSteps({
 				const res = await fetch(`/api/shop/${orderId}`);
 				if (res.ok) {
 					const data = await res.json();
-					if (data.order.status === "PAID") {
+					if (data.order.status === OrderStatus.PAID) {
 						clearInterval(interval);
 						onPaymentSuccess();
 					}
@@ -106,6 +116,15 @@ export default function OrderSteps({
 
 	const totalCents = orderDetails?.pricing?.total || 0;
 
+	const containerProps = {
+		maxWidth: "900px",
+		margin: "2rem auto",
+		bg: "white",
+		p: 6,
+		borderRadius: "8px",
+		minHeight: "500px",
+	};
+
 	// ── Step indicator ─────────────────────────────────────────────
 
 	const StepIndicator = () => (
@@ -117,16 +136,17 @@ export default function OrderSteps({
 			flexWrap="wrap"
 		>
 			{[
-				{ key: "configure", label: "1. Configure" },
-				{ key: "payment", label: "2. Payment" },
-				{ key: "pickup", label: "3. Pickup" },
-				{ key: "complete", label: "4. Done" },
+				{ key: OrderStep.UPLOAD, label: "📄 1. Upload" },
+				{ key: OrderStep.PAYMENT, label: "💳 2. Payment" },
+				{ key: OrderStep.PICKUP, label: "📍 3. Pickup" },
+				{ key: OrderStep.COMPLETE, label: "✅ 4. Done" },
 			].map((s) => {
 				const isCurrent = s.key === step;
 				const isPast =
-					["configure"].includes(s.key) ||
-					(s.key === "payment" && ["pickup", "complete"].includes(step)) ||
-					(s.key === "pickup" && step === "complete");
+					[OrderStep.UPLOAD].includes(s.key) ||
+					(s.key === OrderStep.PAYMENT &&
+						[OrderStep.PICKUP, OrderStep.COMPLETE].includes(step)) ||
+					(s.key === OrderStep.PICKUP && step === OrderStep.COMPLETE);
 				return (
 					<Box
 						key={s.key}
@@ -147,18 +167,12 @@ export default function OrderSteps({
 
 	// ── Payment step ───────────────────────────────────────────────
 
-	if (step === "payment") {
+	if (step === OrderStep.PAYMENT) {
 		return (
-			<Box
-				maxWidth="700px"
-				margin="2rem auto"
-				bg="white"
-				p={6}
-				borderRadius="8px"
-			>
+			<Box {...containerProps}>
 				<StepIndicator />
 				<Heading size="lg" mb={2}>
-					Payment
+					💳 Payment
 				</Heading>
 				<Text color="gray.600" mb={1}>
 					Order: <strong>{orderNumber}</strong>
@@ -171,7 +185,7 @@ export default function OrderSteps({
 				{!paymentMethod ? (
 					<Box display="flex" flexDir="column" gap={4}>
 						<Text fontSize="lg" fontWeight={600} mb={2}>
-							Choose a payment method
+							💰 Choose a payment method
 						</Text>
 						<Button
 							size="lg"
@@ -280,18 +294,12 @@ export default function OrderSteps({
 
 	// ── Pickup step ────────────────────────────────────────────────
 
-	if (step === "pickup") {
+	if (step === OrderStep.PICKUP) {
 		return (
-			<Box
-				maxWidth="700px"
-				margin="2rem auto"
-				bg="white"
-				p={6}
-				borderRadius="8px"
-			>
+			<Box {...containerProps}>
 				<StepIndicator />
 				<Heading size="lg" mb={2}>
-					Select Pickup Time
+					📍 Select Pickup Time
 				</Heading>
 				<Text color="gray.600" mb={4}>
 					Order <strong>{orderNumber}</strong> has been paid. Choose when
@@ -309,22 +317,12 @@ export default function OrderSteps({
 
 	// ── Complete step ──────────────────────────────────────────────
 
-	if (step === "complete") {
+	if (step === OrderStep.COMPLETE) {
 		return (
-			<Box
-				maxWidth="700px"
-				margin="2rem auto"
-				bg="white"
-				p={6}
-				borderRadius="8px"
-				textAlign="center"
-			>
+			<Box {...containerProps} textAlign="center">
 				<StepIndicator />
-				<Box fontSize="4xl" mb={4}>
-					🎉
-				</Box>
 				<Heading size="lg" mb={2}>
-					Order Confirmed!
+					🎉 Order Confirmed!
 				</Heading>
 				<Text color="gray.600" mb={4}>
 					Your order <strong>{orderNumber}</strong> is confirmed.

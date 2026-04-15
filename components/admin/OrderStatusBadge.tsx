@@ -23,10 +23,10 @@ const STATUS_COLORS: Record<
 	},
 	PAID: { bg: "#e8f5e9", text: "#2e7d32", label: "Paid" },
 	AWAITING_PICKUP: { bg: "#e3f2fd", text: "#1565c0", label: "Awaiting Pickup" },
-	READY_FOR_PICKUP: {
+	PRINTED: {
 		bg: "#e8eaf6",
 		text: "#283593",
-		label: "Ready for Pickup",
+		label: "Printed",
 	},
 	PICKED_UP: { bg: "#f3e5f5", text: "#6a1b9a", label: "Picked Up" },
 	EXPIRED: { bg: "#ffebee", text: "#c62828", label: "Expired" },

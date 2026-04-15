@@ -230,9 +230,7 @@ const Cart = ({
 
 			// Step 2: Calculate pricing (in cents)
 			const totalDollars = Number.parseFloat(displayPriceString);
-			const subtotalCents = Math.round(totalDollars * 100);
-			const taxCents = Math.round(subtotalCents * 0.15); // 15% GST for NZ
-			const totalCents = subtotalCents + taxCents;
+			const totalCents = Math.round(totalDollars * 100);
 
 			// Step 3: Create the order in Payload
 			const orderRes = await fetch("/api/shop/orders", {
@@ -241,8 +239,8 @@ const Cart = ({
 				body: JSON.stringify({
 					files: uploadedFiles,
 					pricing: {
-						subtotal: subtotalCents,
-						tax: taxCents,
+						subtotal: totalCents,
+						tax: 0,
 						total: totalCents,
 					},
 				}),
@@ -286,13 +284,14 @@ const Cart = ({
 			position={smallScreen ? "relative" : "sticky"}
 			padding="1rem .5rem"
 			border="1px"
+			borderRadius="8px"
 			color="brown.900"
 			borderColor="brown.200"
 			top={smallScreen ? "0" : "5rem"}
 		>
 			<Box display="flex" flexDir="column">
 				<Heading fontSize="1.5rem" as="p">
-					Your Items
+					🛒 Your Items
 				</Heading>
 				<p>
 					click the <strong>X</strong> on the right of an item to remove
@@ -304,7 +303,7 @@ const Cart = ({
 					<PdfItemContainer />
 					<ListItem>
 						<Text fontSize="1.5rem">
-							<strong>Estimated Price: ${displayPriceString}</strong>
+							<strong>💵 Estimated Price: ${displayPriceString}</strong>
 						</Text>
 					</ListItem>
 
@@ -320,12 +319,12 @@ const Cart = ({
 							isLoading={isCreatingOrder}
 							loadingText="Creating order…"
 						>
-							Proceed to Payment
+							💳 Proceed to Payment
 						</Button>
 					) : (
 						<Box display="flex" flexDir="column" gap={2}>
 							<Button variant="browned" onClick={login}>
-								Sign in to Order
+								🔑 Sign in to Order
 							</Button>
 							<Text fontSize="xs" color="gray.500" textAlign="center">
 								Sign in with Google to proceed with your order

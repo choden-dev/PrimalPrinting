@@ -2,6 +2,7 @@
 
 import { useDocumentInfo } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
+import { OrderStatus } from "../../types/orderStatus";
 
 interface OrderDocumentData {
 	status?: string;
@@ -56,7 +57,7 @@ export const ApprovePaymentButton: React.FC = () => {
 	}, [id]);
 
 	// Only show for orders pending verification
-	if (status !== "PAYMENT_PENDING_VERIFICATION") return null;
+	if (status !== OrderStatus.PAYMENT_PENDING_VERIFICATION) return null;
 
 	return (
 		<div

@@ -2,6 +2,7 @@
 
 import { useDocumentInfo } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
+import { OrderStatus } from "../../types/orderStatus";
 
 interface OrderDocumentData {
 	status?: string;
@@ -10,7 +11,7 @@ interface OrderDocumentData {
 /**
  * Payload admin custom component: "Mark as Picked Up" button.
  *
- * Shown on the order detail view when status === READY_FOR_PICKUP.
+ * Shown on the order detail view when status === PRINTED (admin has printed the order).
  * Transitions the order to PICKED_UP and sets the pickedUpAt timestamp.
  */
 export const MarkPickedUpButton: React.FC = () => {
@@ -38,7 +39,7 @@ export const MarkPickedUpButton: React.FC = () => {
 			const response = await fetch(`/api/shop/${id}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ status: "PICKED_UP" }),
+				body: JSON.stringify({ status: OrderStatus.PICKED_UP }),
 			});
 
 			if (!response.ok) {
@@ -56,7 +57,7 @@ export const MarkPickedUpButton: React.FC = () => {
 	}, [id]);
 
 	// Only show for orders ready for pickup
-	if (status !== "READY_FOR_PICKUP") return null;
+	if (status !== OrderStatus.PRINTED) return null;
 
 	return (
 		<div
@@ -69,7 +70,7 @@ export const MarkPickedUpButton: React.FC = () => {
 			}}
 		>
 			<h4 style={{ margin: "0 0 8px", color: success ? "#2e7d32" : "#1565c0" }}>
-				{success ? "✓ Marked as Picked Up" : "📦 Ready for Pickup"}
+				{success ? "✓ Marked as Picked Up" : "🖨️ Printed — Awaiting Pickup"}
 			</h4>
 
 			{!success && (

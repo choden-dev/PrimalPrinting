@@ -2,6 +2,7 @@
 
 import { useDocumentInfo } from "@payloadcms/ui";
 import { useCallback, useState } from "react";
+import { type OrderStatusValue, PAID_STATUSES } from "../../types/orderStatus";
 
 interface OrderFile {
 	fileName: string;
@@ -39,12 +40,7 @@ export const OrderFilesViewer: React.FC = () => {
 
 	if (files.length === 0 && !bankTransferProofKey) return null;
 
-	const isPaid = [
-		"PAID",
-		"AWAITING_PICKUP",
-		"READY_FOR_PICKUP",
-		"PICKED_UP",
-	].includes(status);
+	const isPaid = PAID_STATUSES.includes(status as OrderStatusValue);
 
 	return (
 		<div

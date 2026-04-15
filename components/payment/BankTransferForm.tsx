@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+interface BankDetailsData {
+	accountName: string;
+	bankName: string;
+	accountNumber: string;
+	instructions: string;
+}
 
 interface BankTransferFormProps {
 	/** The order ID to submit bank transfer for */
@@ -44,7 +51,24 @@ export function BankTransferForm({
 	const [preview, setPreview] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [bankDetails, setBankDetails] = useState<BankDetailsData | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Fetch bank account details from Payload global
+	useEffect(() => {
+		async function fetchBankDetails() {
+			try {
+				const res = await fetch("/api/shop/bank-details");
+				if (res.ok) {
+					const data = await res.json();
+					setBankDetails(data.bankDetails);
+				}
+			} catch {
+				// Silently fail — form still works without details
+			}
+		}
+		fetchBankDetails();
+	}, []);
 
 	const handleFileSelect = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +167,7 @@ export function BankTransferForm({
 				}}
 			>
 				<h4 style={{ margin: "0 0 12px", fontSize: "16px" }}>
-					Bank Transfer Details
+					🏦 Bank Transfer Details
 				</h4>
 				<p style={{ margin: "4px 0", fontSize: "14px", color: "#666" }}>
 					Please transfer <strong>${(totalCents / 100).toFixed(2)}</strong> to
@@ -158,18 +182,47 @@ export function BankTransferForm({
 						fontSize: "14px",
 					}}
 				>
-					<p style={{ margin: "4px 0" }}>
-						<strong>Reference:</strong> {orderNumber}
-					</p>
+					{bankDetails ? (
+						<>
+							<p style={{ margin: "4px 0" }}>
+								<strong>Bank:</strong> {bankDetails.bankName}
+							</p>
+							<p style={{ margin: "4px 0" }}>
+								<strong>Account Name:</strong> {bankDetails.accountName}
+							</p>
+							<p style={{ margin: "4px 0" }}>
+								<strong>Account Number:</strong> {bankDetails.accountNumber}
+							</p>
+							<p style={{ margin: "8px 0 4px" }}>
+								<strong>Reference:</strong> {orderNumber}
+							</p>
+							{bankDetails.instructions && (
+								<p
+									style={{
+										margin: "8px 0 0",
+										fontSize: "13px",
+										color: "#666",
+										fontStyle: "italic",
+									}}
+								>
+									{bankDetails.instructions}
+								</p>
+							)}
+						</>
+					) : (
+						<p style={{ margin: "4px 0", color: "#999" }}>
+							Loading bank details…
+						</p>
+					)}
 					<p
 						style={{
 							margin: "8px 0 0",
 							fontSize: "12px",
-							color: "#999",
+							color: "#e65100",
+							fontWeight: 600,
 						}}
 					>
-						Please include your order number as the payment reference. Bank
-						account details will be provided by the admin.
+						Please include your order number as the payment reference.
 					</p>
 				</div>
 			</div>
@@ -177,7 +230,7 @@ export function BankTransferForm({
 			{/* Proof upload */}
 			<div style={{ marginBottom: "20px" }}>
 				<h4 style={{ margin: "0 0 8px", fontSize: "16px" }}>
-					Upload Proof of Payment
+					📷 Upload Proof of Payment
 				</h4>
 				<p
 					style={{
@@ -259,7 +312,7 @@ export function BankTransferForm({
 					cursor: !selectedFile || loading ? "not-allowed" : "pointer",
 				}}
 			>
-				{loading ? "Submitting…" : "Submit Proof of Payment"}
+				{loading ? "⏳ Submitting…" : "✅ Submit Proof of Payment"}
 			</button>
 		</form>
 	);
