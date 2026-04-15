@@ -103,6 +103,37 @@ export async function getVerifiedPageCount(
 	return null;
 }
 
+/**
+ * Download a PDF from staging and count its pages directly.
+ * Used as a fallback when metadata is not available.
+ */
+export async function countPdfPagesFromStaging(
+	stagingKey: string,
+): Promise<number | null> {
+	const client = getS3Client();
+	try {
+		const response = await client.send(
+			new GetObjectCommand({
+				Bucket: getStagingBucket(),
+				Key: stagingKey,
+			}),
+		);
+
+		const chunks: Uint8Array[] = [];
+		const stream = response.Body as AsyncIterable<Uint8Array>;
+		for await (const chunk of stream) {
+			chunks.push(chunk);
+		}
+
+		const pdfParse = (await import("pdf-parse")).default;
+		const parsed = await pdfParse(Buffer.concat(chunks));
+		return parsed.numpages;
+	} catch (err) {
+		console.error("Failed to count pages from staging:", stagingKey, err);
+		return null;
+	}
+}
+
 // ── Upload operations ────────────────────────────────────────────────────
 
 /**

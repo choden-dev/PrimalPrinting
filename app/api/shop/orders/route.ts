@@ -61,9 +61,27 @@ export async function POST(request: NextRequest) {
 					// Get verified page count — never trust the client
 					const pageCount = await getVerifiedPageCount(f.stagingKey);
 					if (pageCount === null) {
-						throw new Error(
-							`Unable to verify page count for ${f.fileName}. Please re-upload the file.`,
+						console.error(
+							`Page count verification failed for ${f.fileName} (${f.stagingKey}). Counting inline as fallback.`,
 						);
+						// Fallback: count pages by downloading the PDF
+						const { countPdfPagesFromStaging } = await import(
+							"../../../../lib/r2"
+						);
+						const fallbackCount = await countPdfPagesFromStaging(f.stagingKey);
+						if (fallbackCount === null) {
+							throw new Error(
+								`Unable to verify page count for ${f.fileName}. Please re-upload the file.`,
+							);
+						}
+						return {
+							fileName: f.fileName,
+							stagingKey: f.stagingKey,
+							pageCount: fallbackCount,
+							copies: f.copies || 1,
+							colorMode: f.colorMode || "BW",
+							fileSize: f.fileSize || 0,
+						};
 					}
 
 					return {
