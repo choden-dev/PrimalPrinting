@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
-import { getPageCountFromMetadata } from "../../../../lib/r2";
+import { getVerifiedPageCount } from "../../../../lib/r2";
 import { calculateOrderTotal } from "../../../../lib/stripe";
 
 /**
@@ -48,27 +48,28 @@ export async function POST(request: NextRequest) {
 
 		const payload = await getPayloadClient();
 
-		// Map file data and verify page counts server-side
+		// Map file data — page counts come exclusively from server-side verification
 		const orderFiles = await Promise.all(
 			files.map(
 				async (f: {
 					fileName: string;
 					stagingKey: string;
-					pageCount: number;
 					copies?: number;
 					colorMode?: string;
 					fileSize?: number;
 				}) => {
-					// Verify page count from R2 metadata (set at upload time)
-					const metadataPageCount = await getPageCountFromMetadata(
-						f.stagingKey,
-					);
-					const verifiedPageCount = metadataPageCount ?? f.pageCount;
+					// Get verified page count — never trust the client
+					const pageCount = await getVerifiedPageCount(f.stagingKey);
+					if (pageCount === null) {
+						throw new Error(
+							`Unable to verify page count for ${f.fileName}. Please re-upload the file.`,
+						);
+					}
 
 					return {
 						fileName: f.fileName,
 						stagingKey: f.stagingKey,
-						pageCount: verifiedPageCount,
+						pageCount,
 						copies: f.copies || 1,
 						colorMode: f.colorMode || "BW",
 						fileSize: f.fileSize || 0,

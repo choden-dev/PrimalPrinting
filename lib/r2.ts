@@ -75,29 +75,57 @@ export function generateProofKey(orderNumber: string): string {
 // ── PDF page counting ────────────────────────────────────────────────────
 
 /**
- * Get the verified page count from R2 object metadata (set at upload time).
- * Uses a cheap HeadObject call — no file download needed.
- * Returns null if metadata is not available.
+ * Get the verified page count for a staged PDF.
+ *
+ * 1. Tries cheap HeadObject to read metadata (set at upload time)
+ * 2. Falls back to downloading and parsing the PDF
+ * 3. Never returns a client-provided value
+ *
+ * Returns null only if the file is inaccessible or unparseable.
  */
-export async function getPageCountFromMetadata(
+export async function getVerifiedPageCount(
 	stagingKey: string,
 ): Promise<number | null> {
 	const client = getS3Client();
+
+	// Try metadata first (cheap)
 	try {
-		const response = await client.send(
+		const headResponse = await client.send(
 			new HeadObjectCommand({
 				Bucket: getStagingBucket(),
 				Key: stagingKey,
 			}),
 		);
-		const pageCountStr = response.Metadata?.["page-count"];
+		const pageCountStr = headResponse.Metadata?.["page-count"];
 		if (pageCountStr) {
 			const parsed = Number.parseInt(pageCountStr, 10);
-			return Number.isNaN(parsed) ? null : parsed;
+			if (!Number.isNaN(parsed) && parsed > 0) return parsed;
 		}
 	} catch (err) {
-		console.error("Failed to read metadata for", stagingKey, err);
+		console.error("HeadObject failed for", stagingKey, err);
 	}
+
+	// Fallback: download and parse the PDF
+	try {
+		const getResponse = await client.send(
+			new GetObjectCommand({
+				Bucket: getStagingBucket(),
+				Key: stagingKey,
+			}),
+		);
+
+		const chunks: Uint8Array[] = [];
+		const stream = getResponse.Body as AsyncIterable<Uint8Array>;
+		for await (const chunk of stream) {
+			chunks.push(chunk);
+		}
+
+		const parsed = await pdfParse(Buffer.concat(chunks));
+		return parsed.numpages;
+	} catch (err) {
+		console.error("Failed to parse PDF for page count:", stagingKey, err);
+	}
+
 	return null;
 }
 
