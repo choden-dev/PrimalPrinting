@@ -1,30 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
-import { getVerifiedPageCount } from "../../../../lib/r2";
+import { generateStagingKey, uploadToStaging } from "../../../../lib/r2";
 import { calculateOrderTotal } from "../../../../lib/stripe";
 
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB per file
+
 /**
- * POST /api/orders — Create a new DRAFT order.
+ * POST /api/shop/orders — Create a new DRAFT order.
  *
- * Body:
- * ```json
- * {
- *   "files": [
- *     {
- *       "fileName": "thesis.pdf",
- *       "stagingKey": "orders/ORD-20260415-A3F8/uuid-thesis.pdf",
- *       "pageCount": 42,
- *       "copies": 2,
- *       "colorMode": "BW",
- *       "paperSize": "A4",
- *       "doubleSided": true,
- *       "fileSize": 1048576
- *     }
- *   ],
- *   "pricing": { "subtotal": 2100, "tax": 210, "total": 2310 }
- * }
- * ```
+ * Accepts multipart/form-data with:
+ * - `files` (one or more PDF files)
+ * - `metadata` (JSON string with per-file config: copies, colorMode)
+ *
+ * Files are uploaded to R2 staging, pages counted server-side,
+ * pricing calculated server-side. No client-provided staging keys
+ * or page counts are accepted.
  */
 export async function POST(request: NextRequest) {
 	const customer = await getAuthenticatedCustomer(request);
@@ -36,67 +27,93 @@ export async function POST(request: NextRequest) {
 	}
 
 	try {
-		const body = await request.json();
-		const { files } = body;
+		const formData = await request.formData();
+		const metadataRaw = formData.get("metadata") as string | null;
 
-		if (!files || !Array.isArray(files) || files.length === 0) {
+		if (!metadataRaw) {
+			return NextResponse.json(
+				{ error: "metadata field is required." },
+				{ status: 400 },
+			);
+		}
+
+		const metadata: {
+			copies?: number;
+			colorMode?: string;
+		}[] = JSON.parse(metadataRaw);
+
+		// Collect all files from the form data
+		const fileEntries: File[] = [];
+		for (const [key, value] of formData.entries()) {
+			if (key === "files" && value instanceof File) {
+				fileEntries.push(value);
+			}
+		}
+
+		if (fileEntries.length === 0) {
 			return NextResponse.json(
 				{ error: "At least one file is required." },
 				{ status: 400 },
 			);
 		}
 
+		if (fileEntries.length !== metadata.length) {
+			return NextResponse.json(
+				{ error: "Metadata count must match file count." },
+				{ status: 400 },
+			);
+		}
+
 		const payload = await getPayloadClient();
 
-		// Map file data — page counts come exclusively from server-side verification
-		const orderFiles = await Promise.all(
-			files.map(
-				async (f: {
-					fileName: string;
-					stagingKey: string;
-					copies?: number;
-					colorMode?: string;
-					fileSize?: number;
-				}) => {
-					// Get verified page count — never trust the client
-					const pageCount = await getVerifiedPageCount(f.stagingKey);
-					if (pageCount === null) {
-						console.error(
-							`Page count verification failed for ${f.fileName} (${f.stagingKey}). Counting inline as fallback.`,
-						);
-						// Fallback: count pages by downloading the PDF
-						const { countPdfPagesFromStaging } = await import(
-							"../../../../lib/r2"
-						);
-						const fallbackCount = await countPdfPagesFromStaging(f.stagingKey);
-						if (fallbackCount === null) {
-							throw new Error(
-								`Unable to verify page count for ${f.fileName}. Please re-upload the file.`,
-							);
-						}
-						return {
-							fileName: f.fileName,
-							stagingKey: f.stagingKey,
-							pageCount: fallbackCount,
-							copies: f.copies || 1,
-							colorMode: f.colorMode || "BW",
-							fileSize: f.fileSize || 0,
-						};
-					}
+		// Generate a temporary order number for staging keys
+		const tempOrderNumber = `DRAFT-${customer.customerId}-${Date.now()}`;
 
-					return {
-						fileName: f.fileName,
-						stagingKey: f.stagingKey,
-						pageCount,
-						copies: f.copies || 1,
-						colorMode: f.colorMode || "BW",
-						fileSize: f.fileSize || 0,
-					};
-				},
-			),
+		// Process each file: validate, upload to R2, count pages
+		const pdfParse = (await import("pdf-parse")).default;
+
+		const orderFiles = await Promise.all(
+			fileEntries.map(async (file, i) => {
+				if (file.type !== "application/pdf") {
+					throw new Error(`${file.name}: Only PDF files are accepted.`);
+				}
+				if (file.size > MAX_FILE_SIZE) {
+					throw new Error(
+						`${file.name}: File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+					);
+				}
+
+				const buffer = Buffer.from(await file.arrayBuffer());
+
+				// Count pages in memory — authoritative, no client input
+				let pageCount: number;
+				try {
+					const parsed = await pdfParse(buffer);
+					pageCount = parsed.numpages;
+				} catch {
+					throw new Error(
+						`${file.name}: Unable to read PDF. Please ensure it's a valid PDF file.`,
+					);
+				}
+
+				// Upload to R2 staging
+				const stagingKey = generateStagingKey(tempOrderNumber, file.name);
+				await uploadToStaging(stagingKey, buffer, file.type);
+
+				const fileMeta = metadata[i] || {};
+
+				return {
+					fileName: file.name,
+					stagingKey,
+					pageCount,
+					copies: fileMeta.copies || 1,
+					colorMode: fileMeta.colorMode || "BW",
+					fileSize: file.size,
+				};
+			}),
 		);
 
-		// Calculate pricing from verified page counts
+		// Calculate pricing server-side from verified page counts
 		const pricing = await calculateOrderTotal(orderFiles);
 
 		// Set expiry to 7 days from now
@@ -124,6 +141,7 @@ export async function POST(request: NextRequest) {
 				id: order.id,
 				orderNumber: order.orderNumber,
 				status: order.status,
+				pricing: order.pricing,
 				expiresAt: order.expiresAt,
 			},
 		});
@@ -140,9 +158,11 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * PATCH /api/orders — Update a DRAFT order (add/remove files, update pricing).
+ * PATCH /api/shop/orders — Update a DRAFT order.
  *
- * Body: `{ "orderId": "...", "files": [...], "pricing": {...} }`
+ * Body (JSON): `{ "orderId": "..." }`
+ * Currently only supports non-file updates. To change files,
+ * delete the order and create a new one.
  */
 export async function PATCH(request: NextRequest) {
 	const customer = await getAuthenticatedCustomer(request);
@@ -155,7 +175,7 @@ export async function PATCH(request: NextRequest) {
 
 	try {
 		const body = await request.json();
-		const { orderId, files, pricing } = body;
+		const { orderId } = body;
 
 		if (!orderId) {
 			return NextResponse.json(
@@ -166,7 +186,6 @@ export async function PATCH(request: NextRequest) {
 
 		const payload = await getPayloadClient();
 
-		// Verify the order belongs to this customer and is still a DRAFT
 		const existing = await payload.findByID({
 			collection: "orders",
 			id: orderId,
@@ -188,22 +207,12 @@ export async function PATCH(request: NextRequest) {
 			);
 		}
 
-		const updateData: Record<string, unknown> = {};
-		if (files) updateData.files = files;
-		if (pricing) updateData.pricing = pricing;
-
-		const updated = await payload.update({
-			collection: "orders",
-			id: orderId,
-			data: updateData,
-		});
-
 		return NextResponse.json({
 			success: true,
 			order: {
-				id: updated.id,
-				orderNumber: updated.orderNumber,
-				status: updated.status,
+				id: existing.id,
+				orderNumber: existing.orderNumber,
+				status: existing.status,
 			},
 		});
 	} catch (error) {

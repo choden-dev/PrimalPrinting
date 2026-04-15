@@ -154,8 +154,9 @@ const Cart = ({
 	const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
 	/**
-	 * Upload all PDFs to the R2 staging bucket, then create a DRAFT order
-	 * in Payload and proceed to the payment step.
+	 * Upload all PDFs and create the order in a single request.
+	 * Files are sent as multipart form data — the server handles
+	 * R2 upload, page counting, and pricing.
 	 */
 	const handleOrderNow = useCallback(async () => {
 		const cartValid =
@@ -173,64 +174,28 @@ const Cart = ({
 
 		setIsCreatingOrder(true);
 		setIsProcessing(true);
+		setCurrentlyUploading(
+			uploadedPdfs.map((pdf) => ({ name: pdf.displayName, percent: 0 })),
+		);
 
 		try {
-			// Step 1: Upload PDFs to R2 staging bucket
-			const uploadedFiles: {
-				fileName: string;
-				stagingKey: string;
-				pageCount: number;
-				copies: number;
-				colorMode: string;
-				fileSize: number;
-			}[] = [];
+			const formData = new FormData();
 
-			for (let i = 0; i < uploadedPdfs.length; i++) {
-				const pdf = uploadedPdfs[i];
-				setCurrentlyUploading((prev) => {
-					const updated = [...prev];
-					updated[i] = { name: pdf.displayName, percent: 0 };
-					return updated;
-				});
+			// Append each PDF file
+			const metadata = uploadedPdfs.map((pdf) => ({
+				copies: pdf.getQuantity(),
+				colorMode: pdf.isColor ? "COLOR" : "BW",
+			}));
 
-				const formData = new FormData();
-				formData.append("file", pdf.file);
-
-				const uploadRes = await fetch("/api/shop/upload", {
-					method: "POST",
-					body: formData,
-				});
-
-				if (!uploadRes.ok) {
-					const err = await uploadRes.json();
-					throw new Error(err.error || `Failed to upload ${pdf.displayName}`);
-				}
-
-				const { stagingKey, fileSize } = await uploadRes.json();
-
-				setCurrentlyUploading((prev) => {
-					const updated = [...prev];
-					updated[i] = { name: pdf.displayName, percent: 100 };
-					return updated;
-				});
-
-				uploadedFiles.push({
-					fileName: pdf.displayName,
-					stagingKey,
-					pageCount: pdf.getPages(),
-					copies: pdf.getQuantity(),
-					colorMode: pdf.isColor ? "COLOR" : "BW",
-					fileSize: fileSize || pdf.file.size,
-				});
+			for (const pdf of uploadedPdfs) {
+				formData.append("files", pdf.file);
 			}
 
-			// Step 2: Create the order in Payload (pricing calculated server-side)
+			formData.append("metadata", JSON.stringify(metadata));
+
 			const orderRes = await fetch("/api/shop/orders", {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					files: uploadedFiles,
-				}),
+				body: formData,
 			});
 
 			if (!orderRes.ok) {
@@ -239,6 +204,10 @@ const Cart = ({
 			}
 
 			const { order } = await orderRes.json();
+
+			setCurrentlyUploading(
+				uploadedPdfs.map((pdf) => ({ name: pdf.displayName, percent: 100 })),
+			);
 
 			setIsProcessing(false);
 			setCurrentlyUploading([]);
