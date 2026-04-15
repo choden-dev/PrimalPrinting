@@ -118,6 +118,40 @@ export default function OrderSteps({
 
 	const totalCents = orderDetails?.pricing?.total || 0;
 
+	// ── Order summary (reused across steps) ────────────────────────
+
+	const OrderSummary = () => {
+		if (!orderDetails?.files?.length) return null;
+		return (
+			<Box bg="gray.50" borderRadius="8px" padding="0.75rem 1rem" mb={4}>
+				<Text fontSize="sm" fontWeight={600} mb={2}>
+					📋 Order Summary
+				</Text>
+				{orderDetails.files.map((file, i) => (
+					<Box
+						key={`${file.fileName}-${i}`}
+						display="flex"
+						justifyContent="space-between"
+						alignItems="center"
+						py={1}
+						fontSize="sm"
+					>
+						<Text>📄 {file.fileName}</Text>
+						<Text color="gray.500">
+							{file.pageCount} pg · {file.copies}x ·{" "}
+							{file.colorMode === "COLOR" ? "Colour" : "B&W"} · {file.paperSize}
+						</Text>
+					</Box>
+				))}
+				<Divider my={2} />
+				<Box display="flex" justifyContent="space-between" fontWeight={700}>
+					<Text>Total</Text>
+					<Text>${(totalCents / 100).toFixed(2)}</Text>
+				</Box>
+			</Box>
+		);
+	};
+
 	const containerProps = {
 		maxWidth: "900px",
 		margin: "2rem auto",
@@ -178,12 +212,10 @@ export default function OrderSteps({
 				<Heading size="lg" mb={2}>
 					💳 Payment
 				</Heading>
-				<Text color="gray.600" mb={1}>
+				<Text color="gray.600" mb={4}>
 					Order: <strong>{orderNumber}</strong>
 				</Text>
-				<Text color="gray.600" mb={4}>
-					Total: <strong>${(totalCents / 100).toFixed(2)}</strong>
-				</Text>
+				<OrderSummary />
 				<Divider mb={6} />
 
 				{!paymentMethod ? (
@@ -336,6 +368,7 @@ export default function OrderSteps({
 					Order <strong>{orderNumber}</strong> has been paid. Choose when
 					you&apos;d like to collect it.
 				</Text>
+				<OrderSummary />
 				<Divider mb={6} />
 				<TimeslotSelector
 					orderId={orderId}
