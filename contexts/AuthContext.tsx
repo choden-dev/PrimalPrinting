@@ -1,5 +1,5 @@
 import type { Session } from "next-auth";
-import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
+import { SessionProvider, signOut, useSession } from "next-auth/react";
 import {
 	createContext,
 	type PropsWithChildren,
@@ -67,8 +67,9 @@ function AuthContextInner({ children }: PropsWithChildren) {
 				const height = 600;
 				const left = window.screenX + (window.outerWidth - width) / 2;
 				const top = window.screenY + (window.outerHeight - height) / 2;
+				const callbackUrl = encodeURIComponent(window.location.href);
 				window.open(
-					`/api/auth/signin/google?callbackUrl=${encodeURIComponent(window.location.href)}`,
+					`/api/auth/signin?callbackUrl=${callbackUrl}`,
 					"google-signin",
 					`width=${width},height=${height},left=${left},top=${top}`,
 				);
