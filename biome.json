@@ -40,7 +40,8 @@
 			"!**/.vscode/**",
 			"!**/.idea/**",
 			"!**/.DS_Store",
-			"!**/Thumbs.db"
+			"!**/Thumbs.db",
+			"!**/importMap.js"
 		],
 		"ignoreUnknown": true
 	}

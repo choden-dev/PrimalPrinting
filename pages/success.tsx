@@ -4,10 +4,43 @@ import { useRouter } from "next/router";
 import Footer from "../components/footer/Footer";
 import NoSsr from "../components/NoSsr";
 import NavBar from "../components/navbar/NavBar";
+import { getPayloadClient } from "../lib/payload";
 
-const Success: NextPage = () => {
+export async function getStaticProps() {
+	try {
+		const payload = await getPayloadClient();
+		const contactInfo = await payload.findGlobal({
+			slug: "contact-info",
+		});
+		return {
+			props: {
+				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
+			},
+			revalidate: 24 * 60 * 60,
+		};
+	} catch (_error) {
+		return {
+			props: {
+				contactInfo: { email: "", phone: "" },
+			},
+		};
+	}
+}
+
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type PageProps = {
+	contactInfo: ContactInfoData;
+};
+
+const Success: NextPage<PageProps> = ({ contactInfo }) => {
 	const router = useRouter();
 	const orderId = router.query.orderId;
+	const email = contactInfo.email || "";
+
 	return (
 		<NoSsr>
 			<Box className="container">
@@ -30,8 +63,8 @@ const Success: NextPage = () => {
 						Please check your email for order confirmation + details (
 						<strong>Note that the email may appear in your spam folder.</strong>
 						) and email{" "}
-						<Link fontWeight="700" href="mailto: primalprintingnz@gmail.com">
-							primalprintingnz@gmail.com
+						<Link fontWeight="700" href={`mailto: ${email}`}>
+							{email}
 						</Link>{" "}
 						or{" "}
 						<Link fontWeight="700" href="/contact">
@@ -45,7 +78,7 @@ const Success: NextPage = () => {
 					<Divider margin="1rem 0" />
 					<Text fontSize="1.5rem"></Text>
 				</Box>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</Box>
 		</NoSsr>
 	);

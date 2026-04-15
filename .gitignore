@@ -40,3 +40,14 @@ yarn-error.log*
 .env.local
 servicekey.json
 
+# payload
+payload-types.ts
+
+# terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfplan
+terraform/terraform.tfvars
+terraform/crash.log
+

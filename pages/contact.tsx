@@ -3,28 +3,40 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
-import { connectToDatabase } from "../lib/mongo";
+import { getPayloadClient } from "../lib/payload";
 
 export async function getStaticProps() {
 	try {
-		const { db } = await connectToDatabase("WebsiteInfo");
-		const details = await db.collection("Contacts").find({}).toArray();
+		const payload = await getPayloadClient();
+		const contactInfo = await payload.findGlobal({
+			slug: "contact-info",
+		});
 		return {
 			props: {
-				details: JSON.parse(JSON.stringify(details)),
-				revalidate: 24 * 60 * 60,
+				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
 			},
+			revalidate: 24 * 60 * 60,
 		};
 	} catch (_error) {
 		console.log("could not fetch data");
+		return {
+			props: {
+				contactInfo: { email: "", phone: "" },
+			},
+		};
 	}
 }
 
-type PageProps = {
-	details: { name: string; value: string }[];
+type ContactInfoData = {
+	email: string;
+	phone: string;
 };
 
-const Contact: NextPage<PageProps> = (details) => {
+type PageProps = {
+	contactInfo: ContactInfoData;
+};
+
+const Contact: NextPage<PageProps> = ({ contactInfo }) => {
 	return (
 		<>
 			<Head>
@@ -67,10 +79,10 @@ const Contact: NextPage<PageProps> = (details) => {
 					<Heading fontWeight="500">Get in Touch</Heading>
 					<Stack spacing="0">
 						<Text fontSize="xl" fontWeight="500">
-							Email: {details.details[0]?.email}
+							Email: {contactInfo.email}
 						</Text>
 						<Text fontSize="xl" fontWeight="500">
-							Phone: {details.details[0]?.phone}
+							Phone: {contactInfo.phone}
 						</Text>
 					</Stack>
 					<Text>
@@ -78,7 +90,7 @@ const Contact: NextPage<PageProps> = (details) => {
 						email or phone!
 					</Text>
 				</Box>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</Box>
 		</>
 	);
