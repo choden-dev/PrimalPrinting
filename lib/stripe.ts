@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { getMinimumItemsForDiscount, getPercentOff } from "./utils";
 
 let stripeCached: Stripe;
 
@@ -68,6 +69,10 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 /**
  * Calculate the total price for a set of order files server-side.
  * This is the source of truth — never trust client-side pricing.
+ *
+ * Applies a bulk discount when a file has copies >= the configured
+ * minimum (NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT, default 2).
+ * The discount percentage comes from NEXT_PUBLIC_DISCOUNT_PERCENT.
  */
 export const calculateOrderTotal = async (
 	files: {
@@ -75,19 +80,30 @@ export const calculateOrderTotal = async (
 		copies: number;
 		colorMode: string;
 	}[],
-): Promise<{ subtotal: number; total: number }> => {
+): Promise<{ subtotal: number; discount: number; total: number }> => {
 	let subtotal = 0;
+	let discount = 0;
+
+	const minItemsForDiscount = getMinimumItemsForDiscount();
+	const percentOff = getPercentOff();
 
 	for (const file of files) {
 		const isColor = file.colorMode === "COLOR";
 		const priceData = await getPriceForPages(file.pageCount, isColor);
 		const unitPrice = priceData.price || 0;
 		// unitPrice is per copy, multiply by copies
-		subtotal += unitPrice * file.copies;
+		const lineTotal = unitPrice * file.copies;
+		subtotal += lineTotal;
+
+		// Apply bulk discount for items meeting the minimum copies threshold
+		if (file.copies >= minItemsForDiscount && percentOff > 0) {
+			discount += Math.round(lineTotal * (percentOff / 100));
+		}
 	}
 
 	return {
 		subtotal,
-		total: subtotal, // no tax for now
+		discount,
+		total: subtotal - discount, // no tax for now
 	};
 };

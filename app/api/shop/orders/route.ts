@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
 				files: orderFiles,
 				pricing: {
 					subtotal: pricing.subtotal,
+					discount: pricing.discount,
 					tax: 0,
 					total: pricing.total,
 				},
