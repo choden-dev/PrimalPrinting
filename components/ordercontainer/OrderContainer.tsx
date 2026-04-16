@@ -67,7 +67,6 @@ const OrderContainerInner = () => {
 		switch (status) {
 			case OrderStatus.DRAFT:
 			case OrderStatus.AWAITING_PAYMENT:
-			case OrderStatus.PAYMENT_PENDING_VERIFICATION:
 				return OrderStep.PAYMENT;
 			case OrderStatus.PAID:
 				return OrderStep.PICKUP;
@@ -133,7 +132,6 @@ const OrderContainerInner = () => {
 					(o: { status: string }) =>
 						o.status === OrderStatus.DRAFT ||
 						o.status === OrderStatus.AWAITING_PAYMENT ||
-						o.status === OrderStatus.PAYMENT_PENDING_VERIFICATION ||
 						o.status === OrderStatus.PAID,
 				);
 				setPendingOrders(pending);

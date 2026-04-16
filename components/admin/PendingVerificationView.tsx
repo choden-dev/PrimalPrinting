@@ -9,6 +9,7 @@ interface OrderData {
 	status: string;
 	paymentMethod: string | null;
 	bankTransferProofKey: string | null;
+	bankTransferVerified: boolean | null;
 	pricing: { total: number };
 	files: { fileName: string; copies: number }[];
 	customer: { name: string; email: string } | string;
@@ -18,8 +19,9 @@ interface OrderData {
 /**
  * Custom Payload admin view: Bank Transfer Verification Queue.
  *
- * Shows all orders with status PAYMENT_PENDING_VERIFICATION,
- * allowing the admin to view proof images and approve payments.
+ * Shows all bank transfer orders that have not yet been verified,
+ * allowing the admin to view proof images and mark them as verified.
+ * Verification is optional — for record keeping only.
  */
 export default function PendingVerificationView() {
 	const [orders, setOrders] = useState<OrderData[]>([]);
@@ -33,7 +35,7 @@ export default function PendingVerificationView() {
 		setError(null);
 		try {
 			const res = await fetch(
-				"/api/orders?where[status][equals]=PAYMENT_PENDING_VERIFICATION&depth=1&limit=50&sort=-createdAt",
+				"/api/orders?where[paymentMethod][equals]=BANK_TRANSFER&where[bankTransferVerified][equals]=false&depth=1&limit=50&sort=-createdAt",
 			);
 			if (!res.ok) throw new Error("Failed to fetch orders.");
 			const data = await res.json();
@@ -74,7 +76,7 @@ export default function PendingVerificationView() {
 		async (orderId: string) => {
 			if (
 				!window.confirm(
-					"Approve this payment? Files will be transferred to permanent storage.",
+					"Mark this bank transfer as verified? This is for record keeping only.",
 				)
 			)
 				return;
@@ -87,11 +89,11 @@ export default function PendingVerificationView() {
 				});
 				if (!res.ok) {
 					const data = await res.json();
-					throw new Error(data.error || "Failed to approve.");
+					throw new Error(data.error || "Failed to verify.");
 				}
 				fetchOrders(); // Refresh list
 			} catch (err) {
-				window.alert(err instanceof Error ? err.message : "Failed to approve.");
+				window.alert(err instanceof Error ? err.message : "Failed to verify.");
 			} finally {
 				setApprovingId(null);
 			}
@@ -346,8 +348,8 @@ export default function PendingVerificationView() {
 								}}
 							>
 								{isApproving
-									? "Approving…"
-									: "✓ Approve Payment & Transfer Files"}
+									? "Verifying…"
+									: "✓ Mark as Verified"}
 							</button>
 						</div>
 					</div>

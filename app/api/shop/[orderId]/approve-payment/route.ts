@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isPayloadAdmin } from "../../../../../lib/auth";
-import { sendPaymentVerifiedEmail } from "../../../../../lib/email";
 import { getPayloadClient } from "../../../../../lib/payload";
-import { transferOrderFiles } from "../../../../../lib/r2";
 
 type RouteContext = { params: Promise<{ orderId: string }> };
 
 /**
  * POST /api/orders/:orderId/approve-payment
  *
- * Admin-only endpoint to approve a bank transfer payment.
- * Transitions: PAYMENT_PENDING_VERIFICATION → PAID
- * Triggers staging → permanent file transfer.
+ * Admin-only endpoint to mark a bank transfer payment as verified.
+ * This is optional — for record keeping only. The order is already PAID
+ * and the customer can proceed without verification.
+ *
+ * Sets the `bankTransferVerified` flag to true.
  */
 export async function POST(request: NextRequest, context: RouteContext) {
 	const { orderId } = await context.params;
@@ -34,73 +34,32 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			return NextResponse.json({ error: "Order not found." }, { status: 404 });
 		}
 
-		if (order.status !== "PAYMENT_PENDING_VERIFICATION") {
+		if (order.paymentMethod !== "BANK_TRANSFER") {
 			return NextResponse.json(
 				{
-					error: `Cannot approve payment for order in ${order.status} status. Expected PAYMENT_PENDING_VERIFICATION.`,
+					error: "Only bank transfer orders can be verified.",
 				},
 				{ status: 400 },
 			);
 		}
 
-		// Transfer files from staging → permanent bucket
-		const files = order.files || [];
-		const transferMap = await transferOrderFiles(
-			files.map((f: { stagingKey: string }) => ({ stagingKey: f.stagingKey })),
-		);
+		if (order.bankTransferVerified) {
+			return NextResponse.json(
+				{
+					error: "This bank transfer payment has already been verified.",
+				},
+				{ status: 400 },
+			);
+		}
 
-		// Update files with permanent keys
-		const updatedFiles = files.map(
-			(f: {
-				stagingKey: string;
-				permanentKey?: string;
-				fileName?: string;
-				pageCount?: number;
-				copies?: number;
-				colorMode?: string;
-				paperSize?: string;
-				doubleSided?: boolean;
-				fileSize?: number;
-			}) => ({
-				...f,
-				permanentKey: transferMap.get(f.stagingKey) || f.stagingKey,
-			}),
-		);
-
-		// Transition to PAID
+		// Mark as verified for record keeping
 		const updated = await payload.update({
 			collection: "orders",
 			id: orderId,
 			data: {
-				status: "PAID",
-				files: updatedFiles,
+				bankTransferVerified: true,
 			},
 		});
-
-		// Send "payment verified — select pickup slot" email to the customer
-		try {
-			const customer =
-				typeof order.customer === "object" && order.customer !== null
-					? order.customer
-					: await payload.findByID({
-							collection: "customers",
-							id: order.customer as string,
-						});
-
-			if (customer?.email) {
-				const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-				await sendPaymentVerifiedEmail({
-					to: customer.email as string,
-					customerName: (customer.name as string) || "",
-					orderNumber: order.orderNumber || "",
-					total: order.pricing?.total,
-					orderUrl: baseUrl ? `${baseUrl}/my-orders` : undefined,
-				});
-			}
-		} catch (emailError) {
-			// Log but don't fail the request — the order is already updated
-			console.error("Failed to send payment verified email:", emailError);
-		}
 
 		return NextResponse.json({
 			success: true,
@@ -108,17 +67,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				id: updated.id,
 				orderNumber: updated.orderNumber,
 				status: updated.status,
-				paidAt: updated.paidAt,
+				bankTransferVerified: updated.bankTransferVerified,
 			},
-			message:
-				"Payment approved. Files transferred to permanent storage. Customer notified to select pickup slot.",
+			message: "Bank transfer payment verified for record keeping.",
 		});
 	} catch (error) {
-		console.error("Error approving payment:", error);
+		console.error("Error verifying payment:", error);
 		return NextResponse.json(
 			{
 				error:
-					error instanceof Error ? error.message : "Failed to approve payment.",
+					error instanceof Error ? error.message : "Failed to verify payment.",
 			},
 			{ status: 500 },
 		);

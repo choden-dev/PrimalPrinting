@@ -18,7 +18,7 @@ type BankTransferCheck = BankTransferEligibility | BankTransferIneligible;
  * Validates:
  * 1. The order exists and belongs to the customer
  * 2. The order is in DRAFT or AWAITING_PAYMENT status
- * 3. The customer doesn't already have a PAYMENT_PENDING_VERIFICATION order
+ * 3. (Removed — customers can now submit multiple bank transfer orders)
  */
 export async function checkBankTransferEligibility(
 	customerId: string,
@@ -80,25 +80,6 @@ export async function checkBankTransferEligibility(
 		return {
 			eligible: false,
 			error: `Cannot submit bank transfer for order in ${order.status} status.`,
-			status: 400,
-		};
-	}
-
-	// Check for existing pending verification
-	const existingPending = await payload.find({
-		collection: "orders",
-		where: {
-			customer: { equals: customerId },
-			status: { equals: "PAYMENT_PENDING_VERIFICATION" },
-		},
-		limit: 1,
-	});
-
-	if (existingPending.docs.length > 0) {
-		const pendingOrder = existingPending.docs[0];
-		return {
-			eligible: false,
-			error: `You already have an order (${pendingOrder.orderNumber}) pending bank transfer verification. Please wait for it to be verified before submitting another.`,
 			status: 400,
 		};
 	}

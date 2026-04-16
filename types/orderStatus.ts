@@ -3,13 +3,14 @@
  *
  * State machine:
  * DRAFT → AWAITING_PAYMENT → PAID → AWAITING_PICKUP → PRINTED → PICKED_UP
- *                          ↘ PAYMENT_PENDING_VERIFICATION → PAID
  *                          ↘ EXPIRED
+ *
+ * Bank transfer orders go directly to PAID after proof is uploaded.
+ * Admin can optionally verify (bankTransferVerified flag) for record keeping.
  */
 export const OrderStatus = {
 	DRAFT: "DRAFT",
 	AWAITING_PAYMENT: "AWAITING_PAYMENT",
-	PAYMENT_PENDING_VERIFICATION: "PAYMENT_PENDING_VERIFICATION",
 	PAID: "PAID",
 	AWAITING_PICKUP: "AWAITING_PICKUP",
 	PRINTED: "PRINTED",

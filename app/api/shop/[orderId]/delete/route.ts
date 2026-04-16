@@ -8,7 +8,6 @@ type RouteContext = { params: Promise<{ orderId: string }> };
 const CUSTOMER_DELETABLE_STATUSES = [
 	"DRAFT",
 	"AWAITING_PAYMENT",
-	"PAYMENT_PENDING_VERIFICATION",
 	"EXPIRED",
 ];
 

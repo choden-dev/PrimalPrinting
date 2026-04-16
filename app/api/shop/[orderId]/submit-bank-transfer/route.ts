@@ -2,7 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../../lib/auth";
 import { checkBankTransferEligibility } from "../../../../../lib/bankTransfer";
 import { notifyBankTransferSubmitted } from "../../../../../lib/discord";
+import { sendBankTransferReceivedEmail } from "../../../../../lib/email";
 import { getPayloadClient } from "../../../../../lib/payload";
+import { transferOrderFiles } from "../../../../../lib/r2";
 
 type RouteContext = { params: Promise<{ orderId: string }> };
 
@@ -10,7 +12,10 @@ type RouteContext = { params: Promise<{ orderId: string }> };
  * POST /api/orders/:orderId/submit-bank-transfer
  *
  * Submits proof of bank transfer payment. Transitions the order from
- * DRAFT/AWAITING_PAYMENT → PAYMENT_PENDING_VERIFICATION.
+ * DRAFT/AWAITING_PAYMENT → PAID directly (no verification gate).
+ *
+ * Files are transferred from staging to permanent storage.
+ * Admin can optionally verify the payment later for record keeping.
  *
  * Body: `{ "proofKey": "proofs/ORD-20260415-A3F8/uuid.webp" }`
  *
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			return NextResponse.json({ error: "Order not found." }, { status: 404 });
 		}
 
-		// Verify eligibility: owns the order, correct status, no pending verification
+		// Verify eligibility: owns the order, correct status
 		const check = await checkBankTransferEligibility(customer.customerId, {
 			orderId,
 		});
@@ -71,18 +76,44 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			});
 		}
 
-		// Then transition to PAYMENT_PENDING_VERIFICATION
+		// Transfer files from staging → permanent bucket
+		const files = order.files || [];
+		const transferMap = await transferOrderFiles(
+			files.map((f: { stagingKey: string }) => ({ stagingKey: f.stagingKey })),
+		);
+
+		// Update files with permanent keys
+		const updatedFiles = files.map(
+			(f: {
+				stagingKey: string;
+				permanentKey?: string;
+				fileName?: string;
+				pageCount?: number;
+				copies?: number;
+				colorMode?: string;
+				paperSize?: string;
+				doubleSided?: boolean;
+				fileSize?: number;
+			}) => ({
+				...f,
+				permanentKey: transferMap.get(f.stagingKey) || f.stagingKey,
+			}),
+		);
+
+		// Transition directly to PAID
 		const updated = await payload.update({
 			collection: "orders",
 			id: orderId,
 			data: {
-				status: "PAYMENT_PENDING_VERIFICATION",
+				status: "PAID",
 				bankTransferProofKey: proofKey,
 				paymentMethod: "BANK_TRANSFER",
+				bankTransferVerified: false,
+				files: updatedFiles,
 			},
 		});
 
-		// Notify admin via Discord so they can verify the payment
+		// Notify admin via Discord so they can optionally verify the payment
 		try {
 			const total = order.pricing?.total;
 			const formattedTotal =
@@ -98,6 +129,18 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			console.error("Failed to send Discord notification:", discordError);
 		}
 
+		// Send confirmation email to the customer
+		try {
+			await sendBankTransferReceivedEmail({
+				to: customer.email,
+				customerName: customer.name,
+				orderNumber: updated.orderNumber || "",
+				total: order.pricing?.total,
+			});
+		} catch (emailError) {
+			console.error("Failed to send bank transfer email:", emailError);
+		}
+
 		return NextResponse.json({
 			success: true,
 			order: {
@@ -106,7 +149,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				status: updated.status,
 			},
 			message:
-				"Bank transfer proof submitted. Your payment will be verified by an admin.",
+				"Bank transfer proof submitted. You can now select a pickup timeslot.",
 		});
 	} catch (error) {
 		console.error("Error submitting bank transfer:", error);

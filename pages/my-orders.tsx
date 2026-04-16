@@ -42,7 +42,6 @@ interface Order {
 const STATUS_COLORS: Record<string, string> = {
 	DRAFT: "gray",
 	AWAITING_PAYMENT: "orange",
-	PAYMENT_PENDING_VERIFICATION: "yellow",
 	PAID: "green",
 	AWAITING_PICKUP: "blue",
 	PRINTED: "purple",
@@ -53,7 +52,6 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
 	DRAFT: "Draft",
 	AWAITING_PAYMENT: "Awaiting Payment",
-	PAYMENT_PENDING_VERIFICATION: "Pending Verification",
 	PAID: "Paid",
 	AWAITING_PICKUP: "Awaiting Pickup",
 	PRINTED: "Printed",

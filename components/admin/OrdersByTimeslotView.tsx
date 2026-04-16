@@ -17,6 +17,7 @@ interface OrderData {
 	orderNumber: string;
 	status: string;
 	paymentMethod: string | null;
+	bankTransferVerified: boolean | null;
 	pricing: { total: number };
 	files: { fileName: string; copies: number }[];
 	customer: { name: string; email: string } | string;
@@ -464,6 +465,28 @@ export default function OrdersByTimeslotView() {
 												>
 													{order.status.replace(/_/g, " ")}
 												</span>
+												{order.paymentMethod === "BANK_TRANSFER" && (
+													<span
+														style={{
+															display: "inline-block",
+															padding: "3px 8px",
+															borderRadius: "12px",
+															fontSize: "10px",
+															fontWeight: 600,
+															marginLeft: "4px",
+															background: order.bankTransferVerified
+																? "#e8f5e9"
+																: "#fff3e0",
+															color: order.bankTransferVerified
+																? "#2e7d32"
+																: "#e65100",
+														}}
+													>
+														{order.bankTransferVerified
+															? "✓ Verified"
+															: "⏳ Unverified"}
+													</span>
+												)}
 											</td>
 											<td style={{ padding: "10px 12px", textAlign: "right" }}>
 												{order.status === OrderStatus.AWAITING_PICKUP && (
