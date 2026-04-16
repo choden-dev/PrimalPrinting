@@ -1,6 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { getPayloadClient } from "../../../../lib/payload";
+import { getPayloadClient } from "@/lib/payload";
 
 /**
  * NextAuth configuration for customer authentication.
