@@ -67,7 +67,7 @@ function AuthContextInner({ children }: PropsWithChildren) {
 				const height = 600;
 				const left = window.screenX + (window.outerWidth - width) / 2;
 				const top = window.screenY + (window.outerHeight - height) / 2;
-				const callbackUrl = encodeURIComponent(window.location.href);
+				const callbackUrl = encodeURIComponent("/auth/callback");
 				window.open(
 					`/api/auth/signin?callbackUrl=${callbackUrl}`,
 					"google-signin",
