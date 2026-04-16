@@ -91,16 +91,14 @@ export const ApprovePaymentButton: React.FC = () => {
 			}}
 		>
 			<h4 style={{ margin: "0 0 8px", color: success ? "#2e7d32" : "#1565c0" }}>
-				{success
-					? "✓ Payment Verified"
-					: "🏦 Bank Transfer — Not Yet Verified"}
+				{success ? "✓ Payment Verified" : "🏦 Bank Transfer — Not Yet Verified"}
 			</h4>
 
 			{!success && (
 				<>
 					<p style={{ margin: "0 0 12px", fontSize: "14px", color: "#666" }}>
-						This bank transfer payment has not been verified yet. Verification is
-						optional and for record keeping only — the customer can already
+						This bank transfer payment has not been verified yet. Verification
+						is optional and for record keeping only — the customer can already
 						proceed.
 					</p>
 					<button

@@ -347,9 +347,7 @@ export default function PendingVerificationView() {
 									cursor: isApproving ? "not-allowed" : "pointer",
 								}}
 							>
-								{isApproving
-									? "Verifying…"
-									: "✓ Mark as Verified"}
+								{isApproving ? "Verifying…" : "✓ Mark as Verified"}
 							</button>
 						</div>
 					</div>

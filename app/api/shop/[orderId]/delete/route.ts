@@ -5,11 +5,7 @@ import { getPayloadClient } from "../../../../../lib/payload";
 type RouteContext = { params: Promise<{ orderId: string }> };
 
 /** Statuses that customers are allowed to delete themselves */
-const CUSTOMER_DELETABLE_STATUSES = [
-	"DRAFT",
-	"AWAITING_PAYMENT",
-	"EXPIRED",
-];
+const CUSTOMER_DELETABLE_STATUSES = ["DRAFT", "AWAITING_PAYMENT", "EXPIRED"];
 
 /**
  * DELETE /api/shop/:orderId/delete
