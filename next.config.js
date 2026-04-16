@@ -2,9 +2,9 @@ const { withPayload } = require("@payloadcms/next/withPayload");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	reactStrictMode: false,
+	reactStrictMode: true,
 	typescript: {
-		ignoreBuildErrors: true,
+		ignoreBuildErrors: false,
 	},
 };
 

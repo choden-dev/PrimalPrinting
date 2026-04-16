@@ -158,7 +158,7 @@ By Students, For Students🚀💯"
 									{section.content && (
 										<RichText
 											data={
-												section.content as import("lexical").SerializedEditorState
+												section.content as unknown as import("lexical").SerializedEditorState
 											}
 										/>
 									)}

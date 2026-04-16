@@ -7,7 +7,9 @@ export const guidGenerator = () => {
 	return S4() + S4();
 };
 
-export const formatItems = (items): string => {
+export const formatItems = (
+	items: { name: string; quantity: number; cost: number }[],
+): string => {
 	const listItems = items.map((item) => {
 		return `<li>${item.name} - Qty: ${item.quantity}, Cost: ${item.cost}</li>`;
 	});
@@ -17,7 +19,7 @@ export const formatItems = (items): string => {
 	return formattedString;
 };
 
-export const orderSum = (orderItems) => {
+export const orderSum = (orderItems: { cost: number }[]) => {
 	let sum = 0;
 	orderItems.map((item) => {
 		sum += item.cost;

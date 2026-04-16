@@ -11,7 +11,7 @@ export async function getStaticProps() {
 		revalidate: 60 * 60,
 	};
 }
-const Order: NextPage = ({ packages }) => {
+const Order: NextPage = () => {
 	return (
 		<>
 			<Head>
@@ -30,7 +30,7 @@ const Order: NextPage = ({ packages }) => {
 			</Head>
 			<Box className="container">
 				<NavBar />
-				<OrderContainer packages={packages.data} />
+				<OrderContainer />
 			</Box>
 		</>
 	);
