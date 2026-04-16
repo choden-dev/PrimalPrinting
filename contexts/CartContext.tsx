@@ -65,9 +65,7 @@ const alreadyInArray = <T extends CartItem>(
 	return arrayToSearch.some((item) => item.id === itemToCheck.id);
 };
 
-export function CartContextProvider(
-	props: React.PropsWithChildren,
-) {
+export function CartContextProvider(props: React.PropsWithChildren) {
 	const [cartPackages, setCartPackages] = useState<CartItem[]>([]);
 	const [uploadedPdfs, setUploadedPdfs] = useState<PdfCartItem[]>([]);
 	const [displayPriceString, setDisplayPriceString] = useState<string>(
