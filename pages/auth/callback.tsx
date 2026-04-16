@@ -1,19 +1,18 @@
 import { useEffect } from "react";
 
 /**
- * OAuth callback landing page — used when sign-in opens in a popup.
- * Closes the popup and triggers a session refresh in the parent window.
+ * OAuth callback landing page.
+ *
+ * After Google OAuth completes, NextAuth redirects here. This page reads the
+ * saved return URL from sessionStorage and redirects the user back to where
+ * they were before sign-in (e.g. the order page with their uploaded files
+ * restored from IndexedDB).
  */
 export default function AuthCallback() {
 	useEffect(() => {
-		// Notify the parent window to refresh session
-		if (window.opener) {
-			window.opener.focus();
-			window.close();
-		} else {
-			// Fallback: if not opened as popup, redirect to order page
-			window.location.href = "/order";
-		}
+		const returnUrl = sessionStorage.getItem("auth-return-url") || "/order";
+		sessionStorage.removeItem("auth-return-url");
+		window.location.replace(returnUrl);
 	}, []);
 
 	return (
@@ -27,7 +26,7 @@ export default function AuthCallback() {
 				color: "#666",
 			}}
 		>
-			Signing you in...
+			Signing you in…
 		</div>
 	);
 }
