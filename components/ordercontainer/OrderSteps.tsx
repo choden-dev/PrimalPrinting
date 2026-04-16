@@ -94,7 +94,7 @@ export default function OrderSteps({
 		fetchOrder();
 	}, [orderId, step, onPaymentSuccess, onPickupConfirmed]);
 
-	// Poll for payment status (after Stripe confirmation or bank transfer submission)
+	// Poll for payment status (after Stripe confirmation)
 	useEffect(() => {
 		if (!pollForPayment) return;
 		const interval = setInterval(async () => {
@@ -255,7 +255,7 @@ export default function OrderSteps({
 						>
 							<Text fontWeight={700}>🏦 Bank Transfer</Text>
 							<Text fontSize="sm" fontWeight={400} color="gray.500">
-								Transfer & upload proof — verified by admin
+								Transfer & upload proof of payment
 							</Text>
 						</Button>
 					</Box>
@@ -318,36 +318,10 @@ export default function OrderSteps({
 							orderNumber={orderNumber}
 							totalCents={totalCents}
 							onSuccess={() => {
-								setPollForPayment(true);
+								onPaymentSuccess();
 							}}
 							onError={(err) => console.error("Bank transfer error:", err)}
 						/>
-						{pollForPayment && (
-							<Box
-								mt={6}
-								p={4}
-								bg="orange.50"
-								borderRadius="8px"
-								textAlign="center"
-							>
-								<Text fontWeight={600} color="orange.700">
-									⏳ Proof submitted! Waiting for admin verification…
-								</Text>
-								<Text fontSize="sm" color="gray.600" mt={2}>
-									You&apos;ll be redirected automatically once verified, or you
-									can check back later from{" "}
-									<Button
-										variant="link"
-										colorScheme="blue"
-										size="sm"
-										onClick={() => router.push("/my-orders")}
-									>
-										My Orders
-									</Button>
-									.
-								</Text>
-							</Box>
-						)}
 					</Box>
 				)}
 			</Box>

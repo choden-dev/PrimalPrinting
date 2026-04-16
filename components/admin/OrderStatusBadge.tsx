@@ -16,11 +16,6 @@ const STATUS_COLORS: Record<
 		text: "#e65100",
 		label: "Awaiting Payment",
 	},
-	PAYMENT_PENDING_VERIFICATION: {
-		bg: "#fff8e1",
-		text: "#f57f17",
-		label: "Pending Verification",
-	},
 	PAID: { bg: "#e8f5e9", text: "#2e7d32", label: "Paid" },
 	AWAITING_PICKUP: { bg: "#e3f2fd", text: "#1565c0", label: "Awaiting Pickup" },
 	PRINTED: {

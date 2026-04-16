@@ -8,7 +8,7 @@ import { cleanupStagingFiles } from "../../../../lib/r2";
  * Cron job endpoint that expires stale orders.
  * Should be called periodically (e.g. every hour via Vercel Cron or GitHub Actions).
  *
- * Transitions orders in DRAFT / AWAITING_PAYMENT / PAYMENT_PENDING_VERIFICATION
+ * Transitions orders in DRAFT / AWAITING_PAYMENT
  * to EXPIRED when their `expiresAt` timestamp has passed.
  *
  * Cleans up associated staging bucket files.
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 			collection: "orders",
 			where: {
 				status: {
-					in: ["DRAFT", "AWAITING_PAYMENT", "PAYMENT_PENDING_VERIFICATION"],
+					in: ["DRAFT", "AWAITING_PAYMENT"],
 				},
 				expiresAt: {
 					less_than: now,

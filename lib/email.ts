@@ -130,7 +130,7 @@ export async function sendOrderConfirmationEmail(params: {
 
 /**
  * Send an email confirming that bank transfer proof has been received
- * and is pending admin verification.
+ * and the order is now paid. Customer can proceed to select a pickup slot.
  */
 export async function sendBankTransferReceivedEmail(params: {
 	to: string;
@@ -153,39 +153,7 @@ export async function sendBankTransferReceivedEmail(params: {
 	await getTransporter().sendMail({
 		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
 		to,
-		subject: `Payment Received — ${orderNumber} (Pending Verification)`,
-		html,
-	});
-}
-
-/**
- * Send an email notifying the customer that their bank transfer has been
- * verified and they should now select a pickup timeslot.
- */
-export async function sendPaymentVerifiedEmail(params: {
-	to: string;
-	customerName: string;
-	orderNumber: string;
-	total: number | undefined;
-	orderUrl?: string;
-}): Promise<void> {
-	const { to, customerName, orderNumber, total, orderUrl } = params;
-
-	const contact = await getContactInfo();
-
-	const html = renderTemplate("paymentVerified", {
-		customerName: customerName || "Customer",
-		orderNumber,
-		total: formatCents(total),
-		orderUrl: orderUrl || "",
-		contactEmail: contact.email,
-		contactPhone: contact.phone,
-	});
-
-	await getTransporter().sendMail({
-		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
-		to,
-		subject: `Payment Verified — ${orderNumber} — Select Your Pickup Slot`,
+		subject: `Payment Received — ${orderNumber} — Select Your Pickup Slot`,
 		html,
 	});
 }

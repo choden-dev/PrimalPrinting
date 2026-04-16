@@ -9,7 +9,6 @@ import {
 export const ORDER_STATUSES = [
 	"DRAFT",
 	"AWAITING_PAYMENT",
-	"PAYMENT_PENDING_VERIFICATION",
 	"PAID",
 	"AWAITING_PICKUP",
 	"PRINTED",
@@ -22,8 +21,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 // ── Valid state transitions ──────────────────────────────────────────────
 const VALID_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
 	DRAFT: ["AWAITING_PAYMENT", "EXPIRED"],
-	AWAITING_PAYMENT: ["PAYMENT_PENDING_VERIFICATION", "PAID", "EXPIRED"],
-	PAYMENT_PENDING_VERIFICATION: ["PAID", "EXPIRED"],
+	AWAITING_PAYMENT: ["PAID", "EXPIRED"],
 	PAID: ["AWAITING_PICKUP"],
 	AWAITING_PICKUP: ["PRINTED"],
 	PRINTED: ["PICKED_UP"],
@@ -244,6 +242,16 @@ export const Orders: CollectionConfig = {
 			admin: {
 				description:
 					"R2 object key for the downsized bank transfer proof screenshot.",
+				condition: (data) => data?.paymentMethod === "BANK_TRANSFER",
+			},
+		},
+		{
+			name: "bankTransferVerified",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				description:
+					"Whether an admin has verified the bank transfer proof. Optional — for record keeping only.",
 				condition: (data) => data?.paymentMethod === "BANK_TRANSFER",
 			},
 		},
