@@ -158,6 +158,38 @@ export async function sendBankTransferReceivedEmail(params: {
 	});
 }
 
+/**
+ * Send an email notifying the customer that their bank transfer has been
+ * verified and they should now select a pickup timeslot.
+ */
+export async function sendPaymentVerifiedEmail(params: {
+	to: string;
+	customerName: string;
+	orderNumber: string;
+	total: number | undefined;
+	orderUrl?: string;
+}): Promise<void> {
+	const { to, customerName, orderNumber, total, orderUrl } = params;
+
+	const contact = await getContactInfo();
+
+	const html = renderTemplate("paymentVerified", {
+		customerName: customerName || "Customer",
+		orderNumber,
+		total: formatCents(total),
+		orderUrl: orderUrl || "",
+		contactEmail: contact.email,
+		contactPhone: contact.phone,
+	});
+
+	await getTransporter().sendMail({
+		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		to,
+		subject: `Payment Verified — ${orderNumber} — Select Your Pickup Slot`,
+		html,
+	});
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 function formatCents(cents: number | undefined | null): string {

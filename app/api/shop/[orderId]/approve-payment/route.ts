@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isPayloadAdmin } from "../../../../../lib/auth";
+import { sendPaymentVerifiedEmail } from "../../../../../lib/email";
 import { getPayloadClient } from "../../../../../lib/payload";
 import { transferOrderFiles } from "../../../../../lib/r2";
 
@@ -76,6 +77,31 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			},
 		});
 
+		// Send "payment verified — select pickup slot" email to the customer
+		try {
+			const customer =
+				typeof order.customer === "object" && order.customer !== null
+					? order.customer
+					: await payload.findByID({
+							collection: "customers",
+							id: order.customer as string,
+						});
+
+			if (customer?.email) {
+				const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+				await sendPaymentVerifiedEmail({
+					to: customer.email as string,
+					customerName: (customer.name as string) || "",
+					orderNumber: order.orderNumber || "",
+					total: order.pricing?.total,
+					orderUrl: baseUrl ? `${baseUrl}/my-orders` : undefined,
+				});
+			}
+		} catch (emailError) {
+			// Log but don't fail the request — the order is already updated
+			console.error("Failed to send payment verified email:", emailError);
+		}
+
 		return NextResponse.json({
 			success: true,
 			order: {
@@ -84,7 +110,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				status: updated.status,
 				paidAt: updated.paidAt,
 			},
-			message: "Payment approved. Files transferred to permanent storage.",
+			message:
+				"Payment approved. Files transferred to permanent storage. Customer notified to select pickup slot.",
 		});
 	} catch (error) {
 		console.error("Error approving payment:", error);

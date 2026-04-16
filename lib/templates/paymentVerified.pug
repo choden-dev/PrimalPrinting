@@ -1,0 +1,51 @@
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    style.
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+      .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+      .header { background: #1a1a2e; color: #ffffff; padding: 32px 24px; text-align: center; }
+      .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+      .header p { margin: 8px 0 0; opacity: 0.8; font-size: 14px; }
+      .content { padding: 24px; }
+      .status-box { background: #e8f5e9; border-radius: 8px; padding: 16px; border-left: 4px solid #4caf50; margin: 16px 0; }
+      .status-box h3 { margin: 0 0 8px; color: #2e7d32; }
+      .status-box p { margin: 4px 0; }
+      .action-box { background: #e3f2fd; border-radius: 8px; padding: 16px; border-left: 4px solid #1976d2; margin: 16px 0; }
+      .action-box h3 { margin: 0 0 8px; color: #1565c0; }
+      .action-box p { margin: 4px 0; }
+      .cta-button { display: inline-block; background: #1a1a2e; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 16px 0; }
+      .footer { padding: 24px; text-align: center; font-size: 13px; color: #999; border-top: 1px solid #eee; }
+  body
+    .container
+      .header
+        h1 Payment Verified ✓
+        p Order ##{orderNumber}
+
+      .content
+        p Hi #{customerName},
+
+        p Great news! Your bank transfer payment for order ##{orderNumber} has been verified.
+
+        .status-box
+          h3 ✅ Payment Confirmed
+          p Your payment of #{total} has been successfully verified by our team.
+
+        .action-box
+          h3 📅 Next Step: Select a Pickup Slot
+          p Your order is ready to be printed — please select a pickup time so we know when to have it ready for you.
+
+        if orderUrl
+          p(style="text-align: center;")
+            a.cta-button(href=orderUrl) Select Pickup Slot
+
+        p If you have any questions about your order, please contact us:
+        if contactEmail
+          p Email: #{contactEmail}
+        if contactPhone
+          p Phone: #{contactPhone}
+
+      .footer
+        p Primal Printing — Thank you for your order!
