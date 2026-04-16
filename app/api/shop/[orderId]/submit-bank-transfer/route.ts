@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../../lib/auth";
 import { checkBankTransferEligibility } from "../../../../../lib/bankTransfer";
+import { notifyBankTransferSubmitted } from "../../../../../lib/discord";
 import { getPayloadClient } from "../../../../../lib/payload";
 
 type RouteContext = { params: Promise<{ orderId: string }> };
@@ -81,7 +82,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			},
 		});
 
-		// TODO: Send notification to admin (email or Slack webhook)
+		// Notify admin via Discord so they can verify the payment
+		try {
+			const total = order.pricing?.total;
+			const formattedTotal =
+				total != null ? `$${(total / 100).toFixed(2)}` : "N/A";
+
+			await notifyBankTransferSubmitted({
+				orderNumber: updated.orderNumber || orderId,
+				customerName: customer.name,
+				customerEmail: customer.email,
+				totalFormatted: formattedTotal,
+			});
+		} catch (discordError) {
+			console.error("Failed to send Discord notification:", discordError);
+		}
 
 		return NextResponse.json({
 			success: true,

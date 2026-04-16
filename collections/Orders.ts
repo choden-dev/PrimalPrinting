@@ -347,7 +347,18 @@ export const Orders: CollectionConfig = {
 					type: "number",
 					required: true,
 					min: 0,
-					admin: { description: "Subtotal before tax (cents)." },
+					admin: { description: "Subtotal before discount and tax (cents)." },
+				},
+				{
+					name: "discount",
+					type: "number",
+					required: true,
+					min: 0,
+					defaultValue: 0,
+					admin: {
+						description:
+							"Bulk discount amount (cents). Applied when copies >= minimum threshold.",
+					},
 				},
 				{
 					name: "tax",
@@ -361,7 +372,7 @@ export const Orders: CollectionConfig = {
 					type: "number",
 					required: true,
 					min: 0,
-					admin: { description: "Total including tax (cents)." },
+					admin: { description: "Total after discount and tax (cents)." },
 				},
 			],
 		},

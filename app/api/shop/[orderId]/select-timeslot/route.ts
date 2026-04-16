@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../../lib/auth";
+import { notifyPickupSlotSelected } from "../../../../../lib/discord";
 import { sendOrderConfirmationEmail } from "../../../../../lib/email";
 import { getPayloadClient } from "../../../../../lib/payload";
 
@@ -84,6 +85,29 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				pickupTimeslot: timeslotId,
 			},
 		});
+
+		// Notify admin via Discord so they can prepare the order
+		try {
+			const formattedDate = timeslot.date
+				? new Date(timeslot.date).toLocaleDateString("en-NZ", {
+						weekday: "long",
+						day: "numeric",
+						month: "long",
+						year: "numeric",
+					})
+				: "TBD";
+
+			await notifyPickupSlotSelected({
+				orderNumber: order.orderNumber || orderId,
+				customerName: customer.name,
+				customerEmail: customer.email,
+				pickupDate: formattedDate,
+				pickupTime: `${timeslot.startTime} – ${timeslot.endTime}`,
+				pickupLabel: timeslot.label || "",
+			});
+		} catch (discordError) {
+			console.error("Failed to send Discord notification:", discordError);
+		}
 
 		// Send confirmation email
 		try {
