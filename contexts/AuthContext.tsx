@@ -1,5 +1,5 @@
 import type { Session } from "next-auth";
-import { signIn, SessionProvider, signOut, useSession } from "next-auth/react";
+import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
 import {
 	createContext,
 	type PropsWithChildren,
