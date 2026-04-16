@@ -125,8 +125,10 @@ export async function countPdfPagesFromStaging(
 			chunks.push(chunk);
 		}
 
-		const pdfParse = (await import("pdf-parse")).default;
-		const parsed = await pdfParse(Buffer.concat(chunks));
+		// Dynamic import – handle CJS/ESM interop at runtime
+		const pdfParseModule = await import("pdf-parse");
+		const pdfParse = (pdfParseModule as { default?: unknown }).default ?? pdfParseModule;
+		const parsed = await (pdfParse as (buf: Buffer) => Promise<{ numpages: number }>)(Buffer.concat(chunks));
 		return parsed.numpages;
 	} catch (err) {
 		console.error("Failed to count pages from staging:", stagingKey, err);
@@ -154,8 +156,9 @@ export async function uploadToStaging(
 	if (contentType === "application/pdf") {
 		try {
 			// Dynamic import to avoid pdf-parse breaking RSC bundling
-			const pdfParse = (await import("pdf-parse")).default;
-			const parsed = await pdfParse(Buffer.from(body));
+			const pdfParseModule = await import("pdf-parse");
+			const pdfParse = (pdfParseModule as { default?: unknown }).default ?? pdfParseModule;
+			const parsed = await (pdfParse as (buf: Buffer) => Promise<{ numpages: number }>)(Buffer.from(body as Uint8Array));
 			pageCount = parsed.numpages;
 		} catch (err) {
 			console.error("Failed to count PDF pages at upload:", err);

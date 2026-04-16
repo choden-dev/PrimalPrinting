@@ -12,7 +12,7 @@ import { getPayloadClient } from "@/lib/payload";
  * Admin users continue to authenticate via the Payload admin panel
  * (separate `users` collection with `auth: true`).
  */
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
 	providers: [
 		GoogleProvider({
 			clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -106,7 +106,7 @@ export const authOptions: NextAuthOptions = {
 				const extendedSession = session as typeof session & {
 					customerId: string;
 				};
-				extendedSession.customerId = token.customerId;
+				extendedSession.customerId = token.customerId as string;
 			}
 			return session;
 		},

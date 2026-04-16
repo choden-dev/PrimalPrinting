@@ -27,7 +27,7 @@ export async function checkBankTransferEligibility(
 	const payload = await getPayloadClient();
 
 	// Find the order by ID or order number
-	let orderDocs: { status?: string; id: string; orderNumber?: string }[];
+	let orderDocs: { status?: string; id: string | number; orderNumber?: string }[];
 
 	if (orderIdentifier.orderId) {
 		try {

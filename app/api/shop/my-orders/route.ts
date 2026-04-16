@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import type { Where } from "payload";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
 
@@ -30,13 +31,10 @@ export async function GET(request: NextRequest) {
 
 		const payload = await getPayloadClient();
 
-		const where: Record<string, unknown> = {
+		const where: Where = {
 			customer: { equals: customer.customerId },
+			...(statusFilter ? { status: { equals: statusFilter } } : {}),
 		};
-
-		if (statusFilter) {
-			where.status = { equals: statusFilter };
-		}
 
 		const result = await payload.find({
 			collection: "orders",

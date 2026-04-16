@@ -45,7 +45,7 @@ export const Timeslots: CollectionConfig = {
 			admin: {
 				description: 'Start time in 24-hour format, e.g. "09:00".',
 			},
-			validate: (value) => {
+			validate: (value: string | null | undefined) => {
 				if (!value) return "Start time is required.";
 				if (!/^\d{2}:\d{2}$/.test(value))
 					return 'Must be in HH:MM format (e.g. "09:00").';
@@ -59,7 +59,7 @@ export const Timeslots: CollectionConfig = {
 			admin: {
 				description: 'End time in 24-hour format, e.g. "17:00".',
 			},
-			validate: (value) => {
+			validate: (value: string | null | undefined) => {
 				if (!value) return "End time is required.";
 				if (!/^\d{2}:\d{2}$/.test(value))
 					return 'Must be in HH:MM format (e.g. "17:00").';

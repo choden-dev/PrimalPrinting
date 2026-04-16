@@ -66,7 +66,7 @@ const alreadyInArray = <T extends CartItem>(
 };
 
 export function CartContextProvider(
-	props: React.PropsWithChildren<Record<string, never>>,
+	props: React.PropsWithChildren,
 ) {
 	const [cartPackages, setCartPackages] = useState<CartItem[]>([]);
 	const [uploadedPdfs, setUploadedPdfs] = useState<PdfCartItem[]>([]);

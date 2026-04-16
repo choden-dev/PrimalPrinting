@@ -2,7 +2,7 @@
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 
 import { generatePageMetadata, RootPage } from "@payloadcms/next/views";
-import type { AdminViewProps } from "payload";
+
 import config from "@/payload.config";
 import { importMap } from "../importMap";
 
@@ -18,7 +18,7 @@ type Args = {
 export const generateMetadata = ({ params, searchParams }: Args) =>
 	generatePageMetadata({ config, params, searchParams });
 
-const Page = ({ params, searchParams }: AdminViewProps) =>
+const Page = ({ params, searchParams }: Args) =>
 	RootPage({ config, importMap, params, searchParams });
 
 export default Page;

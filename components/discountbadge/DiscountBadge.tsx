@@ -9,6 +9,7 @@ export default function DiscountBadge({
 	return (
 		<>
 			{displayCondition && (
+				// @ts-expect-error — Chakra UI v2 Badge props union is too complex for TS 5.x
 				<Badge colorScheme="green">{getPercentOff()}% off!</Badge>
 			)}
 		</>
