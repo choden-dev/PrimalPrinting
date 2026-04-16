@@ -1,18 +1,6 @@
 import Stripe from "stripe";
-import type {
-	CustomerFriendlyStripeItem,
-	StripeBackendItem,
-} from "../types/types";
-import {
-	getItemsWithBulkDiscount,
-	getMinimumItemsForDiscount,
-	getPercentOff,
-} from "./utils";
 
 let stripeCached: Stripe;
-
-export const CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY =
-	"customerFriendlyStripeItems" as const;
 
 // caches the connection or starts a new one
 const makeStripeConnection = async () => {
@@ -22,13 +10,6 @@ const makeStripeConnection = async () => {
 	});
 	return stripeCached;
 };
-export const getProducts = async () => {
-	const stripe: Stripe = await makeStripeConnection();
-	const products = await stripe.products.list({
-		limit: 3,
-	});
-	return products;
-};
 
 export const findPrice = async (priceId: string) => {
 	const stripe: Stripe = await makeStripeConnection();
@@ -36,14 +17,12 @@ export const findPrice = async (priceId: string) => {
 	return price.unit_amount;
 };
 
-export const getPackages = async () => {
-	const stripe: Stripe = await makeStripeConnection();
-	const packages = await stripe.products.search({
-		query: `metadata["type"]: 'package' AND active: 'true' `,
-	});
-	return packages;
-};
-
+/**
+ * Look up the Stripe product + price for a given page count and colour mode.
+ * Products are configured in Stripe with metadata:
+ *   - minPages / maxPages: page range
+ *   - type: "Colour" or "B/W"
+ */
 export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	const stripe: Stripe = await makeStripeConnection();
 	const pageRange = { maxPages: -1, minPages: -1 };
@@ -74,11 +53,7 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 			throw new Error("Invalid Page Range!");
 	}
 	const products = await stripe.products.search({
-		query: `metadata["maxPages"]:'${
-			pageRange.maxPages
-		}' AND metadata["minPages"]:'${pageRange.minPages}' AND metadata["type"]:${
-			isColor ? "'Colour'" : "'B/W'"
-		}`,
+		query: `metadata["maxPages"]:'${pageRange.maxPages}' AND metadata["minPages"]:'${pageRange.minPages}' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
 	});
 	const priceId = products.data[0].default_price?.toString();
 	const price = await findPrice(priceId || "");
@@ -90,103 +65,29 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	};
 };
 
-export const createUniqueProducts = async (
-	items: (StripeBackendItem & { name: string })[],
-) => {
-	const stripe: Stripe = await makeStripeConnection();
+/**
+ * Calculate the total price for a set of order files server-side.
+ * This is the source of truth — never trust client-side pricing.
+ */
+export const calculateOrderTotal = async (
+	files: {
+		pageCount: number;
+		copies: number;
+		colorMode: string;
+	}[],
+): Promise<{ subtotal: number; total: number }> => {
+	let subtotal = 0;
 
-	return await Promise.all(
-		items.map(async (item) => {
-			const price = await stripe.prices.retrieve(item.priceId);
-			const product = await stripe.products.create({
-				name: item.name,
-				default_price_data: {
-					unit_amount_decimal: price.unit_amount_decimal as string,
-					currency: price.currency,
-				},
-			});
-
-			return {
-				...item,
-				productId: product.id,
-				price: product.default_price as string,
-			};
-		}),
-	);
-};
-
-export const createCoupons = async <T extends StripeBackendItem>(
-	items: T[],
-) => {
-	const stripe: Stripe = await makeStripeConnection();
-
-	const itemsWithBulkDiscount = getItemsWithBulkDiscount(items);
-	if (itemsWithBulkDiscount.length === 0) return undefined;
-	if (getPercentOff() === 0) return undefined;
-
-	return await stripe.coupons.create({
-		percent_off: getPercentOff(),
-		applies_to: {
-			products: itemsWithBulkDiscount.map((item) => item.productId),
-		},
-		duration: "once",
-		name: `${getMinimumItemsForDiscount()} or more discount!`,
-	});
-};
-
-export const createSession = async (
-	items: StripeBackendItem[],
-	orderId: string,
-	email: string,
-	coupon?: Stripe.Coupon,
-) => {
-	const stripe: Stripe = await makeStripeConnection();
-	const session = await stripe.checkout.sessions.create({
-		mode: "payment",
-		line_items: items.map(
-			({ productId, priceId, name, ...relevant }) => relevant,
-		),
-		...(coupon !== undefined && {
-			discounts: [{ coupon: coupon ? coupon.id : undefined }],
-		}),
-		...(coupon === undefined && { allow_promotion_codes: true }),
-
-		success_url: `${
-			process.env.STRIPE_SUCCESS_URL
-		}?session_id={CHECKOUT_SESSION_ID}`,
-		customer_email: email,
-		cancel_url: `${
-			process.env.STRIPE_CANCEL_URL
-		}?session_id={CHECKOUT_SESSION_ID}`,
-		metadata: {
-			orderId: orderId,
-			[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY]: JSON.stringify(
-				generateCustomerFriendlyStripeItems(items),
-			),
-		},
-	});
-	return session;
-};
-
-const generateCustomerFriendlyStripeItems = (
-	items: StripeBackendItem[],
-): CustomerFriendlyStripeItem[] => {
-	return items.map(
-		(item) => `${item.name} x ${item.quantity}` as CustomerFriendlyStripeItem,
-	);
-};
-
-export const checkSession = async (sessionId: string) => {
-	const stripe: Stripe = await makeStripeConnection();
-	const session = await stripe.checkout.sessions.retrieve(sessionId);
+	for (const file of files) {
+		const isColor = file.colorMode === "COLOR";
+		const priceData = await getPriceForPages(file.pageCount, isColor);
+		const unitPrice = priceData.price || 0;
+		// unitPrice is per copy, multiply by copies
+		subtotal += unitPrice * file.copies;
+	}
 
 	return {
-		price: session.amount_total,
-		customer: session.customer_details,
-		paid: session.status === "complete",
-		orderId: session.metadata?.orderId,
-		// This is the RAW JSON string from the metadata
-		[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY]:
-			session.metadata?.[CUSTOMER_FRIENDLY_STRIPE_ITEMS_KEY],
+		subtotal,
+		total: subtotal, // no tax for now
 	};
 };

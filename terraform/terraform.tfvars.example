@@ -5,3 +5,8 @@ cloudflare_api_token  = ""
 cloudflare_account_id = ""
 r2_bucket_name        = "primalprinting-media"
 r2_location           = "APAC"
+
+# Order system buckets
+r2_staging_bucket_name   = "primalprinting-staging"
+r2_permanent_bucket_name = "primalprinting-orders"
+r2_staging_expiry_days   = 7

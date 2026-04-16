@@ -6,8 +6,12 @@ import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { AboutSections } from "./collections/AboutSections";
+import { Customers } from "./collections/Customers";
 import { Media } from "./collections/Media";
+import { Orders } from "./collections/Orders";
+import { Timeslots } from "./collections/Timeslots";
 import { Users } from "./collections/Users";
+import { BankDetails } from "./globals/BankDetails";
 import { ContactInfo } from "./globals/ContactInfo";
 
 const filename = fileURLToPath(import.meta.url);
@@ -19,8 +23,8 @@ export default buildConfig({
 		url: process.env.DATABASE_URI || process.env.MONGODB_URI || "",
 	}),
 	editor: lexicalEditor(),
-	collections: [Users, AboutSections, Media],
-	globals: [ContactInfo],
+	collections: [Users, Customers, Orders, Timeslots, AboutSections, Media],
+	globals: [ContactInfo, BankDetails],
 	sharp,
 	plugins: [
 		...(process.env.R2_S3_ENDPOINT
@@ -55,6 +59,25 @@ export default buildConfig({
 		},
 		importMap: {
 			baseDir: path.resolve(dirname),
+		},
+		components: {
+			views: {
+				ordersByTimeslot: {
+					Component: "@/components/admin/OrdersByTimeslotView",
+					path: "/orders-by-timeslot",
+					meta: {
+						title: "Orders by Timeslot",
+					},
+				},
+				pendingVerification: {
+					Component: "@/components/admin/PendingVerificationView",
+					path: "/verify-payments",
+					meta: {
+						title: "Verify Bank Transfers",
+					},
+				},
+			},
+			afterNavLinks: ["@/components/admin/AdminNavLinks"],
 		},
 	},
 });

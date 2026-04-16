@@ -5,9 +5,11 @@ import {
 	Heading,
 	List,
 	ListItem,
+	Spinner,
 	Text,
 } from "@chakra-ui/react";
-import { useContext } from "react";
+import { useCallback, useContext, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import { CartContext } from "../../contexts/CartContext";
 import type CartItem from "../../types/models/CartItem";
 import DiscountBadge from "../discountbadge/DiscountBadge";
@@ -15,7 +17,11 @@ import QuantityPicker from "../quantitypicker/QuantityPicker";
 
 type Props = {
 	smallScreen: boolean;
-	formRef: React.RefObject<HTMLFormElement>;
+	onProceedToPayment: (orderId: string, orderNumber: string) => void;
+	setIsProcessing: (value: boolean) => void;
+	setCurrentlyUploading: React.Dispatch<
+		React.SetStateAction<{ name: string; percent: number }[]>
+	>;
 };
 
 const CartItemContainer = () => {
@@ -136,23 +142,94 @@ const PdfItemContainer = () => {
 	);
 };
 
-const Cart = ({ smallScreen, formRef }: Props) => {
-	const { cartPackages, uploadedPdfs, displayPriceString, setIsModalOpen } =
+const Cart = ({
+	smallScreen,
+	onProceedToPayment,
+	setIsProcessing,
+	setCurrentlyUploading,
+}: Props) => {
+	const { cartPackages, uploadedPdfs, displayPriceString } =
 		useContext(CartContext);
-	const checkFormValidity = () => {
-		const form = formRef.current;
-		const formValid = form?.checkValidity();
-		if (!formValid) window.alert("Please check your submission details.");
-		return formValid;
-	};
+	const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+	const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
-	const checkCartValidity = () => {
+	/**
+	 * Upload all PDFs and create the order in a single request.
+	 * Files are sent as multipart form data — the server handles
+	 * R2 upload, page counting, and pricing.
+	 */
+	const handleOrderNow = useCallback(async () => {
 		const cartValid =
 			(cartPackages && cartPackages.length !== 0) ||
 			(uploadedPdfs && uploadedPdfs.length !== 0);
-		if (!cartValid) window.alert("Please choose a package or upload a pdf.");
-		return cartValid;
-	};
+		if (!cartValid) {
+			window.alert("Please choose a package or upload a pdf.");
+			return;
+		}
+
+		if (!isAuthenticated) {
+			login();
+			return;
+		}
+
+		setIsCreatingOrder(true);
+		setIsProcessing(true);
+		setCurrentlyUploading(
+			uploadedPdfs.map((pdf) => ({ name: pdf.displayName, percent: 0 })),
+		);
+
+		try {
+			const formData = new FormData();
+
+			// Append each PDF file
+			const metadata = uploadedPdfs.map((pdf) => ({
+				copies: pdf.getQuantity(),
+				colorMode: pdf.isColor ? "COLOR" : "BW",
+			}));
+
+			for (const pdf of uploadedPdfs) {
+				formData.append("files", pdf.file);
+			}
+
+			formData.append("metadata", JSON.stringify(metadata));
+
+			const orderRes = await fetch("/api/shop/orders", {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!orderRes.ok) {
+				const err = await orderRes.json();
+				throw new Error(err.error || "Failed to create order.");
+			}
+
+			const { order } = await orderRes.json();
+
+			setCurrentlyUploading(
+				uploadedPdfs.map((pdf) => ({ name: pdf.displayName, percent: 100 })),
+			);
+
+			setIsProcessing(false);
+			setCurrentlyUploading([]);
+			onProceedToPayment(order.id, order.orderNumber);
+		} catch (error) {
+			setIsProcessing(false);
+			setCurrentlyUploading([]);
+			setIsCreatingOrder(false);
+			window.alert(
+				error instanceof Error ? error.message : "Something went wrong.",
+			);
+		}
+	}, [
+		uploadedPdfs,
+		cartPackages,
+		cartPackages.length,
+		isAuthenticated,
+		login,
+		onProceedToPayment,
+		setIsProcessing,
+		setCurrentlyUploading,
+	]);
 
 	return (
 		<Box
@@ -162,19 +239,19 @@ const Cart = ({ smallScreen, formRef }: Props) => {
 			position={smallScreen ? "relative" : "sticky"}
 			padding="1rem .5rem"
 			border="1px"
+			borderRadius="8px"
 			color="brown.900"
 			borderColor="brown.200"
 			top={smallScreen ? "0" : "5rem"}
 		>
 			<Box display="flex" flexDir="column">
 				<Heading fontSize="1.5rem" as="p">
-					Your Items
+					🛒 Your Items
 				</Heading>
 				<p>
 					click the <strong>X</strong> on the right of an item to remove
 				</p>
 				<List>
-					{false && <Text fontWeight="800">Packages</Text>}
 					<Divider marginBottom=".5rem" />
 					<CartItemContainer />
 					<PdfItemContainer />
@@ -183,15 +260,31 @@ const Cart = ({ smallScreen, formRef }: Props) => {
 							<strong>Estimated Price: ${displayPriceString}</strong>
 						</Text>
 					</ListItem>
-					<Button
-						variant="browned"
-						onClick={() => {
-							if (checkCartValidity() && checkFormValidity())
-								setIsModalOpen(true);
-						}}
-					>
-						Order Now
-					</Button>
+
+					{/* Auth-aware order button */}
+					{authLoading ? (
+						<Button variant="browned" isDisabled>
+							<Spinner size="sm" mr={2} /> Loading…
+						</Button>
+					) : isAuthenticated ? (
+						<Button
+							variant="browned"
+							onClick={handleOrderNow}
+							isLoading={isCreatingOrder}
+							loadingText="Creating order…"
+						>
+							Proceed to Payment
+						</Button>
+					) : (
+						<Box display="flex" flexDir="column" gap={2}>
+							<Button variant="browned" onClick={login}>
+								Sign in to Order
+							</Button>
+							<Text fontSize="xs" color="gray.500" textAlign="center">
+								Sign in with Google to proceed with your order
+							</Text>
+						</Box>
+					)}
 				</List>
 			</Box>
 		</Box>

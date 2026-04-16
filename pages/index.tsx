@@ -1,11 +1,9 @@
 import { Box, Divider, Heading } from "@chakra-ui/react";
-import type { SerializedEditorState } from "lexical";
+import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { MessengerChat } from "react-messenger-chat-plugin";
 import Footer from "../components/footer/Footer";
 import IntroAnimation from "../components/intro/IntroAnimation";
-import NoSsr from "../components/NoSsr";
 import NavBar from "../components/navbar/NavBar";
 import WhatNextDiv from "../components/whatnextdiv/WhatNextDiv";
 import { getPayloadClient } from "../lib/payload";
@@ -23,30 +21,9 @@ export async function getStaticProps() {
 			slug: "contact-info",
 		});
 
-		// Convert Lexical rich text to HTML at build time
-		const { convertLexicalToHTML } = await import(
-			"@payloadcms/richtext-lexical/html"
-		);
-
-		const sectionsWithHtml = await Promise.all(
-			sections.map(async (section) => {
-				let html = "";
-				if (section.content) {
-					html = await convertLexicalToHTML({
-						data: section.content as SerializedEditorState,
-					});
-				}
-				return {
-					id: section.id,
-					title: section.title,
-					html,
-				};
-			}),
-		);
-
 		return {
 			props: {
-				sections: sectionsWithHtml,
+				sections: JSON.parse(JSON.stringify(sections)),
 				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
 			},
 			revalidate: 60 * 60,
@@ -65,7 +42,7 @@ export async function getStaticProps() {
 type AboutSection = {
 	id: string;
 	title: string;
-	html: string;
+	content: Record<string, unknown>;
 };
 
 type ContactInfoData = {
@@ -177,11 +154,15 @@ By Students, For Students🚀💯"
 							}}
 						>
 							{sections.map((section) => (
-								<Box
-									key={section.id}
-									// biome-ignore lint/security/noDangerouslySetInnerHtml: Rich text HTML is generated server-side by Payload's Lexical converter
-									dangerouslySetInnerHTML={{ __html: section.html }}
-								/>
+								<Box key={section.id}>
+									{section.content && (
+										<RichText
+											data={
+												section.content as import("lexical").SerializedEditorState
+											}
+										/>
+									)}
+								</Box>
 							))}
 						</Box>
 					</Box>
@@ -191,15 +172,6 @@ By Students, For Students🚀💯"
 				</Box>
 				<Footer contactInfo={contactInfo} />
 			</Box>
-
-			<NoSsr>
-				<MessengerChat
-					pageId="104194185696145"
-					themeColor={""}
-					loggedInGreeting={""}
-					loggedOutGreeting={""}
-				/>
-			</NoSsr>
 		</>
 	);
 };

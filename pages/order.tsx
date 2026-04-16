@@ -4,17 +4,6 @@ import Head from "next/head";
 import NavBar from "../components/navbar/NavBar";
 import OrderContainer from "../components/ordercontainer/OrderContainer";
 export async function getStaticProps() {
-	/* TODO: renable after packages are back
-  let packages = await getPackages();
-  // return the posts
-  await Promise.all(
-    packages.data.map(async (pack) => {
-      const price = await findPrice(pack.default_price!.toString());
-      pack.price = price;
-    })
-  );
-  */
-
 	return {
 		props: {
 			packages: [], // packages,

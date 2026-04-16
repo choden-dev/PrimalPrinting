@@ -7,6 +7,12 @@ const ShopQuerySchema = z.object({
 	pages: z.string().regex(/^\d+$/, "Pages must be a number").optional(),
 });
 
+/**
+ * GET /api/shop?pages=42&isColor=false
+ *
+ * Returns the Stripe product + price for a given page count and colour mode.
+ * Used by the PdfOrder component to show pricing before checkout.
+ */
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,
@@ -16,7 +22,7 @@ export default async function handler(
 
 		const isColor = parsedQuery.isColor === "true";
 		const pages = parsedQuery.pages
-			? parseInt(parsedQuery.pages, 10)
+			? Number.parseInt(parsedQuery.pages, 10)
 			: undefined;
 
 		if (pages === undefined) {
