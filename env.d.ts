@@ -161,5 +161,13 @@ declare namespace NodeJS {
 		 * Shared secret to authenticate cron job requests (e.g. order expiry).
 		 */
 		CRON_SECRET: string;
+
+		/**
+		 * @env DISCORD_WEBHOOK_URL
+		 * Discord webhook URL for sending admin notifications (e.g. new bank
+		 * transfer submissions, pickup slot selections).
+		 * Create one via Discord → Server Settings → Integrations → Webhooks.
+		 */
+		DISCORD_WEBHOOK_URL?: string;
 	}
 }
