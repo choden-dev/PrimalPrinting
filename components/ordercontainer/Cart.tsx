@@ -148,7 +148,7 @@ const Cart = ({
 	setIsProcessing,
 	setCurrentlyUploading,
 }: Props) => {
-	const { cartPackages, uploadedPdfs, displayPriceString } =
+	const { cartPackages, uploadedPdfs, displayPriceString, persistCart } =
 		useContext(CartContext);
 	const { isAuthenticated, isLoading: authLoading, login } = useAuth();
 	const [isCreatingOrder, setIsCreatingOrder] = useState(false);
@@ -168,6 +168,8 @@ const Cart = ({
 		}
 
 		if (!isAuthenticated) {
+			// Persist uploaded files to IndexedDB before redirecting for OAuth
+			await persistCart();
 			login();
 			return;
 		}
@@ -226,6 +228,7 @@ const Cart = ({
 		cartPackages.length,
 		isAuthenticated,
 		login,
+		persistCart,
 		onProceedToPayment,
 		setIsProcessing,
 		setCurrentlyUploading,
@@ -277,7 +280,13 @@ const Cart = ({
 						</Button>
 					) : (
 						<Box display="flex" flexDir="column" gap={2}>
-							<Button variant="browned" onClick={login}>
+							<Button
+								variant="browned"
+								onClick={async () => {
+									await persistCart();
+									login();
+								}}
+							>
 								Sign in to Order
 							</Button>
 							<Text fontSize="xs" color="gray.500" textAlign="center">

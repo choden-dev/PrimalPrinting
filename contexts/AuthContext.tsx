@@ -1,8 +1,9 @@
 import type { Session } from "next-auth";
-import { SessionProvider, signOut, useSession } from "next-auth/react";
+import { signIn, SessionProvider, signOut, useSession } from "next-auth/react";
 import {
 	createContext,
 	type PropsWithChildren,
+	useCallback,
 	useContext,
 	useMemo,
 } from "react";
@@ -50,6 +51,14 @@ const AuthContext = createContext<CustomerSession>({
 function AuthContextInner({ children }: PropsWithChildren) {
 	const { data: session, status } = useSession();
 
+	const login = useCallback(() => {
+		// Use a full-page redirect for OAuth sign-in.
+		// Uploaded files are persisted to IndexedDB by the Cart before calling
+		// login(), and restored from IndexedDB when the page reloads after auth.
+		sessionStorage.setItem("auth-return-url", window.location.href);
+		signIn("google", { callbackUrl: "/auth/callback" });
+	}, []);
+
 	const value = useMemo<CustomerSession>(() => {
 		const isLoading = status === "loading";
 		const isAuthenticated = status === "authenticated" && !!session;
@@ -61,22 +70,10 @@ function AuthContextInner({ children }: PropsWithChildren) {
 			name: session?.user?.name ?? null,
 			email: session?.user?.email ?? null,
 			image: session?.user?.image ?? null,
-			login: () => {
-				// Open OAuth in a popup so the current page state (uploaded files) is preserved
-				const width = 500;
-				const height = 600;
-				const left = window.screenX + (window.outerWidth - width) / 2;
-				const top = window.screenY + (window.outerHeight - height) / 2;
-				const callbackUrl = encodeURIComponent("/auth/callback");
-				window.open(
-					`/api/auth/signin?callbackUrl=${callbackUrl}`,
-					"google-signin",
-					`width=${width},height=${height},left=${left},top=${top}`,
-				);
-			},
+			login,
 			logout: () => signOut({ callbackUrl: "/" }),
 		};
-	}, [session, status]);
+	}, [session, status, login]);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

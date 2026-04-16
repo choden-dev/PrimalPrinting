@@ -1,7 +1,13 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+	clearCartPdfs,
+	loadCartPdfs,
+	saveCartPdfs,
+	type StoredPdfItem,
+} from "../lib/cartStorage";
 import { getItemsWithBulkDiscount } from "../lib/utils";
 import type CartItem from "../types/models/CartItem";
-import type PdfCartItem from "../types/models/PdfCartItem";
+import PdfCartItem from "../types/models/PdfCartItem";
 
 type cartPackageOperation = (cartPackage: CartItem) => void;
 type cartPdfOperation = (cartPackage: PdfCartItem) => void;
@@ -21,6 +27,8 @@ interface ICartContext {
 	addUploadedPdf: cartPdfOperation;
 	updateUploadedPdf: cartPdfOperation;
 	removeUploadedPdf: cartPdfOperation;
+	/** Persist uploaded PDFs to IndexedDB (call before navigating away). */
+	persistCart: () => Promise<void>;
 }
 
 const defaultCartContext: ICartContext = {
@@ -36,6 +44,7 @@ const defaultCartContext: ICartContext = {
 	addUploadedPdf: (_cartPdf) => {},
 	updateUploadedPdf: (_cartPdf) => {},
 	removeUploadedPdf: (_cartPdf) => {},
+	persistCart: async () => {},
 };
 
 export const CartContext = createContext<ICartContext>(defaultCartContext);
@@ -66,6 +75,66 @@ export function CartContextProvider(
 	);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [hasDiscountApplied, setHasDiscountApplied] = useState<boolean>(false);
+
+	// Keep a ref to uploadedPdfs so persistCart always sees the latest value
+	const uploadedPdfsRef = useRef(uploadedPdfs);
+	uploadedPdfsRef.current = uploadedPdfs;
+
+	// Restore uploaded PDFs from IndexedDB on mount (e.g. after OAuth redirect)
+	useEffect(() => {
+		async function restore() {
+			try {
+				const stored = await loadCartPdfs();
+				if (stored.length === 0) return;
+
+				const restored = stored.map(
+					(item: StoredPdfItem) =>
+						new PdfCartItem(
+							item.id,
+							item.displayName,
+							item.quantity,
+							item.unitPrice,
+							item.priceId,
+							item.pages,
+							item.isColor,
+							item.file,
+							item.productId,
+						),
+				);
+
+				setUploadedPdfs(restored);
+				// Clear IndexedDB after successful restore
+				await clearCartPdfs();
+			} catch (err) {
+				console.error("Failed to restore cart from IndexedDB:", err);
+			}
+		}
+
+		restore();
+	}, []);
+
+	/**
+	 * Persist the current uploaded PDFs to IndexedDB.
+	 * Call this before navigating away (e.g. OAuth redirect) to preserve files.
+	 */
+	const persistCart = useCallback(async () => {
+		const pdfs = uploadedPdfsRef.current;
+		if (pdfs.length === 0) return;
+
+		const items: StoredPdfItem[] = pdfs.map((pdf) => ({
+			id: pdf.id,
+			displayName: pdf.displayName,
+			quantity: pdf.getQuantity(),
+			unitPrice: pdf.getDisplayPrice() / pdf.getQuantity(),
+			priceId: pdf.priceId,
+			pages: pdf.getPages(),
+			isColor: pdf.isColor,
+			file: pdf.file,
+			productId: pdf.productId,
+		}));
+
+		await saveCartPdfs(items);
+	}, []);
 
 	function addCartPackage(cartPackage: CartItem) {
 		if (alreadyInArray(cartPackages, cartPackage)) {
@@ -138,6 +207,7 @@ export function CartContextProvider(
 		displayPriceString,
 		addUploadedPdf,
 		removeUploadedPdf,
+		persistCart,
 	};
 
 	return <CartContext.Provider value={cartData} {...props} />;
