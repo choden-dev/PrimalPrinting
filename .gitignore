@@ -53,6 +53,5 @@ terraform/terraform.tfvars
 terraform/crash.log
 
 
-# OpenNext
-.open-next
+# Cloudflare
 .wrangler
