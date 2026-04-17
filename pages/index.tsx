@@ -8,7 +8,10 @@ import NavBar from "../components/navbar/NavBar";
 import WhatNextDiv from "../components/whatnextdiv/WhatNextDiv";
 import { getPayloadClient } from "../lib/payload";
 
-export async function getStaticProps() {
+export async function getServerSideProps({ res }: { res: import("http").ServerResponse }) {
+	// Cache at the CDN edge for 1 h, serve stale while revalidating for another 1 h
+	res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=3600");
+
 	try {
 		const payload = await getPayloadClient();
 
@@ -26,7 +29,6 @@ export async function getStaticProps() {
 				sections: JSON.parse(JSON.stringify(sections)),
 				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
 			},
-			revalidate: 60 * 60,
 		};
 	} catch (error) {
 		console.log(error);

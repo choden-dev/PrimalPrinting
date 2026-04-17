@@ -5,7 +5,10 @@ import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
 import { getPayloadClient } from "../lib/payload";
 
-export async function getStaticProps() {
+export async function getServerSideProps({ res }: { res: import("http").ServerResponse }) {
+	// Cache at the CDN edge for 24 h, serve stale while revalidating for another 24 h
+	res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=86400");
+
 	try {
 		const payload = await getPayloadClient();
 		const contactInfo = await payload.findGlobal({
@@ -15,7 +18,6 @@ export async function getStaticProps() {
 			props: {
 				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
 			},
-			revalidate: 24 * 60 * 60,
 		};
 	} catch (_error) {
 		console.log("could not fetch data");
