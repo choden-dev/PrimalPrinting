@@ -10,8 +10,8 @@ import { uploadBankTransferProof } from "../../../../lib/r2";
  * - `image` (JPEG/PNG/WebP file, max 10MB)
  * - `orderNumber` (string)
  *
- * The image is automatically downsized to max 1200px width and converted
- * to WebP at 70% quality to prevent abuse / save storage.
+ * The image is uploaded as-is (no server-side resizing — sharp is not
+ * available on Cloudflare Workers).
  *
  * Returns the R2 key to attach to the order.
  */
@@ -80,7 +80,11 @@ export async function POST(request: NextRequest) {
 		}
 
 		const buffer = Buffer.from(await image.arrayBuffer());
-		const proofKey = await uploadBankTransferProof(orderNumber, buffer);
+		const proofKey = await uploadBankTransferProof(
+			orderNumber,
+			buffer,
+			image.type,
+		);
 
 		return NextResponse.json({
 			success: true,
