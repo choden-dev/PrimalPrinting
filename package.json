@@ -70,12 +70,14 @@
 		"node": ">=20",
 		"pnpm": "^10.0.0"
 	},
+	"//cloudflare-workarounds": "jose is an explicit dep because payload uses it for JWT but pnpm doesn't hoist it for the OpenNext esbuild step. canvas is overridden with a local stub because pdfjs-dist optionally requires it (native addon) which breaks esbuild. See next.config.js and shims/canvas/index.js for more details.",
 	"packageManager": "pnpm@10.11.0",
 	"pnpm": {
 		"onlyBuiltDependencies": [
 			"esbuild",
 			"sharp"
 		],
+		"//overrides": "Needed for Cloudflare Workers deployment. canvas is a native Node.js addon required by pdfjs-dist that breaks esbuild bundling. See shims/canvas/index.js for details.",
 		"overrides": {
 			"canvas": "link:./shims/canvas"
 		}
