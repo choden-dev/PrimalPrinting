@@ -37,6 +37,7 @@
 		"framer-motion": "^6.5.1",
 		"googleapis": "^118.0.0",
 		"graphql": "^16.13.2",
+		"jose": "^5.10.0",
 		"lexical": "^0.43.0",
 		"multer": "^1.4.5-lts.1",
 		"next": "15.5.15",
