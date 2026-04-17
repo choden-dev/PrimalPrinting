@@ -26,6 +26,9 @@ importers:
       '@chakra-ui/react':
         specifier: ^2.2.4
         version: 2.2.4(@emotion/react@11.9.3(@babel/core@7.18.9)(@types/react@19.2.14)(react@19.2.5))(@emotion/styled@11.9.3(@babel/core@7.18.9)(@emotion/react@11.9.3(@babel/core@7.18.9)(@types/react@19.2.14)(react@19.2.5))(@types/react@19.2.14)(react@19.2.5))(@types/react@19.2.14)(framer-motion@6.5.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@cloudflare/containers':
+        specifier: ^0.3.2
+        version: 0.3.2
       '@emotion/react':
         specifier: ^11.9.3
         version: 11.9.3(@babel/core@7.18.9)(@types/react@19.2.14)(react@19.2.5)
@@ -973,6 +976,9 @@ packages:
     peerDependencies:
       '@chakra-ui/system': '>=2.0.0-next.0'
       react: '>=18'
+
+  '@cloudflare/containers@0.3.2':
+    resolution: {integrity: sha512-hWobJrpXCgFJ/HYii6E49eegnnlUDWGacjLd0Fb6nQwTD005+T2eHUPI6qOEq9KPJOd7xTWkhkuXEKxDFvfyqQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@cloudflare/containers/-/containers-0.3.2.tgz}
 
   '@cloudflare/kv-asset-handler@0.4.2':
     resolution: {integrity: sha512-SIOD2DxrRRwQ+jgzlXCqoEFiKOFqaPjhnNTGKXSRLvp1HiOvapLaFG2kEr9dYQTYe8rKrd9uvDUzmAITeNyaHQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@cloudflare/kv-asset-handler/-/kv-asset-handler-0.4.2.tgz}
@@ -8063,6 +8069,8 @@ snapshots:
       '@chakra-ui/system': 2.2.2(@emotion/react@11.9.3(@babel/core@7.18.9)(@types/react@19.2.14)(react@19.2.5))(@emotion/styled@11.9.3(@babel/core@7.18.9)(@emotion/react@11.9.3(@babel/core@7.18.9)(@types/react@19.2.14)(react@19.2.5))(@types/react@19.2.14)(react@19.2.5))(react@19.2.5)
       '@chakra-ui/utils': 2.0.4
       react: 19.2.5
+
+  '@cloudflare/containers@0.3.2': {}
 
   '@cloudflare/kv-asset-handler@0.4.2': {}
 

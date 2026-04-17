@@ -20,6 +20,7 @@
 		"@aws-sdk/s3-request-presigner": "^3.1030.0",
 		"@chakra-ui/icons": "^2.0.4",
 		"@chakra-ui/react": "^2.2.4",
+		"@cloudflare/containers": "^0.3.2",
 		"@emotion/react": "^11.9.3",
 		"@emotion/styled": "^11.9.3",
 		"@opennextjs/cloudflare": "^1.19.1",

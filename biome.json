@@ -1,9 +1,9 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
 	"vcs": {
-		"enabled": false,
+		"enabled": true,
 		"clientKind": "git",
-		"useIgnoreFile": false
+		"useIgnoreFile": true
 	},
 	"formatter": {
 		"enabled": true,
@@ -32,20 +32,7 @@
 		}
 	},
 	"files": {
-		"includes": [
-			"**",
-			"!**/node_modules/**",
-			"!**/.next/**",
-			"!**/dist/**",
-			"!**/build/**",
-			"!**/coverage/**",
-			"!**/.git/**",
-			"!**/.vscode/**",
-			"!**/.idea/**",
-			"!**/.DS_Store",
-			"!**/Thumbs.db",
-			"!**/importMap.js"
-		],
+		"includes": ["**", "!**/importMap.js"],
 		"ignoreUnknown": true
 	}
 }

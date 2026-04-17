@@ -1,0 +1,44 @@
+# Dependencies (installed inside the container)
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+.open-next
+out
+dist
+
+# Environment / secrets
+.env
+.env.*
+.dev.vars
+
+# Version control
+.git
+.gitignore
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# CI/CD
+.github
+
+# Terraform
+terraform
+
+# Docker (don't send Dockerfile to build context)
+Dockerfile
+.dockerignore
+
+# Misc
+*.log
+*.tsbuildinfo
+coverage
