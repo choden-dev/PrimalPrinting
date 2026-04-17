@@ -5,7 +5,6 @@ node_modules
 
 # Build outputs
 .next
-.open-next
 out
 dist
 

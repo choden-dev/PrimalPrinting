@@ -14,12 +14,3 @@ const nextConfig = {
 };
 
 module.exports = withPayload(nextConfig);
-
-// OpenNext Cloudflare dev helper — only runs locally, harmless in Docker.
-if (process.env.NODE_ENV !== "production") {
-	import("@opennextjs/cloudflare")
-		.then((m) => m.initOpenNextCloudflareForDev())
-		.catch(() => {
-			// Not available when running in Docker — safe to ignore.
-		});
-}
