@@ -1,6 +1,8 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
+	// Minify the worker bundle to reduce compressed size (~7.3MB → ~6.4MB gzipped)
+	"minify": true,
 	"name": "primalprinting",
 	"compatibility_date": "2026-04-16",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
