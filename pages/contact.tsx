@@ -1,9 +1,9 @@
 import { Box, Heading, Stack, Text } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { getPayloadClient } from "@/lib/payload";
 import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
-import { getPayloadClient } from "@/lib/payload";
 
 export async function getServerSideProps({
 	res,

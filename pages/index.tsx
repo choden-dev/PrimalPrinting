@@ -2,11 +2,11 @@ import { Box, Divider, Heading } from "@chakra-ui/react";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { getPayloadClient } from "@/lib/payload";
 import Footer from "../components/footer/Footer";
 import IntroAnimation from "../components/intro/IntroAnimation";
 import NavBar from "../components/navbar/NavBar";
 import WhatNextDiv from "../components/whatnextdiv/WhatNextDiv";
-import { getPayloadClient } from "@/lib/payload";
 
 export async function getServerSideProps({
 	res,
