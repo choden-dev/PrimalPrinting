@@ -72,10 +72,7 @@ export default function OrderSteps({
 					setOrderDetails(order);
 
 					// If order is already PAID, jump to pickup
-					if (
-						order.status === OrderStatus.PAID &&
-						step === OrderStep.PAYMENT
-					) {
+					if (order.status === OrderStatus.PAID && step === OrderStep.PAYMENT) {
 						onPaymentSuccess();
 					}
 					// If already has a timeslot, jump to complete
