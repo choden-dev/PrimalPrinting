@@ -54,3 +54,4 @@ terraform/crash.log
 
 # OpenNext
 .open-next
+.wrangler

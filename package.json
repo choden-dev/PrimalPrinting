@@ -75,6 +75,9 @@
 		"onlyBuiltDependencies": [
 			"esbuild",
 			"sharp"
-		]
+		],
+		"overrides": {
+			"canvas": "link:./shims/canvas"
+		}
 	}
 }

@@ -6,7 +6,7 @@ const nextConfig = {
 	typescript: {
 		ignoreBuildErrors: false,
 	},
-	serverExternalPackages: ["jose", "canvas"],
+	serverExternalPackages: ["jose", "pdfjs-dist"],
 };
 
 module.exports = withPayload(nextConfig);
