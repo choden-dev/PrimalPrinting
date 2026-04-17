@@ -3,11 +3,18 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
-import { getPayloadClient } from "../lib/payload";
+import { getPayloadClient } from "@/lib/payload";
 
-export async function getServerSideProps({ res }: { res: import("http").ServerResponse }) {
+export async function getServerSideProps({
+	res,
+}: {
+	res: import("http").ServerResponse;
+}) {
 	// Cache at the CDN edge for 24 h, serve stale while revalidating for another 24 h
-	res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=86400");
+	res.setHeader(
+		"Cache-Control",
+		"public, s-maxage=86400, stale-while-revalidate=86400",
+	);
 
 	try {
 		const payload = await getPayloadClient();
