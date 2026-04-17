@@ -6,6 +6,7 @@ const nextConfig = {
 	typescript: {
 		ignoreBuildErrors: false,
 	},
+	serverExternalPackages: ["jose"],
 };
 
 module.exports = withPayload(nextConfig);
