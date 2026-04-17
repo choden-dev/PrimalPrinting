@@ -13,8 +13,8 @@ import { Container, getContainer } from "@cloudflare/containers";
 export class PrimalPrinting extends Container {
 	defaultPort = 3000;
 
-		// Called when a new container instance starts — use to pass secrets
-		// and env vars from the Worker environment into the container.
+	// Called when a new container instance starts — use to pass secrets
+	// and env vars from the Worker environment into the container.
 	envVars = {
 		NODE_ENV: "production",
 		PORT: "3000",
