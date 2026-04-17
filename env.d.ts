@@ -114,5 +114,19 @@ declare namespace NodeJS {
 		 * Create one via Discord → Server Settings → Integrations → Webhooks.
 		 */
 		DISCORD_WEBHOOK_URL?: string;
+
+		// ── Public / client-side config ──────────────────────────────────
+		/**
+		 * @env NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT
+		 * Minimum number of items required to trigger a discount.
+		 * Defaults to "2" in application code.
+		 */
+		NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT?: string;
+		/**
+		 * @env NEXT_PUBLIC_DISCOUNT_PERCENT
+		 * Discount percentage applied when the minimum items threshold is met.
+		 * Defaults to "0" in application code.
+		 */
+		NEXT_PUBLIC_DISCOUNT_PERCENT?: string;
 	}
 }

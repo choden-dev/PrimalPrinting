@@ -36,14 +36,20 @@ export class PrimalPrinting extends Container {
 		R2_ACCESS_KEY_ID: env.R2_ACCESS_KEY_ID ?? "",
 		R2_SECRET_ACCESS_KEY: env.R2_SECRET_ACCESS_KEY ?? "",
 		R2_PUBLIC_URL: env.R2_PUBLIC_URL ?? "",
+		R2_STAGING_BUCKET: env.R2_STAGING_BUCKET ?? "",
+		R2_PERMANENT_BUCKET: env.R2_PERMANENT_BUCKET ?? "",
 		// Stripe
 		STRIPE_PRIVATE_KEY: env.STRIPE_PRIVATE_KEY ?? "",
 		STRIPE_WEBHOOK_SECRET: env.STRIPE_WEBHOOK_SECRET ?? "",
+		NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+			env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
 		// Email
 		GMAIL_USER: env.GMAIL_USER ?? "",
 		GMAIL_PASS: env.GMAIL_PASS ?? "",
 		// Discord
 		DISCORD_WEBHOOK_URL: env.DISCORD_WEBHOOK_URL ?? "",
+		// Cron
+		CRON_SECRET: env.CRON_SECRET ?? "",
 		// Public env vars (baked into client bundle at build time, but
 		// still useful for server-side code that reads them)
 		NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT:
