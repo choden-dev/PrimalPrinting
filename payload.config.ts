@@ -21,13 +21,13 @@ const dirname = path.dirname(filename);
 // Wrap in an async IIFE so that process.env is read at resolution time, not at
 // module-load time. On Cloudflare Workers, env vars (secrets set via the
 // dashboard) are only injected into process.env when the first request arrives.
-// A bare `buildConfig({ url: process.env.MONGODB_URI })` would capture an empty
+// A bare `buildConfig({ url: process.env.DATABASE_URI })` would capture an empty
 // string because the module is evaluated before any request triggers env setup.
 export default (async () =>
 	buildConfig({
 		secret: process.env.PAYLOAD_SECRET || "CHANGE-ME-IN-PRODUCTION",
 		db: mongooseAdapter({
-			url: process.env.DATABASE_URI || process.env.MONGODB_URI || "",
+			url: process.env.DATABASE_URI || "",
 			connectOptions: {
 				// Prevent indefinite hangs on Cloudflare Workers (stateless runtime).
 				// Without these, a slow or unreachable MongoDB will cause the Worker
