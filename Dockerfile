@@ -32,6 +32,14 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Placeholders for NEXT_PUBLIC_* vars — Next.js inlines these into the client
+# bundle at build time. The entrypoint script (docker-entrypoint.sh) replaces
+# them with real values at container startup, keeping the image env-agnostic.
+ENV NEXT_PUBLIC_BASE_URL="__NEXT_PUBLIC_BASE_URL__"
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__"
+ENV NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT="__NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT__"
+ENV NEXT_PUBLIC_DISCOUNT_PERCENT="__NEXT_PUBLIC_DISCOUNT_PERCENT__"
+
 RUN pnpm build
 
 
@@ -56,8 +64,14 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Entrypoint script that replaces NEXT_PUBLIC_* placeholders in the
+# compiled client JS with real env var values at container startup.
+COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 USER nextjs
 
 EXPOSE 3000
 
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]
