@@ -80,7 +80,11 @@ export async function POST(request: NextRequest) {
 		}
 
 		const buffer = Buffer.from(await image.arrayBuffer());
-		const proofKey = await uploadBankTransferProof(orderNumber, buffer, image.type);
+		const proofKey = await uploadBankTransferProof(
+			orderNumber,
+			buffer,
+			image.type,
+		);
 
 		return NextResponse.json({
 			success: true,
