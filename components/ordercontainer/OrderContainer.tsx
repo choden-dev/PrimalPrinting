@@ -94,6 +94,11 @@ const OrderContainerInner = () => {
 				const data = await res.json();
 				const order = data.order;
 
+				if (!order?.status) {
+					setResumeChecked(true);
+					return;
+				}
+
 				if (order.status === OrderStatus.EXPIRED) {
 					// Can't resume expired orders
 					setResumeChecked(true);

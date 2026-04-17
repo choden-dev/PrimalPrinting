@@ -22,6 +22,14 @@ export default buildConfig({
 	secret: process.env.PAYLOAD_SECRET || "CHANGE-ME-IN-PRODUCTION",
 	db: mongooseAdapter({
 		url: process.env.DATABASE_URI || process.env.MONGODB_URI || "",
+		connectOptions: {
+			// Prevent indefinite hangs on Cloudflare Workers (stateless runtime).
+			// Without these, a slow or unreachable MongoDB will cause the Worker
+			// to hang until Cloudflare cancels the request.
+			serverSelectionTimeoutMS: 5000,
+			connectTimeoutMS: 5000,
+			socketTimeoutMS: 10000,
+		},
 	}),
 	editor: lexicalEditor(),
 	collections: [Users, Customers, Orders, Timeslots, AboutSections, Media],

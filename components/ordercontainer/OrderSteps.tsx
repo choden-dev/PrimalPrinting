@@ -66,11 +66,14 @@ export default function OrderSteps({
 				const res = await fetch(`/api/shop/${orderId}`);
 				if (res.ok) {
 					const data = await res.json();
-					setOrderDetails(data.order);
+					const order = data.order;
+					if (!order?.status) return;
+
+					setOrderDetails(order);
 
 					// If order is already PAID, jump to pickup
 					if (
-						data.order.status === OrderStatus.PAID &&
+						order.status === OrderStatus.PAID &&
 						step === OrderStep.PAYMENT
 					) {
 						onPaymentSuccess();
@@ -81,7 +84,7 @@ export default function OrderSteps({
 							OrderStatus.AWAITING_PICKUP,
 							OrderStatus.PRINTED,
 							OrderStatus.PICKED_UP,
-						].includes(data.order.status) &&
+						].includes(order.status) &&
 						step !== OrderStep.COMPLETE
 					) {
 						onPickupConfirmed();
@@ -102,7 +105,7 @@ export default function OrderSteps({
 				const res = await fetch(`/api/shop/${orderId}`);
 				if (res.ok) {
 					const data = await res.json();
-					if (data.order.status === OrderStatus.PAID) {
+					if (data.order?.status === OrderStatus.PAID) {
 						clearInterval(interval);
 						setWaitingForStripe(false);
 						onPaymentSuccess();
