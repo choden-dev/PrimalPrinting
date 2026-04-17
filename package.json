@@ -22,7 +22,6 @@
 		"@chakra-ui/react": "^2.2.4",
 		"@emotion/react": "^11.9.3",
 		"@emotion/styled": "^11.9.3",
-		"@img/sharp-wasm32": "^0.34.5",
 		"@opennextjs/cloudflare": "^1.19.1",
 		"@payloadcms/db-mongodb": "^3.82.1",
 		"@payloadcms/next": "^3.82.1",
@@ -51,7 +50,6 @@
 		"react": "19.2.5",
 		"react-dom": "19.2.5",
 		"react-messenger-chat-plugin": "^3.0.5",
-		"sharp": "^0.34.5",
 		"stripe": "^12.1.1",
 		"tsx": "^4.20.3",
 		"zod": "^4.0.5"
@@ -75,8 +73,7 @@
 	"packageManager": "pnpm@10.11.0",
 	"pnpm": {
 		"onlyBuiltDependencies": [
-			"esbuild",
-			"sharp"
+			"esbuild"
 		],
 		"//overrides": "Needed for Cloudflare Workers deployment. canvas is a native Node.js addon required by pdfjs-dist that breaks esbuild bundling. See shims/canvas/index.js for details.",
 		"overrides": {

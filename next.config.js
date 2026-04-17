@@ -13,9 +13,7 @@ const nextConfig = {
 	// - jose: used by payload for JWT auth (auth/operations/me.js, auth/strategies/jwt.js)
 	// - pdfjs-dist: only used client-side, but gets traced into server bundle where
 	//   it tries to require("canvas") which is a native addon incompatible with Workers
-	// - sharp: native image processing addon used by payload — can't be bundled by esbuild.
-	//   Externalized so the build succeeds; at runtime on Workers it may fall back gracefully.
-	serverExternalPackages: ["jose", "pdfjs-dist", "sharp"],
+	serverExternalPackages: ["jose", "pdfjs-dist"],
 };
 
 module.exports = withPayload(nextConfig);

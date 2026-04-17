@@ -7,7 +7,8 @@ import {
 	S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import sharp from "sharp";
+// sharp removed — native C++ addon incompatible with Cloudflare Workers.
+// Bank transfer proof images are uploaded without server-side resizing.
 
 // ── S3-compatible client (shared across all R2 buckets) ──────────────────
 
@@ -101,16 +102,13 @@ export async function uploadToStaging(
 export async function uploadBankTransferProof(
 	orderNumber: string,
 	imageBuffer: Buffer | Uint8Array,
+	contentType = "image/jpeg",
 ): Promise<string> {
 	const key = generateProofKey(orderNumber);
 
-	// Downsize & convert to WebP
-	const processed = await sharp(imageBuffer)
-		.resize({ width: 1200, withoutEnlargement: true })
-		.webp({ quality: 70 })
-		.toBuffer();
-
-	await uploadToStaging(key, processed, "image/webp");
+	// Previously used sharp to resize/convert to WebP, but sharp's native
+	// bindings are incompatible with Cloudflare Workers. Upload original instead.
+	await uploadToStaging(key, imageBuffer, contentType);
 	return key;
 }
 

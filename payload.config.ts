@@ -4,7 +4,8 @@ import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
-import sharp from "sharp";
+// sharp removed — native C++ addon incompatible with Cloudflare Workers.
+// Images are stored at original size in R2 and served via presigned URLs.
 import { AboutSections } from "./collections/AboutSections";
 import { Customers } from "./collections/Customers";
 import { Media } from "./collections/Media";
@@ -25,7 +26,6 @@ export default buildConfig({
 	editor: lexicalEditor(),
 	collections: [Users, Customers, Orders, Timeslots, AboutSections, Media],
 	globals: [ContactInfo, BankDetails],
-	sharp,
 	plugins: [
 		...(process.env.R2_S3_ENDPOINT
 			? [
