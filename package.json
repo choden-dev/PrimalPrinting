@@ -22,6 +22,7 @@
 		"@chakra-ui/react": "^2.2.4",
 		"@emotion/react": "^11.9.3",
 		"@emotion/styled": "^11.9.3",
+		"@img/sharp-wasm32": "^0.34.5",
 		"@opennextjs/cloudflare": "^1.19.1",
 		"@payloadcms/db-mongodb": "^3.82.1",
 		"@payloadcms/next": "^3.82.1",

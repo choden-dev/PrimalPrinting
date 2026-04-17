@@ -32,6 +32,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.9.3
         version: 11.9.3(@babel/core@7.18.9)(@emotion/react@11.9.3(@babel/core@7.18.9)(@types/react@19.2.14)(react@19.2.5))(@types/react@19.2.14)(react@19.2.5)
+      '@img/sharp-wasm32':
+        specifier: ^0.34.5
+        version: 0.34.5
       '@opennextjs/cloudflare':
         specifier: ^1.19.1
         version: 1.19.1(next@15.5.15(@babel/core@7.18.9)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(sass@1.77.4))(wrangler@4.83.0)
@@ -8154,8 +8157,7 @@ snapshots:
 
   '@emnapi/runtime@1.9.2':
     dependencies:
-      tslib: 2.4.0
-    optional: true
+      tslib: 2.8.1
 
   '@emnapi/wasi-threads@1.2.1':
     dependencies:
@@ -9047,7 +9049,6 @@ snapshots:
   '@img/sharp-wasm32@0.34.5':
     dependencies:
       '@emnapi/runtime': 1.9.2
-    optional: true
 
   '@img/sharp-win32-arm64@0.34.5':
     optional: true
@@ -9295,7 +9296,7 @@ snapshots:
   '@motionone/easing@10.13.1':
     dependencies:
       '@motionone/utils': 10.13.1
-      tslib: 2.4.0
+      tslib: 2.8.1
 
   '@motionone/generators@10.13.1':
     dependencies:
@@ -11716,7 +11717,7 @@ snapshots:
 
   focus-lock@0.11.2:
     dependencies:
-      tslib: 2.4.0
+      tslib: 2.8.1
 
   focus-trap@7.5.4:
     dependencies:
