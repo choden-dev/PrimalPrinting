@@ -20,14 +20,14 @@ export class PrimalPrinting extends Container {
 		PORT: "3000",
 		HOSTNAME: "0.0.0.0",
 		// Database
-		DATABASE_URI: env.DATABASE_URI ?? env.MONGODB_URI ?? "",
-		MONGODB_URI: env.MONGODB_URI ?? env.DATABASE_URI ?? "",
+		DATABASE_URI: env.DATABASE_URI ?? "",
+		MONGODB_URI: env.DATABASE_URI ?? "",
 		// Payload CMS
 		PAYLOAD_SECRET: env.PAYLOAD_SECRET ?? "",
-		BASE_URL: env.BASE_URL ?? "",
+		NEXT_PUBLIC_BASE_URL: env.NEXT_PUBLIC_BASE_URL ?? "",
 		// Auth
 		NEXTAUTH_SECRET: env.NEXTAUTH_SECRET ?? "",
-		NEXTAUTH_URL: env.NEXTAUTH_URL ?? env.BASE_URL ?? "",
+		NEXTAUTH_URL: env.NEXT_PUBLIC_BASE_URL ?? "",
 		GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID ?? "",
 		GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET ?? "",
 		// R2 / S3 storage

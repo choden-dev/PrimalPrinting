@@ -4,10 +4,10 @@ declare namespace NodeJS {
 		GMAIL_USER: string;
 		GMAIL_PASS: string;
 		/**
-		 * @env BASE_URL
+		 * @env NEXT_PUBLIC_BASE_URL
 		 * The base URL of your application (e.g., https://yourdomain.com).
 		 */
-		BASE_URL: string;
+		NEXT_PUBLIC_BASE_URL: string;
 		/**
 		 * @env DATABASE_URI
 		 * MongoDB connection string used by Payload CMS. Obtain from MongoDB Atlas or your MongoDB server.
@@ -62,7 +62,7 @@ declare namespace NodeJS {
 		/**
 		 * @env NEXTAUTH_URL
 		 * Canonical URL of the site. Used by NextAuth for callbacks.
-		 * e.g. https://yourdomain.com
+		 * Derived from NEXT_PUBLIC_BASE_URL — do not set separately.
 		 */
 		NEXTAUTH_URL: string;
 		/**
