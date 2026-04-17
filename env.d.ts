@@ -20,56 +20,6 @@ declare namespace NodeJS {
 		 */
 		PAYLOAD_SECRET: string;
 		/**
-		 * @env type
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		type: string;
-		/**
-		 * @env project_id
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		project_id: string;
-		/**
-		 * @env private_key_id
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		private_key_id: string;
-		/**
-		 * @env private_key
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		private_key: string;
-		/**
-		 * @env client_email
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		client_email: string;
-		/**
-		 * @env client_id
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		client_id: string;
-		/**
-		 * @env auth_uri
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		auth_uri: string;
-		/**
-		 * @env token_uri
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		token_uri: string;
-		/**
-		 * @env auth_provider_x509_cert_url
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		auth_provider_x509_cert_url: string;
-		/**
-		 * @env client_x509_cert_url
-		 * Google service account field. Obtain from your Google Cloud service account JSON.
-		 */
-		client_x509_cert_url: string;
-		/**
 		 * @env R2_BUCKET
 		 * Cloudflare R2 bucket name for Payload CMS media uploads.
 		 */
