@@ -1,22 +1,40 @@
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, FormControl, Heading, Input, Text } from "@chakra-ui/react";
-import * as pdfjs from "pdfjs-dist";
+import type * as pdfjsTypes from "pdfjs-dist";
 import type React from "react";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import PdfCartItem from "../../types/models/PdfCartItem";
 import UploadCard from "../uploadcard/UploadCard";
 
-// solution from https://github.com/wojtekmaj/react-pdf/issues/321
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
 const DEFAULT_IS_COLOR = false;
+
+/**
+ * Lazily load pdfjs-dist on the client only.
+ * pdfjs-dist relies on browser APIs and cannot run on Cloudflare Workers
+ * during SSR — importing it at module scope causes a TypeError.
+ */
+let pdfjsPromise: Promise<typeof pdfjsTypes> | null = null;
+function getPdfjs(): Promise<typeof pdfjsTypes> {
+	if (!pdfjsPromise) {
+		pdfjsPromise = import("pdfjs-dist").then((pdfjs) => {
+			pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+			return pdfjs;
+		});
+	}
+	return pdfjsPromise;
+}
 
 const PdfOrder = () => {
 	const { uploadedPdfs, addUploadedPdf, removeUploadedPdf, updateUploadedPdf } =
 		useContext(CartContext);
 	const uploadZone = useRef(null);
 	const defaultUploadZone = useRef<HTMLInputElement>(null);
+
+	// Eagerly start loading pdfjs when component mounts (client-side only)
+	useEffect(() => {
+		getPdfjs();
+	}, []);
 
 	const handleColorChange = async (option: boolean, toFind: PdfCartItem) => {
 		const idx = uploadedPdfs.findIndex(
@@ -52,9 +70,9 @@ const PdfOrder = () => {
 				if (uploaded.findIndex((f) => f.displayName === file.name) === -1) {
 					const src = URL.createObjectURL(file);
 					let pages: number = -1;
-					pdfjs
-						.getDocument(src)
-						.promise.then((doc) => {
+					getPdfjs()
+						.then((pdfjs) => pdfjs.getDocument(src).promise)
+						.then((doc) => {
 							pages = doc.numPages;
 							fetch(
 								`/api/shop?pages=${pages}&isColor=${DEFAULT_IS_COLOR}`,
