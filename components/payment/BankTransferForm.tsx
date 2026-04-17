@@ -271,7 +271,6 @@ export function BankTransferForm({
 
 				{preview && (
 					<div style={{ marginTop: "12px", textAlign: "center" }}>
-						tttttt
 						{/* biome-ignore lint/performance/noImgElement: Client-side preview of user-selected file */}
 						<img
 							src={preview}
