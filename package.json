@@ -9,9 +9,7 @@
 		"lint": "next lint",
 		"generate:types": "payload generate:types",
 		"seed": "tsx seed.ts",
-		"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-		"upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+		"deploy": "wrangler deploy",
 		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
 	},
 	"dependencies": {
@@ -23,7 +21,6 @@
 		"@cloudflare/containers": "^0.3.2",
 		"@emotion/react": "^11.9.3",
 		"@emotion/styled": "^11.9.3",
-		"@opennextjs/cloudflare": "^1.19.1",
 		"@payloadcms/db-mongodb": "^3.82.1",
 		"@payloadcms/next": "^3.82.1",
 		"@payloadcms/richtext-lexical": "^3.82.1",
@@ -70,7 +67,7 @@
 		"node": ">=20",
 		"pnpm": "^10.0.0"
 	},
-	"//cloudflare-workarounds": "jose is an explicit dep because payload uses it for JWT but pnpm doesn't hoist it for the OpenNext esbuild step. canvas is overridden with a local stub because pdfjs-dist optionally requires it (native addon) which breaks esbuild. See next.config.js and shims/canvas/index.js for more details.",
+	"//cloudflare-workarounds": "jose is an explicit dep because payload uses it for JWT but pnpm doesn't hoist it. canvas is overridden with a local stub because pdfjs-dist optionally requires it (native addon) which breaks the build. See shims/canvas/index.js for details.",
 	"packageManager": "pnpm@10.11.0",
 	"pnpm": {
 		"onlyBuiltDependencies": [
