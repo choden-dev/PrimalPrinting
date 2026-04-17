@@ -49,16 +49,15 @@ export class PrimalPrinting extends Container {
 			// still useful for server-side code that reads them)
 			NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT:
 				env.NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT ?? "2",
-			NEXT_PUBLIC_DISCOUNT_PERCENT:
-				env.NEXT_PUBLIC_DISCOUNT_PERCENT ?? "10",
-		}
+			NEXT_PUBLIC_DISCOUNT_PERCENT: env.NEXT_PUBLIC_DISCOUNT_PERCENT ?? "10",
+		};
 	}
 }
 
 export default {
 	async fetch(request, env) {
 		const url = new URL(request.url);
-		const id = url.searchParams.get('id') || 'singleton';
+		const id = url.searchParams.get("id") || "singleton";
 		// Get the container instance for the given session ID
 		const containerInstance = getContainer(env.APP, id);
 		// Pass the request to the container instance on its default port
