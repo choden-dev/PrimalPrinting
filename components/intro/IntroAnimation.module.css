@@ -24,6 +24,26 @@
 
 .glowing_image {
 	animation: glow 3s infinite;
+	/* Egg-shaped (elliptical) feathered edge: fully opaque in the middle,
+	   smoothly fading to transparent toward the edges.
+	   The ellipse is taller than it is wide, giving it an "egg" feel.
+	   The mask is sized smaller than the element (60% × 70%) so the fade
+	   completes well within the image bounds — this prevents the column
+	   boundary on the right from chopping the feather off. */
+	-webkit-mask-image: radial-gradient(
+		ellipse 60% 70% at 50% 50%,
+		rgba(0, 0, 0, 1) 55%,
+		rgba(0, 0, 0, 0) 100%
+	);
+	mask-image: radial-gradient(
+		ellipse 60% 70% at 50% 50%,
+		rgba(0, 0, 0, 1) 55%,
+		rgba(0, 0, 0, 0) 100%
+	);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
 }
 
 .landing_container {
@@ -33,6 +53,7 @@
 	grid-template-columns: 1fr 1fr;
 	justify-content: center;
 }
+
 .landing_text {
 	animation: bob 5s infinite;
 	display: flex;

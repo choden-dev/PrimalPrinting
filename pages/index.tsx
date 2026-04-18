@@ -71,8 +71,8 @@ const Home: NextPage<PageProps> = ({ sections, contactInfo }) => {
 				<title>Primal Printing - All your printing needs</title>
 				<meta
 					name="description"
-					content="We're THE student run print shop at University of Auckland. 
-We offer affordable printing and binding services, providing students with course books and manuals for as little as $9.99 
+					content="We're a student-run print shop. 
+We offer affordable printing and binding services for as little as $9.99. 
 By Students, For Students💯🚀"
 				/>
 				<meta property="og:type" content="website" />
@@ -82,7 +82,7 @@ By Students, For Students💯🚀"
 				/>
 				<meta
 					property="og:description"
-					content="We're a student run print shop at University of Auckland, providing students with course books, lab manuals & more for a fraction of the usual cost!
+					content="We're a student-run print shop offering affordable printing and binding for a fraction of the usual cost!
 By Students, For Students🚀💯"
 				/>
 				<meta property="og:url" content="https://primalprinting.co.nz" />

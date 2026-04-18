@@ -20,7 +20,7 @@ const Order: NextPage = () => {
 				<meta property="og:title" content="Primal Printing - Order" />
 				<meta
 					property="og:description"
-					content="Want to get a coursebook printed? Upload it here!"
+					content="Want to get a pdf printed? Upload it here!"
 				/>
 				<meta property="og:url" content="https://primalprinting.co.nz/order" />
 				<meta
