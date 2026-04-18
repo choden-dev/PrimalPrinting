@@ -118,7 +118,7 @@ async function seed() {
 				"We all thought he was crazy until we found that several studies have reported that although reading and writing on a computer saves time because it is a faster process, taking notes by hand and reading from a physical book improves students' memorization, word recognition and conceptual understanding!",
 				"However, many students only receive digital files for their study material, and printing options can be expensive or limited.",
 				"Primal Printing provides an affordable printing and binding service for students and individuals who want high-quality physical copies of their own documents.",
-				"Upload your PDF (lecture notes, readings, study material, or course notes) and choose your print preferences! Orders are ready typically in just 1-2 days. We travel to hand out your printing at designated on-campus meeting points",
+				"Upload your PDF (lecture notes, readings, study material, or notes) and choose your print preferences! Orders are ready typically in just 1-2 days. We travel to hand out your printing at designated on-campus meeting points",
 				[
 					{
 						text: `Click "order now" to upload your file and get an automatic quote! Or email us your file at ${process.env.CONTACT_EMAIL || "our email"} with your name and colour preference, and we'll get back to you asap :)`,

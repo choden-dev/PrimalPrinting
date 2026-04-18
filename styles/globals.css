@@ -44,6 +44,13 @@ body {
 	src: url("/fonts/coffeematcha.ttf");
 }
 
+@font-face {
+	font-family: "Aloja";
+	src: url("/fonts/Aloja-Light.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
+}
+
 a {
 	color: inherit;
 	text-decoration: none;
