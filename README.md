@@ -111,7 +111,7 @@ for caching + parallelism. Common tasks:
 | `pnpm lint`              | `turbo run lint` → `biome check .`                        |
 | `pnpm dev`               | `turbo run dev` → `next dev`                              |
 
-Set `TURBO_TOKEN` / `TURBO_TEAMID` in CI to enable Turborepo Remote Cache.
+Set `TURBO_TOKEN` / `TURBO_TEAM` in CI to enable Turborepo Remote Cache.
 
 #### Cloudflare Workers Builds (`pnpm run deploy`)
 
@@ -147,7 +147,7 @@ In **Variables and Secrets → Build**, add:
 | `TURBO_API` (self-hosted only)      | Plain   | no       | Self-hosted Turbo cache URL                 |
 | `TURBO_REMOTE_CACHE_SIGNATURE_KEY`  | Secret  | no       | Turbo remote cache signing key              |
 
-`TURBO_TEAMID` is hardcoded in `wrangler.jsonc` (it's a public team identifier,
+`TURBO_TEAM` is hardcoded in `wrangler.jsonc` (it's a public Vercel team slug,
 not a secret) and flows into the docker build via `image_vars`, so there's no
 need to set it in the dashboard.
 

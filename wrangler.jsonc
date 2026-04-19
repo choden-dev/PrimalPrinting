@@ -53,7 +53,7 @@
 			// so the substitution always runs.
 			"image_vars": {
 				// — Hardcoded non-secrets ——————————————————————————————
-				"TURBO_TEAMID": "team_ATZPkCXiYj2fRXGwHYQ1Zd27",
+				"TURBO_TEAM": "primalprinting",
 				"NEXT_PUBLIC_ASSET_PREFIX": "https://assets.primalprinting.co.nz",
 				"R2_ASSETS_BUCKET": "primalprinting-assets",
 				// NEXT_PUBLIC_* discount config baked in at build time. Required
