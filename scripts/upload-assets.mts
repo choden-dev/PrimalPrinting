@@ -102,11 +102,22 @@ const ACCESS_KEY = requireEnv("R2_ACCESS_KEY_ID");
 const SECRET_KEY = requireEnv("R2_SECRET_ACCESS_KEY");
 
 // ── S3 client (R2 is S3-compatible) ────────────────────────────────────────
+//
+// `requestChecksumCalculation` and `responseChecksumValidation` are pinned
+// to "WHEN_REQUIRED" because Cloudflare R2 does not fully support the
+// `Content-Encoding: aws-chunked` + `x-amz-trailer` flexible-checksum
+// framing that aws-sdk-js v3 enables by default since v3.730. Without this
+// opt-out, every PutObject is rejected (streamed bodies surface as
+// "non-retryable streaming request" + UnknownError; smaller bodies surface
+// as 403 Access Denied), even though the credentials are correct.
+// See: https://developers.cloudflare.com/r2/examples/aws/aws-sdk-js-v3/
 const s3 = new S3Client({
 	region: "auto",
 	endpoint: ENDPOINT,
 	credentials: { accessKeyId: ACCESS_KEY, secretAccessKey: SECRET_KEY },
 	forcePathStyle: true,
+	requestChecksumCalculation: "WHEN_REQUIRED",
+	responseChecksumValidation: "WHEN_REQUIRED",
 });
 
 // ── Types ─────────────────────────────────────────────────────────────────
