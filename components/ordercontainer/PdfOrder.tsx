@@ -18,11 +18,21 @@ let pdfjsPromise: Promise<typeof pdfjsTypes> | null = null;
 function getPdfjs(): Promise<typeof pdfjsTypes> {
 	if (!pdfjsPromise) {
 		pdfjsPromise = import("pdfjs-dist").then((pdfjs) => {
-			// pdfjs-dist v4+ ships its worker as an ES module (.mjs). Loading
-			// the legacy `.js` URL silently 404s and every getDocument() call
-			// rejects with an opaque error — which the upload handler then
-			// surfaces as a misleading "invalid file type" message.
-			pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+			// pdfjs-dist v4+ ships its worker as an ES module (.mjs). We bundle
+			// it locally via `new URL(..., import.meta.url)` — webpack/Turbopack
+			// recognise this idiom, copy the worker into the build output, and
+			// hand back a same-origin asset URL.
+			//
+			// Why not the cdnjs.cloudflare.com URL we used before? It coupled
+			// the app to a third-party CDN that had to (a) be online, (b) have
+			// already published the exact pdfjs-dist version we depend on, and
+			// (c) not be blocked by a strict CSP. Any of those failing yields
+			// an opaque "Setting up fake worker failed" error and every PDF
+			// upload breaks. Bundling the worker eliminates all three risks.
+			pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+				"pdfjs-dist/build/pdf.worker.min.mjs",
+				import.meta.url,
+			).toString();
 			return pdfjs;
 		});
 	}
