@@ -8,7 +8,12 @@
 #      would treat e.g. "${TURBO_API}" as a real cache URL → broken cache.
 #   2. Logging the resolved (non-secret) build-time config so deploy logs
 #      are debuggable.
-#   3. Picking `build:headless` (which runs `next build` + the R2
+#   3. Bootstrapping a minimal `turbo` binary and running `turbo run
+#      install:run` so node_modules is restored from the remote cache when
+#      pnpm-lock.yaml hasn't changed (avoiding a multi-minute re-install
+#      on every Cloudflare Workers Build, where Docker layer cache is not
+#      persisted between deploys).
+#   4. Picking `build:headless` (which runs `next build` + the R2
 #      asset-upload script) when all R2 credentials are present, otherwise
 #      falling back to a plain `next build`.
 #
@@ -46,6 +51,43 @@ echo "  • R2_ASSETS_BUCKET=${R2_ASSETS_BUCKET:-<unset>}"
 echo "  • R2_S3_ENDPOINT=${R2_S3_ENDPOINT:-<unset>}"
 echo "  • R2_ACCESS_KEY_ID=$(mask "${R2_ACCESS_KEY_ID:-}")"
 echo "  • R2_SECRET_ACCESS_KEY=$(mask "${R2_SECRET_ACCESS_KEY:-}")"
+
+# ── Cached install via Turbo remote cache ─────────────────────────────────
+#
+# Bootstrap turbo independently of node_modules so we can ask Turbo to fetch
+# (or rebuild) node_modules itself. The bootstrap install lives in /tmp so
+# it doesn't pollute /app and Turbo always sees a clean state.
+#
+# `turbo run install:run` will:
+#   - hash the install:run inputs (pnpm-lock.yaml, package.json, etc.)
+#   - on a cache HIT: replay the cached node_modules into ./node_modules and
+#     skip running pnpm install entirely
+#   - on a cache MISS: invoke `pnpm install --frozen-lockfile`, then upload
+#     the resulting node_modules to the remote cache for future builds
+#
+# When TURBO_TOKEN is unset Turbo silently falls back to local cache only,
+# which on a fresh Cloudflare Workers Build runner is always a miss → it
+# just runs pnpm install as normal. So this is safe with or without the
+# remote cache being configured.
+echo "→ Bootstrapping turbo for cached install"
+mkdir -p /tmp/turbo-bootstrap
+cd /tmp/turbo-bootstrap
+# Pin to the same major as devDependencies.turbo in package.json. corepack
+# is already enabled by the Dockerfile, so `pnpm add` works without any
+# prior install in /app.
+pnpm add --silent --save-dev "turbo@^2.5.0" >/dev/null
+TURBO_BIN="/tmp/turbo-bootstrap/node_modules/.bin/turbo"
+cd /app
+
+if [ ! -x "$TURBO_BIN" ]; then
+	echo "✗ turbo bootstrap failed — falling back to direct pnpm install"
+	pnpm install --frozen-lockfile
+else
+	echo "→ Running turbo install:run (will hit remote cache when pnpm-lock.yaml is unchanged)"
+	# Use --output-logs=new-only so a cache hit shows the original install
+	# log (helpful when debugging) but a cache miss only shows new output.
+	"$TURBO_BIN" run install:run --output-logs=new-only
+fi
 
 if [ -n "${R2_ASSETS_BUCKET:-}" ] \
 	&& [ -n "${R2_ACCESS_KEY_ID:-}" ] \
