@@ -20,9 +20,7 @@
 				"NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
 				"NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT",
 				"NEXT_PUBLIC_DISCOUNT_PERCENT",
-				"NEXT_PUBLIC_ASSET_PREFIX",
-				"DATABASE_URI",
-				"PAYLOAD_SECRET"
+				"NEXT_PUBLIC_ASSET_PREFIX"
 			],
 			"inputs": [
 				"$TURBO_DEFAULT$",
@@ -35,13 +33,7 @@
 		},
 		"upload-assets:run": {
 			"dependsOn": ["build:next"],
-			"env": [
-				"NEXT_PUBLIC_ASSET_PREFIX",
-				"R2_ASSETS_BUCKET",
-				"R2_S3_ENDPOINT",
-				"R2_ACCESS_KEY_ID",
-				"R2_SECRET_ACCESS_KEY"
-			],
+			"cache": false,
 			"inputs": ["scripts/upload-assets.mts", ".next/static/**", "public/**"],
 			"outputs": [".next/asset-upload.manifest.json"]
 		},
