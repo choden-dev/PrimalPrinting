@@ -1,31 +1,21 @@
-# ── Stage 1: Install dependencies ─────────────────────────────────────────
-FROM node:22-slim AS deps
+# ── Stage 1: Build the application ───────────────────────────────────────
+#
+# We deliberately collapse install + build into a single stage so the
+# `pnpm install` step can be driven by Turbo's remote cache (see
+# `install:run` in turbo.json). Splitting install into its own Docker
+# stage only helps when Docker layer cache is preserved between builds —
+# which is NOT the case for Cloudflare Workers Builds. Turbo's remote
+# cache, by contrast, IS preserved, so we get a true "skip pnpm install
+# when the lockfile hasn't changed" path on every deploy.
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
 # Enable pnpm via corepack (matches packageManager in package.json)
 RUN corepack enable pnpm
 
-# Copy only the files pnpm needs to resolve packages
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* .npmrc* ./
-# Canvas shim referenced by pnpm.overrides — must exist during install
-COPY shims/ ./shims/
-
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
-
-
-# ── Stage 2: Build the application ───────────────────────────────────────
-FROM node:22-slim AS builder
-
-WORKDIR /app
-
-RUN corepack enable pnpm
-
-# Copy deps from stage 1
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy source code
+# Copy source code (includes package.json, pnpm-lock.yaml, shims/, turbo.json,
+# and everything else needed for both the cached install and the Next build).
 COPY . .
 
 # Next.js collects anonymous telemetry — disable in CI/Docker builds

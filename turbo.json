@@ -14,7 +14,19 @@
 		"middleware.ts"
 	],
 	"tasks": {
+		"install:run": {
+			"inputs": [
+				"pnpm-lock.yaml",
+				"package.json",
+				"pnpm-workspace.yaml",
+				".npmrc",
+				"shims/**"
+			],
+			"outputs": ["node_modules/**"],
+			"env": ["CI"]
+		},
 		"build:next": {
+			"dependsOn": ["install:run"],
 			"env": [
 				"NEXT_PUBLIC_BASE_URL",
 				"NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
@@ -49,6 +61,7 @@
 			"outputs": []
 		},
 		"typecheck:run": {
+			"dependsOn": ["install:run"],
 			"inputs": [
 				"$TURBO_DEFAULT$",
 				"!**/*.md",
@@ -60,6 +73,7 @@
 			"outputs": []
 		},
 		"generate:types:run": {
+			"dependsOn": ["install:run"],
 			"cache": false,
 			"outputs": ["payload-types.ts"]
 		}

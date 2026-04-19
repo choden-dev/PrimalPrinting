@@ -6,6 +6,8 @@
 		"build": "turbo run build:next",
 		"build:next": "next build",
 		"build:headless": "turbo run build:next upload-assets:run",
+		"install:cached": "turbo run install:run",
+		"install:run": "pnpm install --frozen-lockfile",
 		"upload-assets": "turbo run upload-assets:run",
 		"upload-assets:run": "tsx scripts/upload-assets.mts",
 		"dev": "next dev",
