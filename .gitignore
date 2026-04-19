@@ -41,6 +41,10 @@ yarn-error.log*
 .env.local
 servicekey.json
 
+# Generated at deploy time by scripts/cloudflare-build.mts — contains
+# plaintext secrets substituted into image_vars and must never be committed.
+/wrangler.deploy.jsonc
+
 # payload
 payload-types.ts
 
