@@ -25,7 +25,7 @@
  * as the task's output.
  */
 
-import { createReadStream } from "node:fs";
+import { createReadStream, type Dirent } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, posix, relative, resolve, sep } from "node:path";
 import process from "node:process";
@@ -136,7 +136,7 @@ function isFailure(r: WorkerResult): r is UploadFailure {
 
 // ── Filesystem helpers ─────────────────────────────────────────────────────
 async function* walk(dir: string): AsyncGenerator<string> {
-	let entries: Awaited<ReturnType<typeof readdir>>;
+	let entries: Dirent<string>[];
 	try {
 		entries = await readdir(dir, { withFileTypes: true });
 	} catch (err) {

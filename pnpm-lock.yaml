@@ -145,6 +145,9 @@ importers:
       lefthook:
         specifier: ^2.1.6
         version: 2.1.6
+      turbo:
+        specifier: ^2.5.0
+        version: 2.9.6
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -1941,6 +1944,36 @@ packages:
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@tokenizer/token/-/token-0.3.0.tgz}
 
+  '@turbo/darwin-64@2.9.6':
+    resolution: {integrity: sha512-X/56SnVXIQZBLKwniGTwEQTGmtE5brSACnKMBWpY3YafuxVYefrC2acamfjgxP7BG5w3I+6jf0UrLoSzgPcSJg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@turbo/darwin-64/-/darwin-64-2.9.6.tgz}
+    cpu: [x64]
+    os: [darwin]
+
+  '@turbo/darwin-arm64@2.9.6':
+    resolution: {integrity: sha512-aalBeSl4agT/QtYGDyf/XLajedWzUC9Vg/pm/YO6QQ93vkQ91Vz5uK1ta5RbVRDozQSz4njxUNqRNmOXDzW+qw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@turbo/darwin-arm64/-/darwin-arm64-2.9.6.tgz}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@turbo/linux-64@2.9.6':
+    resolution: {integrity: sha512-YKi05jnNHaD7vevgYwahpzGwbsNNTwzU2c7VZdmdFm7+cGDP4oREUWSsainiMfRqjRuolQxBwRn8wf1jmu+YZA==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@turbo/linux-64/-/linux-64-2.9.6.tgz}
+    cpu: [x64]
+    os: [linux]
+
+  '@turbo/linux-arm64@2.9.6':
+    resolution: {integrity: sha512-02o/ZS69cOYEDczXvOB2xmyrtzjQ2hVFtWZK1iqxXUfzMmTjZK4UumrfNnjckSg+gqeBfnPRHa0NstA173Ik3g==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@turbo/linux-arm64/-/linux-arm64-2.9.6.tgz}
+    cpu: [arm64]
+    os: [linux]
+
+  '@turbo/windows-64@2.9.6':
+    resolution: {integrity: sha512-wVdQjvnBI15wB6JrA+43CtUtagjIMmX6XYO758oZHAsCNSxqRlJtdyujih0D8OCnwCRWiGWGI63zAxR0hO6s9g==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@turbo/windows-64/-/windows-64-2.9.6.tgz}
+    cpu: [x64]
+    os: [win32]
+
+  '@turbo/windows-arm64@2.9.6':
+    resolution: {integrity: sha512-1XUUyWW0W6FTSqGEhU8RHVqb2wP1SPkr7hIvBlMEwH9jr+sJQK5kqeosLJ/QaUv4ecSAd1ZhIrLoW7qslAzT4A==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@turbo/windows-arm64/-/windows-arm64-2.9.6.tgz}
+    cpu: [arm64]
+    os: [win32]
+
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==, tarball: https://packages.atlassian.com/api/npm/npm-remote/@types/acorn/-/acorn-4.0.6.tgz}
 
@@ -3686,6 +3719,10 @@ packages:
   tsx@4.21.0:
     resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==, tarball: https://packages.atlassian.com/api/npm/npm-remote/tsx/-/tsx-4.21.0.tgz}
     engines: {node: '>=18.0.0'}
+    hasBin: true
+
+  turbo@2.9.6:
+    resolution: {integrity: sha512-+v2QJey7ZUeUiuigkU+uFfklvNUyPI2VO2vBpMYJA+a1hKFLFiKtUYlRHdb3P9CrAvMzi0upbjI4WT+zKtqkBg==, tarball: https://packages.atlassian.com/api/npm/npm-remote/turbo/-/turbo-2.9.6.tgz}
     hasBin: true
 
   type-is@1.6.18:
@@ -6254,6 +6291,24 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
+  '@turbo/darwin-64@2.9.6':
+    optional: true
+
+  '@turbo/darwin-arm64@2.9.6':
+    optional: true
+
+  '@turbo/linux-64@2.9.6':
+    optional: true
+
+  '@turbo/linux-arm64@2.9.6':
+    optional: true
+
+  '@turbo/windows-64@2.9.6':
+    optional: true
+
+  '@turbo/windows-arm64@2.9.6':
+    optional: true
+
   '@types/acorn@4.0.6':
     dependencies:
       '@types/estree': 1.0.8
@@ -8273,6 +8328,15 @@ snapshots:
       get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  turbo@2.9.6:
+    optionalDependencies:
+      '@turbo/darwin-64': 2.9.6
+      '@turbo/darwin-arm64': 2.9.6
+      '@turbo/linux-64': 2.9.6
+      '@turbo/linux-arm64': 2.9.6
+      '@turbo/windows-64': 2.9.6
+      '@turbo/windows-arm64': 2.9.6
 
   type-is@1.6.18:
     dependencies:

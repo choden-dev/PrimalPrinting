@@ -12,6 +12,7 @@ env:
   TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
 jobs:
+  # Run Biome on its own (no Node/pnpm install needed) — keeps the fast path.
   quality:
     runs-on: ubuntu-latest
     steps:
@@ -23,3 +24,47 @@ jobs:
           version: 2.1.1
       - name: Run Biome
         run: biome ci .
+
+  # Catches:
+  #   - lockfile drift (pnpm install --frozen-lockfile fails when
+  #     package.json is updated without regenerating pnpm-lock.yaml).
+  #     This is exactly the failure mode that broke the Cloudflare
+  #     Workers Build after #55.
+  #   - TypeScript regressions (typecheck across the whole repo).
+  install-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        # Version is read from the `packageManager` field in package.json.
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Read from .nvmrc so this stays in sync with local + Docker builds.
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # `--frozen-lockfile` reproduces the exact behaviour of the Dockerfile
+      # used by `wrangler deploy`. If `package.json` and `pnpm-lock.yaml`
+      # disagree, this step fails — surfacing the issue at PR time instead
+      # of during deploy.
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      # Cache Turbo's local cache directory between runs. With TURBO_TOKEN
+      # set this also benefits from the Vercel-hosted remote cache, but the
+      # local cache alone already keeps unchanged-tree typechecks instant.
+      - name: Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: TypeScript typecheck (via Turbo)
+        run: pnpm typecheck
