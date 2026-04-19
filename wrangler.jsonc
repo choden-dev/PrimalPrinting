@@ -27,10 +27,27 @@
 			// Configure these in the Cloudflare dashboard:
 			//   Workers & Pages → primalprinting → Settings → Builds →
 			//   Variables and Secrets
-			// (mark TURBO_TOKEN as "Secret")
+			// (mark TURBO_TOKEN, R2_SECRET_ACCESS_KEY as "Secret")
+			//
+			// R2_* vars feed the build-time `pnpm upload-assets` step that
+			// mirrors .next/static + public/ to the assets bucket so Next's
+			// `assetPrefix` can serve them from the CDN. They reuse the
+			// same R2 credentials already configured for runtime media
+			// access — only the bucket differs (R2_ASSETS_BUCKET).
+			//
+			// NEXT_PUBLIC_ASSET_PREFIX is baked into the client bundle at
+			// build time (Next inlines NEXT_PUBLIC_* vars). The runtime
+			// value is also injected via the worker env passthrough in
+			// container-worker.js so the entrypoint placeholder swap can
+			// re-target a different CDN per deploy if needed.
 			"image_vars": {
 				"TURBO_TEAM": "${TURBO_TEAM}",
-				"TURBO_TOKEN": "${TURBO_TOKEN}"
+				"TURBO_TOKEN": "${TURBO_TOKEN}",
+				"NEXT_PUBLIC_ASSET_PREFIX": "${NEXT_PUBLIC_ASSET_PREFIX}",
+				"R2_ASSETS_BUCKET": "${R2_ASSETS_BUCKET}",
+				"R2_S3_ENDPOINT": "${R2_S3_ENDPOINT}",
+				"R2_ACCESS_KEY_ID": "${R2_ACCESS_KEY_ID}",
+				"R2_SECRET_ACCESS_KEY": "${R2_SECRET_ACCESS_KEY}"
 			}
 		}
 	],
