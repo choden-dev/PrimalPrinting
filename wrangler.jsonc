@@ -35,45 +35,30 @@
 			"class_name": "PrimalPrinting",
 			"image": "./Dockerfile",
 			"max_instances": 1,
-			// Forward Turborepo Remote Cache credentials from the Cloudflare
-			// Workers Build environment into the container build as
-			// docker `--build-arg` values. The ${VAR} placeholders are
-			// substituted by wrangler at deploy time from the build env, so
-			// no secret values are ever committed to this file.
+			// Non-secret build-time values — passed through to the docker
+			// build as --build-args. Stored here (not in the dashboard) so
+			// they're version-controlled and reviewable.
 			//
-			// Only the two vars actually needed for Vercel-hosted Remote
-			// Cache are listed here. If you self-host or sign cache
-			// artefacts, add `"TURBO_API": "${TURBO_API}"` and/or
-			// `"TURBO_REMOTE_CACHE_SIGNATURE_KEY": "${TURBO_REMOTE_CACHE_SIGNATURE_KEY}"`
-			// once those env vars are set in the Cloudflare build env —
-			// referencing an unset env var here makes wrangler pass through
-			// the literal "${TURBO_API}" string, which Turbo then treats as
-			// a (broken) cache URL.
+			// Note: image_vars passes values *literally* — there is NO
+			// ${VAR} interpolation against the build env. Hardcode strings.
 			//
-			// Configure these in the Cloudflare dashboard:
-			//   Workers & Pages → primalprinting → Settings → Builds →
-			//   Variables and Secrets
-			// (mark TURBO_TOKEN, R2_SECRET_ACCESS_KEY as "Secret")
-			//
-			// R2_* vars feed the build-time `pnpm upload-assets` step that
-			// mirrors .next/static + public/ to the assets bucket so Next's
-			// `assetPrefix` can serve them from the CDN. They reuse the
-			// same R2 credentials already configured for runtime media
-			// access — only the bucket differs (R2_ASSETS_BUCKET).
-			//
-			// NEXT_PUBLIC_ASSET_PREFIX is baked into the client bundle at
-			// build time (Next inlines NEXT_PUBLIC_* vars). The runtime
-			// value is also injected via the worker env passthrough in
-			// container-worker.js so the entrypoint placeholder swap can
-			// re-target a different CDN per deploy if needed.
+			// Secrets (TURBO_TOKEN, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)
+			// stay in the dashboard's "Build configuration → Variables and
+			// Secrets" — Cloudflare auto-forwards them as --build-args
+			// alongside these.
 			"image_vars": {
-				"TURBO_TEAM": "${TURBO_TEAM}",
-				"TURBO_TOKEN": "${TURBO_TOKEN}",
-				"NEXT_PUBLIC_ASSET_PREFIX": "${NEXT_PUBLIC_ASSET_PREFIX}",
-				"R2_ASSETS_BUCKET": "${R2_ASSETS_BUCKET}",
-				"R2_S3_ENDPOINT": "${R2_S3_ENDPOINT}",
-				"R2_ACCESS_KEY_ID": "${R2_ACCESS_KEY_ID}",
-				"R2_SECRET_ACCESS_KEY": "${R2_SECRET_ACCESS_KEY}"
+				// Vercel team ID for Turborepo Remote Cache. TURBO_TEAMID
+				// accepts the team_… form; use TURBO_TEAM if you'd rather
+				// supply the slug.
+				"TURBO_TEAMID": "team_ATZPkCXiYj2fRXGwHYQ1Zd27",
+				// Headless asset hosting — Next inlines NEXT_PUBLIC_* vars
+				// at build time, so this needs to be the build-time value.
+				// The matching runtime value is set in `vars` above so the
+				// container env passthrough has the same value.
+				"NEXT_PUBLIC_ASSET_PREFIX": "https://assets.primalprinting.co.nz",
+				// R2 assets bucket name. The matching access keys + S3
+				// endpoint live in the dashboard as Secrets.
+				"R2_ASSETS_BUCKET": "primalprinting-assets"
 			}
 		}
 	],
