@@ -50,13 +50,13 @@ resource "cloudflare_r2_bucket_lifecycle" "staging_expiry" {
     enabled = true
 
     conditions = {
-      prefix = ""  # apply to all objects in the bucket
+      prefix = "" # apply to all objects in the bucket
     }
 
     delete_objects_transition = {
       condition = {
         type    = "Age"
-        max_age = var.r2_staging_expiry_days * 86400  # convert days to seconds
+        max_age = var.r2_staging_expiry_days * 86400 # convert days to seconds
       }
     }
   }]
@@ -94,6 +94,52 @@ resource "cloudflare_r2_managed_domain" "assets" {
   account_id  = var.cloudflare_account_id
   bucket_name = cloudflare_r2_bucket.assets.name
   enabled     = true
+}
+
+# ---------------------------------------------------------------------------
+# CORS policy for the headless asset bucket.
+#
+# The Next.js app is served from https://primalprinting.co.nz but loads its
+# static bundle (JS, CSS, fonts, the pdf.js worker, …) from
+# https://assets.primalprinting.co.nz via NEXT_PUBLIC_ASSET_PREFIX. Browsers
+# treat that as cross-origin, so any request that triggers CORS — most
+# notably the dynamic `import()` of the pdf.js worker module — is rejected
+# unless R2 returns Access-Control-Allow-Origin.
+#
+# The allow-list is intentionally narrow: only the production hostname (and
+# its www. subdomain) plus the Cloudflare Workers preview origins so we can
+# also smoke-test from a *.workers.dev preview if needed. If you spin up
+# additional environments (staging, PR previews, …) add their origins here.
+# ---------------------------------------------------------------------------
+resource "cloudflare_r2_bucket_cors" "assets" {
+  account_id  = var.cloudflare_account_id
+  bucket_name = cloudflare_r2_bucket.assets.name
+
+  rules = [{
+    id = "allow-app-origins"
+
+    allowed = {
+      # GET covers normal asset fetches; HEAD covers conditional requests
+      # (If-None-Match, etc.) that browsers issue on revalidation.
+      methods = ["GET", "HEAD"]
+      origins = concat(
+        ["https://primalprinting.co.nz", "https://www.primalprinting.co.nz"],
+        var.r2_assets_extra_cors_origins,
+      )
+      # Allow the standard fetch/Range headers so cached pdf workers,
+      # video <source> Range requests, etc. all succeed.
+      headers = ["Range", "If-None-Match", "If-Modified-Since"]
+    }
+
+    # Expose ETag so the browser cache can do conditional revalidation, and
+    # Content-Length / Content-Range so Range-aware consumers (audio/video,
+    # pdf.js streamed loads) can compute progress.
+    expose_headers = ["ETag", "Content-Length", "Content-Range"]
+
+    # 24h preflight cache — assets rarely change CORS shape and keeping this
+    # high means OPTIONS preflights drop off the critical path.
+    max_age_seconds = 86400
+  }]
 }
 
 # Optional custom domain — only created when the caller supplies a hostname
