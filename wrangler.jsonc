@@ -63,7 +63,7 @@
 				// from the headless asset CDN. Keep these in sync with the
 				// runtime defaults in container-worker.js / docker-entrypoint.sh.
 				"NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT": "2",
-				"NEXT_PUBLIC_DISCOUNT_PERCENT": "10",
+				"NEXT_PUBLIC_DISCOUNT_PERCENT": "15",
 				// — Substituted from build-env Secrets at deploy time ——
 				"R2_S3_ENDPOINT": "${R2_S3_ENDPOINT}",
 				"R2_ACCESS_KEY_ID": "${R2_ACCESS_KEY_ID}",
