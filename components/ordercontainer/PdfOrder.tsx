@@ -18,7 +18,11 @@ let pdfjsPromise: Promise<typeof pdfjsTypes> | null = null;
 function getPdfjs(): Promise<typeof pdfjsTypes> {
 	if (!pdfjsPromise) {
 		pdfjsPromise = import("pdfjs-dist").then((pdfjs) => {
-			pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+			// pdfjs-dist v4+ ships its worker as an ES module (.mjs). Loading
+			// the legacy `.js` URL silently 404s and every getDocument() call
+			// rejects with an opaque error — which the upload handler then
+			// surfaces as a misleading "invalid file type" message.
+			pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 			return pdfjs;
 		});
 	}
@@ -65,7 +69,10 @@ const PdfOrder = () => {
 	const handlePdfUpload = useCallback(
 		(files: File[]) => {
 			const uploaded = [...uploadedPdfs];
-			files.some((file: File) => {
+			// `.some()` was used here as a forEach without ever returning
+			// true to short-circuit — switch to the correct iterator so the
+			// linter is happy and intent is clear.
+			files.forEach((file: File) => {
 				//file doesn't exist
 				if (uploaded.findIndex((f) => f.displayName === file.name) === -1) {
 					const src = URL.createObjectURL(file);
@@ -105,7 +112,27 @@ const PdfOrder = () => {
 								}),
 							);
 						})
-						.catch(() => console.error("invalid file type"));
+						.catch((err) => {
+							// Surface the underlying pdfjs error so genuine
+							// load/parse failures are debuggable. The previous
+							// blanket "invalid file type" message hid problems
+							// like the worker URL 404'ing on valid PDFs.
+							console.error("PDF processing failed:", err);
+							const name = err instanceof Error ? err.name : "UnknownError";
+							const isInvalidPdf =
+								name === "InvalidPDFException" ||
+								name === "PasswordException" ||
+								name === "MissingPDFException";
+							if (isInvalidPdf) {
+								window.alert(
+									"This file doesn't appear to be a valid PDF. Please try a different file.",
+								);
+							} else {
+								window.alert(
+									"Something went wrong processing this PDF. Please try again, or contact us if the problem persists.",
+								);
+							}
+						});
 				}
 			});
 		},
