@@ -32,19 +32,26 @@ ENV NODE_ENV=production
 # uploaded to R2 *during the build* — at which point the placeholders are
 # frozen into the uploaded files and the entrypoint sed has nothing to patch.
 # For values that must reach the headless CDN, supply them as build ARGs
-# (see NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT / NEXT_PUBLIC_DISCOUNT_PERCENT
-# below and NEXT_PUBLIC_ASSET_PREFIX further down).
+# (see NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT / NEXT_PUBLIC_DISCOUNT_PERCENT /
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY below and NEXT_PUBLIC_ASSET_PREFIX further
+# down).
 ENV NEXT_PUBLIC_BASE_URL="__NEXT_PUBLIC_BASE_URL__"
-ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__"
 
-# Discount config is consumed by client-side code (DiscountBadge, CartItem,
-# ExtraInfo) and therefore ends up in the chunks uploaded to R2 — bake the
-# real values in at build time. Defaults match docker-entrypoint.sh /
+# Discount config + Stripe publishable key are consumed by client-side code
+# (DiscountBadge, CartItem, ExtraInfo, StripePaymentForm) and therefore end up
+# in the chunks uploaded to R2 — bake the real values in at build time.
+# Defaults for the discount config match docker-entrypoint.sh /
 # container-worker.js so an unset build env still produces a working image.
+# The Stripe publishable key has no safe default (it's environment-specific
+# and would silently break Stripe Elements if mis-set) so it defaults to an
+# empty string — the build will succeed and the failure surfaces as a clear
+# Stripe-side error instead of a confusing placeholder string.
 ARG NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT="2"
 ARG NEXT_PUBLIC_DISCOUNT_PERCENT="15"
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
 ENV NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT=$NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT \
-    NEXT_PUBLIC_DISCOUNT_PERCENT=$NEXT_PUBLIC_DISCOUNT_PERCENT
+    NEXT_PUBLIC_DISCOUNT_PERCENT=$NEXT_PUBLIC_DISCOUNT_PERCENT \
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 # Asset prefix used by Next.js for /_next/static/* + /_next/image.
 #
 # When supplied via wrangler `image_vars`, the real value is baked into the

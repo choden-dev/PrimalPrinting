@@ -14,13 +14,13 @@ SEARCH_DIR="/app/.next"
 
 # Each entry: "PLACEHOLDER|ENV_VAR_NAME|DEFAULT_VALUE"
 #
-# Note: NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT and NEXT_PUBLIC_DISCOUNT_PERCENT
-# are intentionally NOT swapped here — they're baked in at build time via
-# Docker ARGs so the values survive into the headless asset bundles uploaded
-# to R2 (which this runtime sed can't reach). See the Dockerfile for details.
+# Note: NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT, NEXT_PUBLIC_DISCOUNT_PERCENT
+# and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY are intentionally NOT swapped here —
+# they're baked in at build time via Docker ARGs so the values survive into
+# the headless asset bundles uploaded to R2 (which this runtime sed can't
+# reach). See the Dockerfile for details.
 REPLACEMENTS="
 __NEXT_PUBLIC_BASE_URL__|NEXT_PUBLIC_BASE_URL|
-__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__|NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY|
 __NEXT_PUBLIC_ASSET_PREFIX__|NEXT_PUBLIC_ASSET_PREFIX|
 "
 
