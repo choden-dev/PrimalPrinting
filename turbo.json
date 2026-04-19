@@ -4,7 +4,6 @@
 	"globalEnv": ["NODE_ENV", "NEXT_TELEMETRY_DISABLED", "CI"],
 	"globalPassThroughEnv": ["PATH", "HOME", "SHELL"],
 	"globalDependencies": [
-		"package.json",
 		"pnpm-lock.yaml",
 		"tsconfig.json",
 		"biome.json",
