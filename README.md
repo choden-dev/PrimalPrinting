@@ -66,6 +66,71 @@ pnpm dev
 ### Production Build
 
 ```bash
-pnpm build
+pnpm build      # Turbo orchestrates `next build` with caching
 pnpm start
 ```
+
+### Headless Asset Hosting (R2 + assetPrefix)
+
+For a fully "headless" deploy, the static assets emitted by `next build` are
+mirrored to a dedicated Cloudflare R2 bucket and served from a CDN URL. The
+standalone Next server then never has to serve static files itself.
+
+| Variable                   | Description                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_ASSET_PREFIX` | Public origin for `_next/static/*` and `_next/image` (e.g. `https://assets.primalprinting.com`). Inlined into the client bundle at build time and re-replaced at container startup so one image can target multiple CDNs. |
+| `R2_ASSETS_BUCKET`         | R2 bucket the upload script writes to. Provisioned by Terraform (`r2_assets_bucket_name`).   |
+
+Provision the bucket with Terraform (see [`terraform/README.md`](./terraform/README.md)),
+then build + upload assets in one Turbo task:
+
+```bash
+export NEXT_PUBLIC_ASSET_PREFIX="$(cd terraform && terraform output -raw r2_assets_public_url)"
+export R2_ASSETS_BUCKET="$(cd terraform && terraform output -raw r2_assets_bucket_name)"
+export R2_S3_ENDPOINT="$(cd terraform && terraform output -raw r2_s3_endpoint)"
+export R2_ACCESS_KEY_ID=...
+export R2_SECRET_ACCESS_KEY=...
+
+pnpm run build:headless   # turbo: build:next + upload-assets:run
+```
+
+The upload script is content-aware: fingerprinted files in `.next/static/` are
+HEADed first and skipped if already present, so re-deploys upload only what
+actually changed.
+
+### Build Tooling (Turbo)
+
+Builds, lints, and asset uploads are orchestrated by [Turborepo](https://turborepo.com)
+for caching + parallelism. Common tasks:
+
+| Command                  | What it runs                                              |
+| ------------------------ | --------------------------------------------------------- |
+| `pnpm build`             | `turbo run build` → `next build` with cached outputs      |
+| `pnpm build:headless`    | `next build` + `scripts/upload-assets.mts` (R2 sync)      |
+| `pnpm upload-assets`     | Mirror `.next/static` + `public` to the R2 assets bucket  |
+| `pnpm lint`              | `turbo run lint` → `biome check .`                        |
+| `pnpm dev`               | `turbo run dev` → `next dev`                              |
+
+Set `TURBO_TOKEN` / `TURBO_TEAM` in CI to enable Turborepo Remote Cache.
+
+#### Cloudflare Workers Builds (`wrangler deploy`)
+
+`wrangler deploy` builds the container image on Cloudflare's infrastructure.
+Turbo cache vars reach the docker build via `image_vars` in `wrangler.jsonc`,
+which interpolates `${VAR}` placeholders from the Cloudflare Workers Build
+environment at deploy time — no secret values are committed to the repo.
+
+In **Workers & Pages → primalprinting → Settings → Builds → Variables and
+Secrets**, add:
+
+| Name                                | Type    |
+| ----------------------------------- | ------- |
+| `TURBO_TEAM` (or `TURBO_TEAMID`)    | Plain   |
+| `TURBO_TOKEN`                       | Secret  |
+| `TURBO_API` (self-hosted only)      | Plain   |
+| `TURBO_REMOTE_CACHE_SIGNATURE_KEY`  | Secret  |
+
+The Dockerfile picks them up as `ARG`s, exports them for the `pnpm run build`
+step, then clears `TURBO_TOKEN` from the env before the runner stage. Look
+for `Remote caching enabled` followed by `cache hit, replaying logs` near the
+top of the build log to confirm it's working.

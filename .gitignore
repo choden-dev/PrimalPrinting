@@ -55,3 +55,6 @@ terraform/crash.log
 
 # Cloudflare
 .wrangler
+
+# Turbo
+.turbo

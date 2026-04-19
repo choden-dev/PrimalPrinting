@@ -10,3 +10,11 @@ r2_location           = "APAC"
 r2_staging_bucket_name   = "primalprinting-staging"
 r2_permanent_bucket_name = "primalprinting-orders"
 r2_staging_expiry_days   = 7
+
+# Headless asset hosting
+# Set r2_assets_custom_domain + r2_assets_zone_id to attach a custom domain
+# (recommended for production). Leave both empty to use the R2.dev subdomain.
+r2_assets_bucket_name     = "primalprinting-assets"
+r2_assets_custom_domain   = ""
+r2_assets_zone_id         = ""
+r2_assets_max_age_seconds = 31536000
