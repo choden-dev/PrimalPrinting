@@ -4,6 +4,32 @@
 	"name": "primalprinting",
 	"compatibility_date": "2026-04-16",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	// Custom domain routes — kept in code so `wrangler deploy` doesn't wipe
+	// them on every push (which it does when the local config diverges from
+	// the dashboard).
+	"routes": [
+		{
+			"pattern": "primalprinting.co.nz",
+			"zone_name": "primalprinting.co.nz",
+			"custom_domain": true
+		},
+		{
+			"pattern": "www.primalprinting.co.nz",
+			"zone_name": "primalprinting.co.nz"
+		}
+	],
+	// Runtime worker env vars (visible to container-worker.js as `env.<NAME>`
+	// and forwarded to the container env in container-worker.js's
+	// envVars passthrough). Non-secret values only — secrets stay in the
+	// dashboard's "Variables and Secrets → Runtime" section.
+	//
+	// NEXT_PUBLIC_ASSET_PREFIX must match the build-time value supplied via
+	// `image_vars` below: build-time controls Next.js's emitted asset URLs;
+	// runtime controls the entrypoint placeholder swap and any server-side
+	// reads.
+	"vars": {
+		"NEXT_PUBLIC_ASSET_PREFIX": "https://assets.primalprinting.co.nz"
+	},
 	"containers": [
 		{
 			"class_name": "PrimalPrinting",
