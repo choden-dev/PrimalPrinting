@@ -80,7 +80,20 @@ ENV TURBO_TEAM=$TURBO_TEAM \
 # Build via Turbo so the (optional) remote cache is queried before re-running
 # `next build`. Look for "Remote caching enabled" + "cache hit, replaying logs"
 # in the build output to confirm it's working.
-RUN pnpm run build
+#
+# Defensive cleanup: wrangler's `image_vars` substitutes `${VAR}` against the
+# Cloudflare Workers Build env at deploy time, but if the env var is unset
+# wrangler passes through the literal "${VAR}" string instead of an empty
+# value. Strip any such unsubstituted placeholders so Turbo doesn't try to
+# use them as URLs / tokens.
+RUN for v in TURBO_TEAM TURBO_TEAMID TURBO_TOKEN TURBO_API TURBO_REMOTE_CACHE_SIGNATURE_KEY; do \
+      if eval "[ \"\${$v}\" = \"\\\${${v}}\" ]"; then \
+        echo "  unset literal placeholder for \$v"; \
+        unset $v; \
+        export $v=""; \
+      fi; \
+    done && \
+    pnpm run build
 
 # Strip TURBO_TOKEN from the env so it doesn't leak into the runner stage's
 # inherited env or any subsequent layers. (The runner stage starts FROM a

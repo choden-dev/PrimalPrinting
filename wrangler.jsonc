@@ -15,16 +15,22 @@
 			// substituted by wrangler at deploy time from the build env, so
 			// no secret values are ever committed to this file.
 			//
+			// Only the two vars actually needed for Vercel-hosted Remote
+			// Cache are listed here. If you self-host or sign cache
+			// artefacts, add `"TURBO_API": "${TURBO_API}"` and/or
+			// `"TURBO_REMOTE_CACHE_SIGNATURE_KEY": "${TURBO_REMOTE_CACHE_SIGNATURE_KEY}"`
+			// once those env vars are set in the Cloudflare build env —
+			// referencing an unset env var here makes wrangler pass through
+			// the literal "${TURBO_API}" string, which Turbo then treats as
+			// a (broken) cache URL.
+			//
 			// Configure these in the Cloudflare dashboard:
 			//   Workers & Pages → primalprinting → Settings → Builds →
 			//   Variables and Secrets
-			// (mark TURBO_TOKEN + TURBO_REMOTE_CACHE_SIGNATURE_KEY as "Secret")
+			// (mark TURBO_TOKEN as "Secret")
 			"image_vars": {
 				"TURBO_TEAM": "${TURBO_TEAM}",
-				"TURBO_TEAMID": "${TURBO_TEAMID}",
-				"TURBO_TOKEN": "${TURBO_TOKEN}",
-				"TURBO_API": "${TURBO_API}",
-				"TURBO_REMOTE_CACHE_SIGNATURE_KEY": "${TURBO_REMOTE_CACHE_SIGNATURE_KEY}"
+				"TURBO_TOKEN": "${TURBO_TOKEN}"
 			}
 		}
 	],
