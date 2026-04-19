@@ -42,7 +42,7 @@ ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__"
 # real values in at build time. Defaults match docker-entrypoint.sh /
 # container-worker.js so an unset build env still produces a working image.
 ARG NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT="2"
-ARG NEXT_PUBLIC_DISCOUNT_PERCENT="10"
+ARG NEXT_PUBLIC_DISCOUNT_PERCENT="15"
 ENV NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT=$NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT \
     NEXT_PUBLIC_DISCOUNT_PERCENT=$NEXT_PUBLIC_DISCOUNT_PERCENT
 # Asset prefix used by Next.js for /_next/static/* + /_next/image.
