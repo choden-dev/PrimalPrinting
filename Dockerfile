@@ -84,17 +84,17 @@ ENV R2_ASSETS_BUCKET=$R2_ASSETS_BUCKET \
 # limited to that environment.
 #
 # In Cloudflare Workers Builds set:
-#   - TURBO_TEAMID   (the team_… ID — already hardcoded in wrangler.jsonc
-#                     image_vars, no need to set in the dashboard)
+#   - TURBO_TEAM     (the Vercel team slug — already hardcoded in
+#                     wrangler.jsonc image_vars, no need to set in the dashboard)
 #   - TURBO_TOKEN    (mark as Secret)
 #   - TURBO_API      (optional, only for self-hosted caches)
 #
 # Turbo silently falls back to local cache when TURBO_TOKEN is absent.
-ARG TURBO_TEAMID=""
+ARG TURBO_TEAM=""
 ARG TURBO_TOKEN=""
 ARG TURBO_API=""
 ARG TURBO_REMOTE_CACHE_SIGNATURE_KEY=""
-ENV TURBO_TEAMID=$TURBO_TEAMID \
+ENV TURBO_TEAM=$TURBO_TEAM \
     TURBO_TOKEN=$TURBO_TOKEN \
     TURBO_API=$TURBO_API \
     TURBO_REMOTE_CACHE_SIGNATURE_KEY=$TURBO_REMOTE_CACHE_SIGNATURE_KEY \
