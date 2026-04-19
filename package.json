@@ -17,7 +17,7 @@
 		"generate:types": "turbo run generate:types:run",
 		"generate:types:run": "payload generate:types",
 		"seed": "tsx seed.ts",
-		"deploy": "wrangler deploy",
+		"deploy": "tsx scripts/cloudflare-build.mts",
 		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
 	},
 	"dependencies": {

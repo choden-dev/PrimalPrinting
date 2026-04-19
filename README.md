@@ -113,24 +113,44 @@ for caching + parallelism. Common tasks:
 
 Set `TURBO_TOKEN` / `TURBO_TEAM` in CI to enable Turborepo Remote Cache.
 
-#### Cloudflare Workers Builds (`wrangler deploy`)
+#### Cloudflare Workers Builds (`pnpm run deploy`)
 
-`wrangler deploy` builds the container image on Cloudflare's infrastructure.
-Turbo cache vars reach the docker build via `image_vars` in `wrangler.jsonc`,
-which interpolates `${VAR}` placeholders from the Cloudflare Workers Build
-environment at deploy time — no secret values are committed to the repo.
+`pnpm run deploy` is the canonical deploy entrypoint. It runs
+`scripts/cloudflare-build.mts` (via `tsx`), which:
 
-In **Workers & Pages → primalprinting → Settings → Builds → Variables and
-Secrets**, add:
+1. Reads `wrangler.jsonc` and substitutes any `${VAR}` placeholders inside
+   `containers[].image_vars` with values from the Cloudflare Workers Build
+   environment (no envsubst dependency, no secret values committed to the
+   repo).
+2. Writes the rendered config to `wrangler.deploy.jsonc` (gitignored,
+   mode 600) and runs `wrangler deploy --config wrangler.deploy.jsonc`.
+3. Wipes the rendered config on exit.
 
-| Name                                | Type    |
-| ----------------------------------- | ------- |
-| `TURBO_TEAM` (or `TURBO_TEAMID`)    | Plain   |
-| `TURBO_TOKEN`                       | Secret  |
-| `TURBO_API` (self-hosted only)      | Plain   |
-| `TURBO_REMOTE_CACHE_SIGNATURE_KEY`  | Secret  |
+This is required because wrangler's `image_vars` field passes string values
+*literally* to `docker build --build-arg` — there is no native `${VAR}`
+substitution against the build env, and Cloudflare doesn't auto-forward
+dashboard env vars into the docker build either.
+
+**Dashboard configuration** (Workers & Pages → primalprinting → Settings →
+Builds):
+
+- **Build command**: `pnpm run deploy`
+
+In **Variables and Secrets → Build**, add:
+
+| Name                                | Type    | Required | Purpose                                     |
+| ----------------------------------- | ------- | -------- | ------------------------------------------- |
+| `R2_S3_ENDPOINT`                    | Secret  | yes      | R2 endpoint for `pnpm build:headless` upload |
+| `R2_ACCESS_KEY_ID`                  | Secret  | yes      | R2 access key for asset upload              |
+| `R2_SECRET_ACCESS_KEY`              | Secret  | yes      | R2 secret key for asset upload              |
+| `TURBO_TOKEN`                       | Secret  | no       | Turborepo Remote Cache token                |
+| `TURBO_TEAM` (or `TURBO_TEAMID`)    | Plain   | no       | Turborepo team slug or id (TURBO_TEAMID is hardcoded in `wrangler.jsonc`) |
+| `TURBO_API` (self-hosted only)      | Plain   | no       | Self-hosted Turbo cache URL                 |
+| `TURBO_REMOTE_CACHE_SIGNATURE_KEY`  | Secret  | no       | Turbo remote cache signing key              |
 
 The Dockerfile picks them up as `ARG`s, exports them for the `pnpm run build`
-step, then clears `TURBO_TOKEN` from the env before the runner stage. Look
+step, then clears the secrets from the env before the runner stage. Look
 for `Remote caching enabled` followed by `cache hit, replaying logs` near the
-top of the build log to confirm it's working.
+top of the build log to confirm Turbo's remote cache is working, and
+`Building with headless asset upload` to confirm the R2 creds reached the
+build.

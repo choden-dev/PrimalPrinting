@@ -44,13 +44,13 @@
 			//
 			// Secrets (TURBO_TOKEN, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)
 			// stay in the dashboard's "Build configuration → Variables and
-			// Secrets" — Cloudflare auto-forwards them as --build-args
-			// alongside these.
-			// `image_vars` are passed verbatim to `docker build --build-arg`.
-			// Wrangler does NOT interpolate `${VAR}` here, so the
-			// `${SECRET}` placeholders below are substituted by
-			// `scripts/cloudflare-build.sh` (envsubst) at deploy time
-			// from the Cloudflare Workers Build env.
+			// Secrets". Cloudflare exposes them only to the build script,
+			// NOT to docker --build-args, so `scripts/cloudflare-build.mts`
+			// (run via `pnpm run deploy`) substitutes the `${SECRET}`
+			// placeholders below into image_vars at deploy time.
+			//
+			// Keep the dashboard's Build command set to `pnpm run deploy`
+			// so the substitution always runs.
 			"image_vars": {
 				// — Hardcoded non-secrets ——————————————————————————————
 				"TURBO_TEAMID": "team_ATZPkCXiYj2fRXGwHYQ1Zd27",
