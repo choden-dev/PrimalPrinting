@@ -65,3 +65,9 @@ variable "r2_assets_max_age_seconds" {
   type        = number
   default     = 31536000
 }
+
+variable "r2_assets_extra_cors_origins" {
+  description = "Additional origins (e.g. https://staging.primalprinting.co.nz, https://*.workers.dev preview URLs) that should be allowed to fetch assets cross-origin from the headless R2 bucket. The production hostname and its www. subdomain are always included automatically — list only the extras here. Each entry must be a full origin (scheme + host, no trailing slash)."
+  type        = list(string)
+  default     = []
+}
