@@ -114,21 +114,10 @@ ENV TURBO_TEAM=$TURBO_TEAM \
 #
 # Falls back to a plain `next build` when R2 creds are missing (e.g. local
 # `docker build` without secrets) so local builds still work.
-RUN for v in TURBO_TEAM TURBO_TEAMID TURBO_TOKEN TURBO_API TURBO_REMOTE_CACHE_SIGNATURE_KEY \
-             NEXT_PUBLIC_ASSET_PREFIX R2_ASSETS_BUCKET R2_S3_ENDPOINT R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do \
-      if eval "[ \"\${$v}\" = \"\\\${${v}}\" ]"; then \
-        echo "  unset literal placeholder for \$v"; \
-        unset $v; \
-        export $v=""; \
-      fi; \
-    done && \
-    if [ -n "$R2_ASSETS_BUCKET" ] && [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$R2_SECRET_ACCESS_KEY" ] && [ -n "$R2_S3_ENDPOINT" ]; then \
-      echo "→ Building with headless asset upload (R2_ASSETS_BUCKET=$R2_ASSETS_BUCKET)"; \
-      pnpm run build:headless; \
-    else \
-      echo "→ R2 asset upload credentials not provided — running plain Next build (assetPrefix will be unused)"; \
-      pnpm run build; \
-    fi
+# Build via a dedicated shell script under scripts/ — keeps the Dockerfile
+# free of escape-soup and lets the build logic be unit-testable on its own.
+COPY scripts/docker-build-step.sh /tmp/docker-build-step.sh
+RUN chmod +x /tmp/docker-build-step.sh && /tmp/docker-build-step.sh && rm /tmp/docker-build-step.sh
 
 # Strip secrets from the env so they don't leak into the runner stage's
 # inherited env or any subsequent layers. (The runner stage starts FROM a
