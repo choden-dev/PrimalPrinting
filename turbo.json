@@ -34,10 +34,6 @@
 			],
 			"outputs": [".next/**", "!.next/cache/**"]
 		},
-		"build": {
-			"dependsOn": ["build:next"],
-			"cache": false
-		},
 		"upload-assets:run": {
 			"dependsOn": ["build:next"],
 			"env": [
@@ -50,48 +46,24 @@
 			"inputs": ["scripts/upload-assets.mts", ".next/static/**", "public/**"],
 			"outputs": [".next/asset-upload.manifest.json"]
 		},
-		"upload-assets": {
-			"dependsOn": ["upload-assets:run"],
-			"cache": false
-		},
-		"build:headless": {
-			"dependsOn": ["build:next", "upload-assets:run"],
-			"cache": false
-		},
-		"dev:next": {
-			"cache": false,
-			"persistent": true
-		},
-		"dev": {
-			"dependsOn": ["dev:next"],
-			"cache": false,
-			"persistent": true
-		},
-		"start:next": {
-			"cache": false,
-			"persistent": true,
-			"dependsOn": ["build:next"]
-		},
-		"start": {
-			"dependsOn": ["start:next"],
-			"cache": false,
-			"persistent": true
-		},
 		"lint:run": {
 			"inputs": ["$TURBO_DEFAULT$", "biome.json"],
 			"outputs": []
 		},
-		"lint": {
-			"dependsOn": ["lint:run"],
-			"cache": false
+		"typecheck:run": {
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"!**/*.md",
+				"!terraform/**",
+				"!.github/**",
+				"!Dockerfile",
+				"!docker-entrypoint.sh"
+			],
+			"outputs": []
 		},
 		"generate:types:run": {
 			"cache": false,
 			"outputs": ["payload-types.ts"]
-		},
-		"generate:types": {
-			"dependsOn": ["generate:types:run"],
-			"cache": false
 		}
 	}
 }
