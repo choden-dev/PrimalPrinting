@@ -128,5 +128,25 @@ declare namespace NodeJS {
 		 * Defaults to "0" in application code.
 		 */
 		NEXT_PUBLIC_DISCOUNT_PERCENT?: string;
+
+		// ── Headless asset hosting ───────────────────────────────────────
+		/**
+		 * @env NEXT_PUBLIC_ASSET_PREFIX
+		 * Public origin from which Next.js static assets (`/_next/static/*`
+		 * and `/_next/image`) are served. Set to the public URL of the R2
+		 * assets bucket (or its custom domain, e.g.
+		 * `https://assets.primalprinting.com`) for a fully headless setup.
+		 * Leave unset locally so the dev server serves assets itself.
+		 */
+		NEXT_PUBLIC_ASSET_PREFIX?: string;
+
+		// ── Build-time R2 asset upload ───────────────────────────────────
+		/**
+		 * @env R2_ASSETS_BUCKET
+		 * R2 bucket name used by `scripts/upload-assets.mts` to host the
+		 * built `.next/static/*` files and `public/*` for the headless
+		 * `assetPrefix` setup. Provisioned via Terraform.
+		 */
+		R2_ASSETS_BUCKET?: string;
 	}
 }

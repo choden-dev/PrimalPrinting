@@ -4,6 +4,13 @@ on:
   push:
   pull_request:
 
+# Optional Turborepo Remote Cache — set these as repo secrets to enable
+# cross-CI build/lint caching. Safe to leave unset (Turbo just uses local cache).
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+
 jobs:
   quality:
     runs-on: ubuntu-latest

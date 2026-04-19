@@ -8,7 +8,24 @@
 		{
 			"class_name": "PrimalPrinting",
 			"image": "./Dockerfile",
-			"max_instances": 1
+			"max_instances": 1,
+			// Forward Turborepo Remote Cache credentials from the Cloudflare
+			// Workers Build environment into the container build as
+			// docker `--build-arg` values. The ${VAR} placeholders are
+			// substituted by wrangler at deploy time from the build env, so
+			// no secret values are ever committed to this file.
+			//
+			// Configure these in the Cloudflare dashboard:
+			//   Workers & Pages → primalprinting → Settings → Builds →
+			//   Variables and Secrets
+			// (mark TURBO_TOKEN + TURBO_REMOTE_CACHE_SIGNATURE_KEY as "Secret")
+			"image_vars": {
+				"TURBO_TEAM": "${TURBO_TEAM}",
+				"TURBO_TEAMID": "${TURBO_TEAMID}",
+				"TURBO_TOKEN": "${TURBO_TOKEN}",
+				"TURBO_API": "${TURBO_API}",
+				"TURBO_REMOTE_CACHE_SIGNATURE_KEY": "${TURBO_REMOTE_CACHE_SIGNATURE_KEY}"
+			}
 		}
 	],
 	"durable_objects": {

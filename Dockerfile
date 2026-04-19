@@ -39,8 +39,53 @@ ENV NEXT_PUBLIC_BASE_URL="__NEXT_PUBLIC_BASE_URL__"
 ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__"
 ENV NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT="__NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT__"
 ENV NEXT_PUBLIC_DISCOUNT_PERCENT="__NEXT_PUBLIC_DISCOUNT_PERCENT__"
+# Asset prefix used by Next.js for /_next/static/* + /_next/image. Replaced
+# at container startup so the same image can target different CDNs/buckets.
+# Defaults to "" so Next falls back to serving assets from the same origin.
+ENV NEXT_PUBLIC_ASSET_PREFIX="__NEXT_PUBLIC_ASSET_PREFIX__"
 
-RUN pnpm build
+# ── Turborepo Remote Cache (optional) ─────────────────────────────────────
+# Forward the team identity (slug or id), API base URL, and access token as
+# plain build args. We can't use BuildKit secret mounts because `wrangler
+# deploy` (which builds this image on Cloudflare Workers Builds) doesn't
+# support `--secret` flags — only build args via `image_vars` in wrangler.jsonc.
+#
+# Threat model: the values are sourced from Cloudflare Workers Build
+# environment variables (TURBO_TOKEN stored as a Secret there), interpolated
+# into `image_vars` at deploy time, and only ever exist inside the Cloudflare
+# build environment. The resulting image is not published — it's pulled
+# directly into the Container runtime — so `docker history` exposure is
+# limited to that environment.
+#
+# In Cloudflare Workers Builds set:
+#   - TURBO_TEAM     (your Vercel team slug)  — or TURBO_TEAMID for the team_… ID
+#   - TURBO_TOKEN    (mark as Secret)
+#   - TURBO_API      (optional, only for self-hosted caches)
+#
+# Turbo silently falls back to local cache when TURBO_TOKEN is absent.
+ARG TURBO_TEAM=""
+ARG TURBO_TEAMID=""
+ARG TURBO_TOKEN=""
+ARG TURBO_API=""
+ARG TURBO_REMOTE_CACHE_SIGNATURE_KEY=""
+ENV TURBO_TEAM=$TURBO_TEAM \
+    TURBO_TEAMID=$TURBO_TEAMID \
+    TURBO_TOKEN=$TURBO_TOKEN \
+    TURBO_API=$TURBO_API \
+    TURBO_REMOTE_CACHE_SIGNATURE_KEY=$TURBO_REMOTE_CACHE_SIGNATURE_KEY \
+    # Force colour-less, scriptable Turbo output in the build log
+    FORCE_COLOR=0 \
+    TURBO_TELEMETRY_DISABLED=1
+
+# Build via Turbo so the (optional) remote cache is queried before re-running
+# `next build`. Look for "Remote caching enabled" + "cache hit, replaying logs"
+# in the build output to confirm it's working.
+RUN pnpm run build
+
+# Strip TURBO_TOKEN from the env so it doesn't leak into the runner stage's
+# inherited env or any subsequent layers. (The runner stage starts FROM a
+# fresh base image anyway, but be defensive.)
+ENV TURBO_TOKEN=""
 
 
 # ── Stage 3: Production runner ───────────────────────────────────────────

@@ -27,6 +27,7 @@
 	"include": [
 		"**/*.ts",
 		"**/*.tsx",
+		"**/*.mts",
 		"next-env.d.ts",
 		"pages/api/shop.js",
 		".next/types/**/*.ts",

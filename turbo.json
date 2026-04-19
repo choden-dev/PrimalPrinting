@@ -1,0 +1,97 @@
+{
+	"$schema": "https://turborepo.com/schema.json",
+	"ui": "stream",
+	"globalEnv": ["NODE_ENV", "NEXT_TELEMETRY_DISABLED", "CI"],
+	"globalPassThroughEnv": ["PATH", "HOME", "SHELL"],
+	"globalDependencies": [
+		"package.json",
+		"pnpm-lock.yaml",
+		"tsconfig.json",
+		"biome.json",
+		".nvmrc",
+		"next.config.ts",
+		"payload.config.ts",
+		"env.d.ts",
+		"middleware.ts"
+	],
+	"tasks": {
+		"build:next": {
+			"env": [
+				"NEXT_PUBLIC_BASE_URL",
+				"NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+				"NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT",
+				"NEXT_PUBLIC_DISCOUNT_PERCENT",
+				"NEXT_PUBLIC_ASSET_PREFIX",
+				"DATABASE_URI",
+				"PAYLOAD_SECRET"
+			],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"!**/*.md",
+				"!terraform/**",
+				"!.github/**",
+				"!scripts/**"
+			],
+			"outputs": [".next/**", "!.next/cache/**"]
+		},
+		"build": {
+			"dependsOn": ["build:next"],
+			"cache": false
+		},
+		"upload-assets:run": {
+			"dependsOn": ["build:next"],
+			"env": [
+				"NEXT_PUBLIC_ASSET_PREFIX",
+				"R2_ASSETS_BUCKET",
+				"R2_S3_ENDPOINT",
+				"R2_ACCESS_KEY_ID",
+				"R2_SECRET_ACCESS_KEY"
+			],
+			"inputs": ["scripts/upload-assets.mts", ".next/static/**", "public/**"],
+			"outputs": [".next/asset-upload.manifest.json"]
+		},
+		"upload-assets": {
+			"dependsOn": ["upload-assets:run"],
+			"cache": false
+		},
+		"build:headless": {
+			"dependsOn": ["build:next", "upload-assets:run"],
+			"cache": false
+		},
+		"dev:next": {
+			"cache": false,
+			"persistent": true
+		},
+		"dev": {
+			"dependsOn": ["dev:next"],
+			"cache": false,
+			"persistent": true
+		},
+		"start:next": {
+			"cache": false,
+			"persistent": true,
+			"dependsOn": ["build:next"]
+		},
+		"start": {
+			"dependsOn": ["start:next"],
+			"cache": false,
+			"persistent": true
+		},
+		"lint:run": {
+			"inputs": ["$TURBO_DEFAULT$", "biome.json"],
+			"outputs": []
+		},
+		"lint": {
+			"dependsOn": ["lint:run"],
+			"cache": false
+		},
+		"generate:types:run": {
+			"cache": false,
+			"outputs": ["payload-types.ts"]
+		},
+		"generate:types": {
+			"dependsOn": ["generate:types:run"],
+			"cache": false
+		}
+	}
+}

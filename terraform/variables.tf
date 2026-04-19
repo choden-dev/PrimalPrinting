@@ -38,3 +38,30 @@ variable "r2_staging_expiry_days" {
   type        = number
   default     = 7
 }
+
+# ---------------------------------------------------------------------------
+# Headless static-asset hosting
+# ---------------------------------------------------------------------------
+variable "r2_assets_bucket_name" {
+  description = "Name of the R2 bucket used to host Next.js static assets (.next/static, public/) for headless serving via assetPrefix"
+  type        = string
+  default     = "primalprinting-assets"
+}
+
+variable "r2_assets_custom_domain" {
+  description = "Optional custom domain to attach to the R2 assets bucket (e.g. assets.primalprinting.com). Leave empty to skip and use the R2.dev subdomain instead."
+  type        = string
+  default     = ""
+}
+
+variable "r2_assets_zone_id" {
+  description = "Cloudflare zone ID that owns r2_assets_custom_domain. Required only when r2_assets_custom_domain is set."
+  type        = string
+  default     = ""
+}
+
+variable "r2_assets_max_age_seconds" {
+  description = "Cache-Control max-age (seconds) advertised for objects served from the assets bucket. Defaults to 1 year — Next.js fingerprints filenames so long caching is safe."
+  type        = number
+  default     = 31536000
+}

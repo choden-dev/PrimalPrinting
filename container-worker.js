@@ -55,6 +55,10 @@ export class PrimalPrinting extends Container {
 		NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT:
 			env.NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT ?? "2",
 		NEXT_PUBLIC_DISCOUNT_PERCENT: env.NEXT_PUBLIC_DISCOUNT_PERCENT ?? "10",
+		// Headless asset hosting — points Next.js at the R2 assets bucket
+		// (or its custom domain) so the standalone server doesn't have to
+		// serve any static files. Empty string falls back to same-origin.
+		NEXT_PUBLIC_ASSET_PREFIX: env.NEXT_PUBLIC_ASSET_PREFIX ?? "",
 	};
 }
 
