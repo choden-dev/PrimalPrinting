@@ -20,18 +20,34 @@ export const formatItems = (
 };
 
 export const orderSum = (orderItems: { cost: number }[]) => {
-	let sum = 0;
-	orderItems.map((item) => {
-		sum += item.cost;
-	});
+	const sum = orderItems.reduce((acc, item) => acc + item.cost, 0);
 	return sum.toFixed(2);
 };
 
+/**
+ * Parse a numeric env var, falling back to `fallback` when the value is
+ * missing, empty, an unsubstituted Docker placeholder (e.g.
+ * `__NEXT_PUBLIC_FOO__`), or otherwise non-numeric.
+ *
+ * Necessary because Next.js inlines NEXT_PUBLIC_* values into the client
+ * bundle at build time. When the build runs against a placeholder string
+ * (so the docker entrypoint can sed-replace them at startup), `parseInt`
+ * on the placeholder returns NaN — which then propagates through every
+ * discount calculation in the UI.
+ */
+const parseNumericEnv = (raw: string | undefined, fallback: number): number => {
+	if (!raw) return fallback;
+	const trimmed = raw.trim();
+	if (trimmed === "" || /^__[A-Z0-9_]+__$/.test(trimmed)) return fallback;
+	const parsed = parseInt(trimmed, 10);
+	return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 export const getMinimumItemsForDiscount = () =>
-	parseInt(process.env.NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT ?? "2");
+	parseNumericEnv(process.env.NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT, 2);
 
 export const getPercentOff = () =>
-	parseInt(process.env.NEXT_PUBLIC_DISCOUNT_PERCENT ?? "0");
+	parseNumericEnv(process.env.NEXT_PUBLIC_DISCOUNT_PERCENT, 0);
 
 export const getItemsWithBulkDiscount = <
 	T extends { quantity: number } | CartItem,

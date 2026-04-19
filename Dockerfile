@@ -35,10 +35,26 @@ ENV NODE_ENV=production
 # Placeholders for NEXT_PUBLIC_* vars — Next.js inlines these into the client
 # bundle at build time. The entrypoint script (docker-entrypoint.sh) replaces
 # them with real values at container startup, keeping the image env-agnostic.
+#
+# Caveat: this runtime-swap pattern only works for bundles served by the
+# standalone Next server itself. When the headless asset upload is enabled
+# (NEXT_PUBLIC_ASSET_PREFIX + R2_ASSETS_BUCKET set), the client bundles are
+# uploaded to R2 *during the build* — at which point the placeholders are
+# frozen into the uploaded files and the entrypoint sed has nothing to patch.
+# For values that must reach the headless CDN, supply them as build ARGs
+# (see NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT / NEXT_PUBLIC_DISCOUNT_PERCENT
+# below and NEXT_PUBLIC_ASSET_PREFIX further down).
 ENV NEXT_PUBLIC_BASE_URL="__NEXT_PUBLIC_BASE_URL__"
 ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__"
-ENV NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT="__NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT__"
-ENV NEXT_PUBLIC_DISCOUNT_PERCENT="__NEXT_PUBLIC_DISCOUNT_PERCENT__"
+
+# Discount config is consumed by client-side code (DiscountBadge, CartItem,
+# ExtraInfo) and therefore ends up in the chunks uploaded to R2 — bake the
+# real values in at build time. Defaults match docker-entrypoint.sh /
+# container-worker.js so an unset build env still produces a working image.
+ARG NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT="2"
+ARG NEXT_PUBLIC_DISCOUNT_PERCENT="10"
+ENV NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT=$NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT \
+    NEXT_PUBLIC_DISCOUNT_PERCENT=$NEXT_PUBLIC_DISCOUNT_PERCENT
 # Asset prefix used by Next.js for /_next/static/* + /_next/image.
 #
 # When supplied via wrangler `image_vars`, the real value is baked into the

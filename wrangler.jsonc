@@ -56,6 +56,14 @@
 				"TURBO_TEAMID": "team_ATZPkCXiYj2fRXGwHYQ1Zd27",
 				"NEXT_PUBLIC_ASSET_PREFIX": "https://assets.primalprinting.co.nz",
 				"R2_ASSETS_BUCKET": "primalprinting-assets",
+				// NEXT_PUBLIC_* discount config baked in at build time. Required
+				// because client bundles are uploaded to R2 during the build —
+				// runtime sed-replacement in docker-entrypoint.sh only patches
+				// the standalone server's local copy, not the bundles served
+				// from the headless asset CDN. Keep these in sync with the
+				// runtime defaults in container-worker.js / docker-entrypoint.sh.
+				"NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT": "2",
+				"NEXT_PUBLIC_DISCOUNT_PERCENT": "10",
 				// — Substituted from build-env Secrets at deploy time ——
 				"R2_S3_ENDPOINT": "${R2_S3_ENDPOINT}",
 				"R2_ACCESS_KEY_ID": "${R2_ACCESS_KEY_ID}",
