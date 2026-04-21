@@ -63,6 +63,46 @@ resource "cloudflare_r2_bucket_lifecycle" "staging_expiry" {
 }
 
 # ---------------------------------------------------------------------------
+# CORS policy for the staging bucket.
+#
+# Customers PUT their PDF uploads directly to this bucket from the browser
+# using short-lived presigned URLs issued by /api/shop/staging-urls. Without
+# CORS, the browser would block the cross-origin PUT and the upload would
+# fail with a generic network error.
+#
+# We only need PUT (browser → R2 upload) — the server-side SDK calls
+# (HEAD / GET / DELETE on staging objects) are made server-to-server and
+# don't go through the browser CORS check.
+# ---------------------------------------------------------------------------
+resource "cloudflare_r2_bucket_cors" "staging" {
+  account_id  = var.cloudflare_account_id
+  bucket_name = cloudflare_r2_bucket.order_staging.name
+
+  rules = [{
+    id = "allow-app-presigned-uploads"
+
+    allowed = {
+      methods = ["PUT"]
+      origins = concat(
+        ["https://primalprinting.co.nz", "https://www.primalprinting.co.nz"],
+        var.r2_staging_extra_cors_origins,
+      )
+      # Allow the headers the browser sets on a presigned PUT.
+      # `Content-Type` is required because the presigned URL is signed against
+      # the content type the server picked — the browser must echo it back.
+      headers = ["Content-Type", "Content-Length", "x-amz-content-sha256"]
+    }
+
+    # Expose ETag so the client can verify upload integrity if needed.
+    expose_headers = ["ETag"]
+
+    # 1h preflight cache. Lower than the asset bucket because uploads are
+    # rarer and we'd like CORS changes to roll out reasonably fast.
+    max_age_seconds = 3600
+  }]
+}
+
+# ---------------------------------------------------------------------------
 # R2 bucket for permanent order files (transferred here once payment is confirmed).
 # No lifecycle rule – files are retained indefinitely.
 # ---------------------------------------------------------------------------

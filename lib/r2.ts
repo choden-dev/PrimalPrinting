@@ -3,6 +3,7 @@ import {
 	CopyObjectCommand,
 	DeleteObjectCommand,
 	GetObjectCommand,
+	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
@@ -53,6 +54,36 @@ export function generateStagingKey(
 ): string {
 	const sanitised = originalFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
 	return `orders/${orderNumber}/${randomUUID()}-${sanitised}`;
+}
+
+/**
+ * Generate a customer-scoped staging key used for direct browser uploads
+ * via presigned PUT URLs.
+ *
+ * Format: `staging/<customerId>/<uuid>-<sanitisedFilename>`
+ *
+ * Embedding the `customerId` in the key prefix means we can verify ownership
+ * in the order-finalisation step without trusting any client-supplied data:
+ * the client can only claim a key whose prefix matches their own session.
+ */
+export function generateCustomerStagingKey(
+	customerId: string,
+	originalFileName: string,
+): string {
+	// Customer ID may include characters that S3 accepts but we'd rather not
+	// see in object keys (slashes, control chars). Sanitise defensively.
+	const safeCustomerId = String(customerId).replace(/[^a-zA-Z0-9._-]/g, "_");
+	const sanitised = originalFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+	return `staging/${safeCustomerId}/${randomUUID()}-${sanitised}`;
+}
+
+/**
+ * Returns true if the given staging key was generated for the given customer
+ * by `generateCustomerStagingKey`. Used to gate access during finalisation.
+ */
+export function isCustomerStagingKey(key: string, customerId: string): boolean {
+	const safeCustomerId = String(customerId).replace(/[^a-zA-Z0-9._-]/g, "_");
+	return key.startsWith(`staging/${safeCustomerId}/`);
 }
 
 /**
@@ -210,4 +241,87 @@ export async function getPresignedUrl(
 	});
 
 	return getSignedUrl(client, command, { expiresIn });
+}
+
+/**
+ * Generate a pre-signed URL for uploading (PUT) a file directly from the
+ * browser to the staging R2 bucket.
+ *
+ * The browser must send a matching `Content-Type` header on the PUT request
+ * so the signature validates. The URL is short-lived to limit the blast
+ * radius if it leaks.
+ */
+export async function getPresignedUploadUrl(
+	key: string,
+	contentType: string,
+	options?: { expiresIn?: number },
+): Promise<string> {
+	const client = getS3Client();
+	const expiresIn = options?.expiresIn ?? 5 * 60; // 5 minutes default
+
+	const command = new PutObjectCommand({
+		Bucket: getStagingBucket(),
+		Key: key,
+		ContentType: contentType,
+	});
+
+	return getSignedUrl(client, command, { expiresIn });
+}
+
+// ── Read operations ──────────────────────────────────────────────────────
+
+/**
+ * HEAD an object in the staging bucket. Returns the object metadata
+ * (size + content-type) or `null` if the object does not exist.
+ *
+ * Used during order finalisation to verify that a client-supplied staging
+ * key actually corresponds to a successfully-uploaded object.
+ */
+export async function headStagingObject(
+	key: string,
+): Promise<{ contentLength: number; contentType: string } | null> {
+	const client = getS3Client();
+	try {
+		const result = await client.send(
+			new HeadObjectCommand({
+				Bucket: getStagingBucket(),
+				Key: key,
+			}),
+		);
+		return {
+			contentLength: result.ContentLength ?? 0,
+			contentType: result.ContentType ?? "application/octet-stream",
+		};
+	} catch (err) {
+		const status = (err as { $metadata?: { httpStatusCode?: number } })
+			?.$metadata?.httpStatusCode;
+		if (status === 404 || status === 403) return null;
+		throw err;
+	}
+}
+
+/**
+ * Download an object from the staging bucket as a Buffer. Used by the
+ * order-finalisation endpoint to read the uploaded PDF for page counting.
+ */
+export async function downloadFromStaging(key: string): Promise<Buffer> {
+	const client = getS3Client();
+	const result = await client.send(
+		new GetObjectCommand({
+			Bucket: getStagingBucket(),
+			Key: key,
+		}),
+	);
+
+	if (!result.Body) {
+		throw new Error(`Staging object ${key} has no body.`);
+	}
+
+	// `result.Body` in the AWS SDK v3 is a Readable | ReadableStream | Blob
+	// depending on the runtime. `transformToByteArray` is the cross-runtime
+	// helper exposed by the SDK for collecting the whole body into memory.
+	const bytes = await (
+		result.Body as { transformToByteArray: () => Promise<Uint8Array> }
+	).transformToByteArray();
+	return Buffer.from(bytes);
 }

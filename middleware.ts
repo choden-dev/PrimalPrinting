@@ -6,27 +6,36 @@ import { getToken } from "next-auth/jwt";
  * Middleware to protect order-related API routes that require authentication.
  *
  * Public routes (no auth required):
- * - GET  /api/timeslots          – list available pickup slots
- * - POST /api/shop/upload      – upload files (auth checked in handler for flexibility)
- * - /api/auth/*                  – NextAuth routes
- * - /api/webhooks/*              – Stripe webhooks
- * - /api/cron/*                  – Cron jobs (protected by CRON_SECRET instead)
- * - /admin/*                     – Payload admin (has its own auth)
- * - All non-API routes           – public pages
+ * - GET  /api/pickup-slots           – list available pickup slots
+ * - /api/auth/*                      – NextAuth routes
+ * - /api/webhooks/*                  – Stripe webhooks
+ * - /api/cron/*                      – Cron jobs (protected by CRON_SECRET instead)
+ * - /admin/*                         – Payload admin (has its own auth)
+ * - All non-API routes               – public pages
  *
  * Protected routes (require NextAuth session):
- * - POST/PATCH /api/shop       – create / update orders
- * - GET /api/shop/my-orders    – user's order history
- * - POST /api/shop/:id/*       – payment, timeslot selection
+ * - POST/PATCH /api/shop/orders      – create / finalise orders
+ * - POST       /api/shop/staging-urls – issue presigned upload URLs
+ * - POST       /api/shop/upload-proof – upload bank transfer proof
+ * - GET        /api/shop/my-orders   – user's order history
+ * - *          /api/shop/:id/*       – payment, timeslot selection, etc.
  */
 
-// Routes that require authentication
+// Routes that require authentication. Each handler performs its own
+// `getAuthenticatedCustomer` check too — this middleware is defence in depth.
+//
+// NOTE: `/api/shop/bank-details` is intentionally PUBLIC and must not be
+// covered by any pattern below.
 const PROTECTED_PATTERNS = [
-	/^\/api\/orders$/, // POST/PATCH create/update orders
-	/^\/api\/orders\/my-orders$/, // GET user's order list
-	/^\/api\/orders\/[^/]+\/create-payment-intent$/, // POST payment intent
-	/^\/api\/orders\/[^/]+\/submit-bank-transfer$/, // POST bank transfer proof
-	/^\/api\/orders\/[^/]+\/select-timeslot$/, // POST select timeslot
+	/^\/api\/shop\/orders$/, // POST/PATCH create/finalise orders
+	/^\/api\/shop\/staging-urls$/, // POST issue presigned upload URLs
+	/^\/api\/shop\/upload-proof$/, // POST bank transfer proof image
+	/^\/api\/shop\/my-orders$/, // GET user's order list
+	/^\/api\/shop\/[^/]+\/create-payment-intent$/, // POST payment intent
+	/^\/api\/shop\/[^/]+\/submit-bank-transfer$/, // POST bank transfer proof submission
+	/^\/api\/shop\/[^/]+\/select-timeslot$/, // POST select timeslot
+	/^\/api\/shop\/[^/]+\/approve-payment$/, // POST approve payment (admin)
+	/^\/api\/shop\/[^/]+\/delete$/, // POST delete order
 ];
 
 export async function middleware(request: NextRequest) {
