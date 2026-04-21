@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { checkBankTransferEligibility } from "../../../../lib/bankTransfer";
+import { parseMultipartFormData } from "../../../../lib/formData";
 import { uploadBankTransferProof } from "../../../../lib/r2";
 
 /**
@@ -17,12 +18,19 @@ import { uploadBankTransferProof } from "../../../../lib/r2";
  */
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+// Body cap — single image plus a generous slack for multipart overhead and
+// the small `orderNumber` field. Anything larger is rejected before the
+// runtime even attempts to parse the multipart payload.
+const MAX_PROOF_BODY_SIZE = MAX_IMAGE_SIZE + 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = [
 	"image/jpeg",
 	"image/png",
 	"image/webp",
 	"image/jpg",
 ];
+
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
 	const customer = await getAuthenticatedCustomer(request);
@@ -33,8 +41,23 @@ export async function POST(request: NextRequest) {
 		);
 	}
 
+	// Parse the multipart body via the shared safe helper so customers see a
+	// clear, actionable error instead of the runtime's bare
+	// "Failed to parse body as FormData" when the upload is too large or
+	// gets truncated mid-stream.
+	const parseResult = await parseMultipartFormData(
+		request,
+		MAX_PROOF_BODY_SIZE,
+	);
+	if (!parseResult.ok) {
+		return NextResponse.json(
+			{ error: parseResult.error.message },
+			{ status: parseResult.error.status },
+		);
+	}
+	const formData = parseResult.formData;
+
 	try {
-		const formData = await request.formData();
 		const image = formData.get("image") as File | null;
 		const orderNumber = formData.get("orderNumber") as string | null;
 
@@ -65,17 +88,20 @@ export async function POST(request: NextRequest) {
 
 		if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
 			return NextResponse.json(
-				{ error: "Only JPEG, PNG, and WebP images are accepted." },
+				{
+					error: `Unsupported image type "${image.type || "unknown"}". Only JPEG, PNG, and WebP images are accepted.`,
+				},
 				{ status: 400 },
 			);
 		}
 
 		if (image.size > MAX_IMAGE_SIZE) {
+			const mb = (image.size / 1024 / 1024).toFixed(1);
 			return NextResponse.json(
 				{
-					error: `Image too large. Maximum size is ${MAX_IMAGE_SIZE / 1024 / 1024}MB.`,
+					error: `Image too large (${mb}MB). Maximum size is ${MAX_IMAGE_SIZE / 1024 / 1024}MB. Please compress or resize the image and try again.`,
 				},
-				{ status: 400 },
+				{ status: 413 },
 			);
 		}
 
@@ -93,7 +119,12 @@ export async function POST(request: NextRequest) {
 	} catch (error) {
 		console.error("Error uploading proof:", error);
 		return NextResponse.json(
-			{ error: "Failed to upload proof image." },
+			{
+				error:
+					error instanceof Error
+						? `Failed to upload proof image: ${error.message}`
+						: "Failed to upload proof image.",
+			},
 			{ status: 500 },
 		);
 	}

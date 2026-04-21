@@ -108,19 +108,50 @@ export function BankTransferForm({
 			setError(null);
 
 			try {
+				// ── Defensive client-side validation ────────────────────────
+				// Mirrors the server-side limits in
+				// app/api/shop/upload-proof/route.ts so customers get an
+				// instant, descriptive error before the upload is attempted.
+				if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+					throw new Error(
+						`Unsupported image type "${selectedFile.type || "unknown"}". Only JPEG, PNG, and WebP images are accepted.`,
+					);
+				}
+				if (selectedFile.size > MAX_FILE_SIZE) {
+					const mb = (selectedFile.size / 1024 / 1024).toFixed(1);
+					throw new Error(
+						`Image too large (${mb}MB). Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB. Please compress or resize the image and try again.`,
+					);
+				}
+
 				// Step 1: Upload proof image
 				const uploadFormData = new FormData();
 				uploadFormData.append("image", selectedFile);
 				uploadFormData.append("orderNumber", orderNumber);
 
-				const uploadRes = await fetch("/api/shop/upload-proof", {
-					method: "POST",
-					body: uploadFormData,
-				});
+				let uploadRes: Response;
+				try {
+					uploadRes = await fetch("/api/shop/upload-proof", {
+						method: "POST",
+						body: uploadFormData,
+					});
+				} catch (networkErr) {
+					throw new Error(
+						`Upload failed before reaching the server — your connection may have dropped. Please check your internet and try again. (${
+							networkErr instanceof Error ? networkErr.message : "network error"
+						})`,
+					);
+				}
 
 				if (!uploadRes.ok) {
-					const data = await uploadRes.json();
-					throw new Error(data.error || "Failed to upload proof image.");
+					let serverMessage = `Failed to upload proof image (HTTP ${uploadRes.status}).`;
+					try {
+						const data = await uploadRes.json();
+						if (data?.error) serverMessage = data.error;
+					} catch {
+						// Response body wasn't JSON — keep the HTTP-status message.
+					}
+					throw new Error(serverMessage);
 				}
 
 				const { proofKey } = await uploadRes.json();
