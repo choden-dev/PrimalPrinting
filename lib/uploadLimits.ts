@@ -32,8 +32,18 @@ export const ALLOWED_FILE_TYPES = ["application/pdf"] as const;
 /**
  * Lifetime of presigned PUT URLs issued by /api/shop/staging-urls.
  *
- * Sized to comfortably accommodate uploading a max-size file on a slow
- * NZ home connection (~10 Mbps): 100 MB at 1 MB/s ≈ 100s, so 15 min gives
- * a generous safety margin and lets retries happen within a single TTL.
+ * Kept deliberately short to limit the blast radius if a URL leaks (e.g.
+ * via browser history, shared logs, or a tampered client). 3 minutes is
+ * comfortable for the median real-world upload:
+ *   - 100 MB at 10 Mbps (≈1.25 MB/s) ≈ 80s
+ *   - 100 MB at 5  Mbps (≈0.6  MB/s) ≈ 165s — still inside the window
+ *
+ * Customers on slower connections (rural / mobile) uploading near-cap
+ * files may need a fresh URL — the client surfaces a clear retry prompt
+ * if a signed PUT 403s after expiry.
+ *
+ * Trade-off: if you raise MAX_FILE_SIZE_BYTES in the future, also raise
+ * this — a max-size file must be able to upload comfortably within one
+ * TTL window even on a slow link.
  */
-export const PRESIGN_TTL_SECONDS = 15 * 60;
+export const PRESIGN_TTL_SECONDS = 3 * 60;
