@@ -4,6 +4,13 @@ import {
 	generateCustomerStagingKey,
 	getPresignedUploadUrl,
 } from "../../../../lib/r2";
+import {
+	ALLOWED_FILE_TYPES,
+	MAX_FILE_SIZE_BYTES,
+	MAX_FILE_SIZE_MB,
+	MAX_FILES_PER_ORDER,
+	PRESIGN_TTL_SECONDS,
+} from "../../../../lib/uploadLimits";
 
 /**
  * POST /api/shop/staging-urls — Issue presigned PUT URLs so the browser can
@@ -31,11 +38,6 @@ import {
 
 export const runtime = "nodejs";
 export const maxDuration = 10;
-
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB per file
-const MAX_FILES_PER_ORDER = 25;
-const ALLOWED_TYPES = ["application/pdf"];
-const PRESIGN_TTL_SECONDS = 5 * 60;
 
 type RequestedUpload = {
 	name?: unknown;
@@ -99,16 +101,18 @@ export async function POST(request: NextRequest) {
 				{ status: 400 },
 			);
 		}
-		if (size > MAX_FILE_SIZE) {
+		if (size > MAX_FILE_SIZE_BYTES) {
 			const mb = (size / 1024 / 1024).toFixed(1);
 			return NextResponse.json(
 				{
-					error: `"${name}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB per-file limit.`,
+					error: `"${name}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE_MB}MB per-file limit.`,
 				},
 				{ status: 413 },
 			);
 		}
-		if (!ALLOWED_TYPES.includes(type)) {
+		if (
+			!ALLOWED_FILE_TYPES.includes(type as (typeof ALLOWED_FILE_TYPES)[number])
+		) {
 			return NextResponse.json(
 				{
 					error: `"${name}" has unsupported type "${type || "unknown"}". Only PDF files are accepted.`,

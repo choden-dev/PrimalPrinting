@@ -8,15 +8,19 @@ import {
 	isCustomerStagingKey,
 } from "../../../../lib/r2";
 import { calculateOrderTotal } from "../../../../lib/stripe";
-
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB per file
-const MAX_FILES_PER_ORDER = 25;
-const ALLOWED_FILE_TYPES = ["application/pdf"];
+import {
+	ALLOWED_FILE_TYPES,
+	MAX_FILE_SIZE_BYTES,
+	MAX_FILE_SIZE_MB,
+	MAX_FILES_PER_ORDER,
+} from "../../../../lib/uploadLimits";
 
 // Run on the Node.js runtime — required for Buffer + the S3 client used by
 // downloadFromStaging.
 export const runtime = "nodejs";
 // Allow time for HEAD + page-counting downloads of every file in an order.
+// 25 files × 100MB at typical R2 download speeds (~50MB/s sustained) =
+// ~50s, with parallelism this comfortably fits in 60s.
 export const maxDuration = 60;
 
 /**
@@ -198,13 +202,17 @@ export async function POST(request: NextRequest) {
 						`"${v.fileName}" arrived as an empty file. Please try uploading again.`,
 					);
 				}
-				if (head.contentLength > MAX_FILE_SIZE) {
+				if (head.contentLength > MAX_FILE_SIZE_BYTES) {
 					const mb = (head.contentLength / 1024 / 1024).toFixed(1);
 					throw new Error(
-						`"${v.fileName}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB per-file limit.`,
+						`"${v.fileName}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE_MB}MB per-file limit.`,
 					);
 				}
-				if (!ALLOWED_FILE_TYPES.includes(head.contentType)) {
+				if (
+					!ALLOWED_FILE_TYPES.includes(
+						head.contentType as (typeof ALLOWED_FILE_TYPES)[number],
+					)
+				) {
 					throw new Error(
 						`"${v.fileName}" has unsupported type "${head.contentType}". Only PDF files are accepted.`,
 					);

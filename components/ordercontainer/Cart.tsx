@@ -15,6 +15,11 @@ import {
 	requestPresignedUrls,
 	uploadFilesWithProgress,
 } from "../../lib/uploadClient";
+import {
+	MAX_FILE_SIZE_BYTES,
+	MAX_FILE_SIZE_MB,
+	MAX_FILES_PER_ORDER,
+} from "../../lib/uploadLimits";
 import type CartItem from "../../types/models/CartItem";
 import DiscountBadge from "../discountbadge/DiscountBadge";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
@@ -186,12 +191,8 @@ const Cart = ({
 		}
 
 		// ── Client-side validation ─────────────────────────────────────────
-		// Keep these in sync with the server-side limits defined in
-		// app/api/shop/staging-urls/route.ts and app/api/shop/orders/route.ts
-		// (MAX_FILE_SIZE / MAX_FILES_PER_ORDER).
-		const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB per file
-		const MAX_FILES_PER_ORDER = 25;
-
+		// Limits are imported from lib/uploadLimits.ts so client + server can
+		// never drift apart.
 		if (uploadedPdfs.length > MAX_FILES_PER_ORDER) {
 			window.alert(
 				`You've added ${uploadedPdfs.length} files. The maximum is ${MAX_FILES_PER_ORDER} per order. Please remove some files and try again.`,
@@ -199,11 +200,13 @@ const Cart = ({
 			return;
 		}
 
-		const oversized = uploadedPdfs.find((pdf) => pdf.file.size > MAX_FILE_SIZE);
+		const oversized = uploadedPdfs.find(
+			(pdf) => pdf.file.size > MAX_FILE_SIZE_BYTES,
+		);
 		if (oversized) {
 			const mb = (oversized.file.size / 1024 / 1024).toFixed(1);
 			window.alert(
-				`"${oversized.displayName}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB per-file limit. Please compress or split the PDF and try again.`,
+				`"${oversized.displayName}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE_MB}MB per-file limit. Please compress or split the PDF and try again.`,
 			);
 			return;
 		}
