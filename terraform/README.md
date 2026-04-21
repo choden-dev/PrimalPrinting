@@ -51,6 +51,7 @@ terraform apply
 | `r2_staging_bucket_name`   | ❌        | `primalprinting-staging` | Temporary order files (auto-expired)                                                       |
 | `r2_permanent_bucket_name` | ❌        | `primalprinting-orders`  | Permanent order files                                                                      |
 | `r2_staging_expiry_days`   | ❌        | `7`                      | Auto-expiry window for the staging bucket                                                  |
+| `r2_staging_extra_cors_origins` | ❌   | `[]`                     | Extra origins (staging hosts, PR previews) allowed to PUT direct uploads to the staging bucket. Production hostname + www. are always allowed. |
 | `r2_assets_bucket_name`    | ❌        | `primalprinting-assets`  | Static-asset bucket used for headless `assetPrefix` serving                                |
 | `r2_assets_custom_domain`  | ❌        | `""`                     | Custom domain for the assets bucket (e.g. `assets.primalprinting.com`). Empty = R2.dev URL |
 | `r2_assets_zone_id`        | ❌        | `""`                     | Zone ID owning `r2_assets_custom_domain`. Required if a custom domain is set               |

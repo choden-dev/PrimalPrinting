@@ -39,6 +39,12 @@ variable "r2_staging_expiry_days" {
   default     = 7
 }
 
+variable "r2_staging_extra_cors_origins" {
+  description = "Additional origins allowed to PUT/GET directly against the staging R2 bucket via presigned URLs (e.g. staging or PR-preview hostnames). The production hostname and its www. subdomain are always included automatically. Each entry must be a full origin (scheme + host, no trailing slash)."
+  type        = list(string)
+  default     = []
+}
+
 # ---------------------------------------------------------------------------
 # Headless static-asset hosting
 # ---------------------------------------------------------------------------

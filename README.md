@@ -57,6 +57,21 @@ After applying, create an **R2 API Token** in the Cloudflare dashboard (R2 → M
 
 Finally, enable public access on the bucket (either via the R2.dev subdomain or a custom domain) and set `R2_PUBLIC_URL` accordingly. See [`terraform/README.md`](./terraform/README.md) for details.
 
+#### Direct browser uploads (`/order` PDF flow)
+
+Customer PDF uploads on the `/order` page are PUT **directly** from the
+browser to the R2 staging bucket via short-lived presigned URLs issued by
+`POST /api/shop/staging-urls`. The bytes never traverse the Next.js server,
+which sidesteps Cloudflare Worker / Container body-size limits and lets us
+report real upload progress.
+
+This requires the staging bucket to allow cross-origin `PUT` from the app's
+origin. Terraform configures this via `cloudflare_r2_bucket_cors.staging`
+in [`terraform/main.tf`](./terraform/main.tf) — the production hostname and
+its `www.` subdomain are allowed by default, plus any extras you list in the
+`r2_staging_extra_cors_origins` Terraform variable (handy for staging /
+PR-preview deploys).
+
 ### Development
 
 ```bash

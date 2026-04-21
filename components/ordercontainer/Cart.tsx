@@ -11,6 +11,10 @@ import {
 import { useCallback, useContext, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { CartContext } from "../../contexts/CartContext";
+import {
+	requestPresignedUrls,
+	uploadFilesWithProgress,
+} from "../../lib/uploadClient";
 import type CartItem from "../../types/models/CartItem";
 import DiscountBadge from "../discountbadge/DiscountBadge";
 import QuantityPicker from "../quantitypicker/QuantityPicker";
@@ -154,9 +158,16 @@ const Cart = ({
 	const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
 	/**
-	 * Upload all PDFs and create the order in a single request.
-	 * Files are sent as multipart form data — the server handles
-	 * R2 upload, page counting, and pricing.
+	 * Upload all PDFs to R2 via presigned PUT URLs (with real per-file
+	 * progress), then call /api/shop/orders to finalise the DRAFT order.
+	 *
+	 * The bytes never traverse our server — the browser PUTs straight to R2.
+	 * This avoids the Cloudflare Worker / Container body-size limits that
+	 * caused the original "Failed to parse body as FormData" failures, and
+	 * lets us show real upload progress via XHR.upload.onprogress.
+	 *
+	 * Client-side validation mirrors the server limits so customers get
+	 * instant, descriptive errors before any bytes leave their machine.
 	 */
 	const handleOrderNow = useCallback(async () => {
 		const cartValid =
@@ -174,6 +185,47 @@ const Cart = ({
 			return;
 		}
 
+		// ── Client-side validation ─────────────────────────────────────────
+		// Keep these in sync with the server-side limits defined in
+		// app/api/shop/staging-urls/route.ts and app/api/shop/orders/route.ts
+		// (MAX_FILE_SIZE / MAX_FILES_PER_ORDER).
+		const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB per file
+		const MAX_FILES_PER_ORDER = 25;
+
+		if (uploadedPdfs.length > MAX_FILES_PER_ORDER) {
+			window.alert(
+				`You've added ${uploadedPdfs.length} files. The maximum is ${MAX_FILES_PER_ORDER} per order. Please remove some files and try again.`,
+			);
+			return;
+		}
+
+		const oversized = uploadedPdfs.find((pdf) => pdf.file.size > MAX_FILE_SIZE);
+		if (oversized) {
+			const mb = (oversized.file.size / 1024 / 1024).toFixed(1);
+			window.alert(
+				`"${oversized.displayName}" is ${mb}MB, which exceeds the ${MAX_FILE_SIZE / 1024 / 1024}MB per-file limit. Please compress or split the PDF and try again.`,
+			);
+			return;
+		}
+
+		const wrongType = uploadedPdfs.find(
+			(pdf) => pdf.file.type && pdf.file.type !== "application/pdf",
+		);
+		if (wrongType) {
+			window.alert(
+				`"${wrongType.displayName}" is not a PDF (${wrongType.file.type}). Only PDF files are accepted.`,
+			);
+			return;
+		}
+
+		const empty = uploadedPdfs.find((pdf) => pdf.file.size === 0);
+		if (empty) {
+			window.alert(
+				`"${empty.displayName}" is empty (0 bytes). Please re-add the file and try again.`,
+			);
+			return;
+		}
+
 		setIsCreatingOrder(true);
 		setIsProcessing(true);
 		setCurrentlyUploading(
@@ -181,28 +233,64 @@ const Cart = ({
 		);
 
 		try {
-			const formData = new FormData();
-
-			// Append each PDF file
-			const metadata = uploadedPdfs.map((pdf) => ({
-				copies: pdf.getQuantity(),
-				colorMode: pdf.isColor ? "COLOR" : "BW",
+			// Step 1: Ask the server for presigned PUT URLs for each file.
+			const filesToUpload = uploadedPdfs.map((pdf) => ({
+				file: pdf.file,
+				displayName: pdf.displayName,
 			}));
+			const uploads = await requestPresignedUrls(filesToUpload);
 
-			for (const pdf of uploadedPdfs) {
-				formData.append("files", pdf.file);
-			}
-
-			formData.append("metadata", JSON.stringify(metadata));
-
-			const orderRes = await fetch("/api/shop/orders", {
-				method: "POST",
-				body: formData,
+			// Step 2: PUT each file directly to R2 with real progress events.
+			//   - Concurrency 3 keeps the customer's connection responsive
+			//     while still parallelising for speed.
+			//   - 1 automatic retry recovers from transient network blips.
+			const uploaded = await uploadFilesWithProgress({
+				files: filesToUpload,
+				uploads,
+				concurrency: 3,
+				retries: 1,
+				onProgress: ({ displayName, percent }) => {
+					setCurrentlyUploading((prev) =>
+						prev.map((p) => (p.name === displayName ? { ...p, percent } : p)),
+					);
+				},
 			});
 
+			// Step 3: Finalise the order with the server. Tiny JSON payload —
+			// no multipart, no body-size concerns.
+			const finaliseBody = {
+				files: uploaded.map((u, i) => ({
+					stagingKey: u.stagingKey,
+					fileName: u.file.file.name,
+					copies: uploadedPdfs[i].getQuantity(),
+					colorMode: uploadedPdfs[i].isColor ? "COLOR" : "BW",
+				})),
+			};
+
+			let orderRes: Response;
+			try {
+				orderRes = await fetch("/api/shop/orders", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(finaliseBody),
+				});
+			} catch (networkErr) {
+				throw new Error(
+					`Could not reach the server to finalise the order — your connection may have dropped. Please try again. (${
+						networkErr instanceof Error ? networkErr.message : "network error"
+					})`,
+				);
+			}
+
 			if (!orderRes.ok) {
-				const err = await orderRes.json();
-				throw new Error(err.error || "Failed to create order.");
+				let serverMessage = `Failed to create order (HTTP ${orderRes.status}).`;
+				try {
+					const err = await orderRes.json();
+					if (err?.error) serverMessage = err.error;
+				} catch {
+					// Response body wasn't JSON — keep the HTTP-status message.
+				}
+				throw new Error(serverMessage);
 			}
 
 			const { order } = await orderRes.json();
