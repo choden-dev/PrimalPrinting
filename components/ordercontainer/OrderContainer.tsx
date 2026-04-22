@@ -23,15 +23,28 @@ import ExtraInfo from "./ExtraInfo";
 import OrderSteps from "./OrderSteps";
 import PdfOrder from "./PdfOrder";
 
-const OrderContainer = () => {
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type OrderContainerProps = {
+	contactInfo: ContactInfoData;
+};
+
+const OrderContainer = ({ contactInfo }: OrderContainerProps) => {
 	return (
 		<CartContextProvider>
-			<OrderContainerInner />
+			<OrderContainerInner contactInfo={contactInfo} />
 		</CartContextProvider>
 	);
 };
 
-const OrderContainerInner = () => {
+const OrderContainerInner = ({
+	contactInfo,
+}: {
+	contactInfo: ContactInfoData;
+}) => {
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [currentlyUploading, setCurrentlyUploading] = useState<
 		{ name: string; percent: number }[]
@@ -177,7 +190,7 @@ const OrderContainerInner = () => {
 						⏳ Resuming your order…
 					</Text>
 				</Box>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</>
 		);
 	}
@@ -210,7 +223,7 @@ const OrderContainerInner = () => {
 					onPaymentSuccess={handlePaymentSuccess}
 					onPickupConfirmed={handlePickupConfirmed}
 				/>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</>
 		);
 	}
@@ -354,7 +367,7 @@ const OrderContainerInner = () => {
 					setCurrentlyUploading={setCurrentlyUploading}
 				/>
 			</Box>
-			<Footer />
+			<Footer contactInfo={contactInfo} />
 		</>
 	);
 };

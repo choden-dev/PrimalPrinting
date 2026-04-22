@@ -2,9 +2,37 @@ import { Box, Button, Divider, Heading, Spinner, Text } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { getPayloadClient } from "@/lib/payload";
 import Footer from "../components/footer/Footer";
 import NoSsr from "../components/NoSsr";
 import NavBar from "../components/navbar/NavBar";
+
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type PageProps = {
+	contactInfo: ContactInfoData;
+};
+
+export async function getServerSideProps() {
+	try {
+		const payload = await getPayloadClient();
+		const contactInfo = await payload.findGlobal({ slug: "contact-info" });
+		return {
+			props: {
+				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
+			},
+		};
+	} catch {
+		return {
+			props: {
+				contactInfo: { email: "", phone: "" },
+			},
+		};
+	}
+}
 
 interface OrderDetails {
 	orderNumber: string;
@@ -32,7 +60,7 @@ interface OrderDetails {
  *
  * Fetches the order from the API and shows a confirmation summary.
  */
-const OrderComplete: NextPage = () => {
+const OrderComplete: NextPage<PageProps> = ({ contactInfo }) => {
 	const router = useRouter();
 	const orderId = router.query.orderId as string | undefined;
 	const [order, setOrder] = useState<OrderDetails | null>(null);
@@ -218,7 +246,7 @@ const OrderComplete: NextPage = () => {
 						</>
 					)}
 				</Box>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</Box>
 		</NoSsr>
 	);
