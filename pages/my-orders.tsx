@@ -11,6 +11,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { getPayloadClient } from "@/lib/payload";
 import Footer from "../components/footer/Footer";
 import NavBar from "../components/navbar/NavBar";
 import { useAuth } from "../contexts/AuthContext";
@@ -19,6 +20,33 @@ import {
 	type OrderStatusValue,
 	RESUMABLE_STATUSES,
 } from "../types/orderStatus";
+
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type PageProps = {
+	contactInfo: ContactInfoData;
+};
+
+export async function getServerSideProps() {
+	try {
+		const payload = await getPayloadClient();
+		const contactInfo = await payload.findGlobal({ slug: "contact-info" });
+		return {
+			props: {
+				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
+			},
+		};
+	} catch {
+		return {
+			props: {
+				contactInfo: { email: "", phone: "" },
+			},
+		};
+	}
+}
 
 interface Order {
 	id: string;
@@ -67,7 +95,7 @@ const containerProps = {
 	borderRadius: "8px",
 };
 
-const MyOrders: NextPage = () => {
+const MyOrders: NextPage<PageProps> = ({ contactInfo }) => {
 	const { isAuthenticated, isLoading: authLoading, login, name } = useAuth();
 	const router = useRouter();
 	const [orders, setOrders] = useState<Order[]>([]);
@@ -113,7 +141,7 @@ const MyOrders: NextPage = () => {
 							Sign in with Google
 						</Button>
 					</Box>
-					<Footer />
+					<Footer contactInfo={contactInfo} />
 				</Box>
 			</>
 		);
@@ -286,7 +314,7 @@ const MyOrders: NextPage = () => {
 						</Box>
 					)}
 				</Box>
-				<Footer />
+				<Footer contactInfo={contactInfo} />
 			</Box>
 		</>
 	);

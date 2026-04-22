@@ -8,7 +8,6 @@ import {
 	UnorderedList,
 	useMediaQuery,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 import SocialLinks from "../sociallinks/sociallinks";
 
 type ContactInfoData = {
@@ -17,36 +16,13 @@ type ContactInfoData = {
 };
 
 type Props = {
-	contactInfo?: ContactInfoData;
+	contactInfo: ContactInfoData;
 };
 
 export default function Footer({ contactInfo }: Props) {
 	const [smallScreen] = useMediaQuery("(max-width: 800px)");
-	const [fetchedContact, setFetchedContact] = useState<ContactInfoData | null>(
-		null,
-	);
-
-	// Fetch contact info from Payload if not passed as prop
-	useEffect(() => {
-		if (contactInfo?.email || contactInfo?.phone) return;
-
-		async function fetchContact() {
-			try {
-				const res = await fetch("/api/globals/contact-info");
-				if (res.ok) {
-					const data = await res.json();
-					setFetchedContact(data);
-				}
-			} catch {
-				// Silently fail
-			}
-		}
-		fetchContact();
-	}, [contactInfo]);
-
-	const contact = contactInfo?.email ? contactInfo : fetchedContact;
-	const email = contact?.email || "";
-	const phone = contact?.phone || "";
+	const email = contactInfo.email || "";
+	const phone = contactInfo.phone || "";
 
 	return (
 		<Box

@@ -1,17 +1,38 @@
 import { Box } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { getPayloadClient } from "@/lib/payload";
 import NavBar from "../components/navbar/NavBar";
 import OrderContainer from "../components/ordercontainer/OrderContainer";
-export async function getStaticProps() {
-	return {
-		props: {
-			packages: [], // packages,
-		},
-		revalidate: 60 * 60,
-	};
+
+type ContactInfoData = {
+	email: string;
+	phone: string;
+};
+
+type PageProps = {
+	contactInfo: ContactInfoData;
+};
+
+export async function getServerSideProps() {
+	try {
+		const payload = await getPayloadClient();
+		const contactInfo = await payload.findGlobal({ slug: "contact-info" });
+		return {
+			props: {
+				contactInfo: JSON.parse(JSON.stringify(contactInfo)),
+			},
+		};
+	} catch {
+		return {
+			props: {
+				contactInfo: { email: "", phone: "" },
+			},
+		};
+	}
 }
-const Order: NextPage = () => {
+
+const Order: NextPage<PageProps> = ({ contactInfo }) => {
 	return (
 		<>
 			<Head>
@@ -30,7 +51,7 @@ const Order: NextPage = () => {
 			</Head>
 			<Box className="container">
 				<NavBar />
-				<OrderContainer />
+				<OrderContainer contactInfo={contactInfo} />
 			</Box>
 		</>
 	);
