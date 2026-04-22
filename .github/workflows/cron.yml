@@ -6,6 +6,8 @@
 #
 # Required repository secrets:
 #   CRON_SECRET  – shared secret the API checks via `Authorization: Bearer <secret>`
+#
+# Required repository variables (Settings → Secrets and variables → Actions → Variables):
 #   DEPLOY_URL   – base URL of the deployed app (e.g. https://example.com)
 
 name: Cron jobs
@@ -77,7 +79,7 @@ jobs:
     steps:
       - name: Call ${{ matrix.endpoint }}
         env:
-          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           set -euo pipefail
