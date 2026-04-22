@@ -1,0 +1,109 @@
+# Scheduled cron jobs
+#
+# This workflow calls the app's /api/cron/* endpoints on a schedule.
+# Each job is defined in the matrix below, making it easy to add new
+# endpoints with independent cadences.
+#
+# Required repository secrets:
+#   CRON_SECRET  – shared secret the API checks via `Authorization: Bearer <secret>`
+#   DEPLOY_URL   – base URL of the deployed app (e.g. https://example.com)
+
+name: Cron jobs
+
+on:
+  # ────────────────────────────────────────────────────────────
+  # Add a new `cron` entry here when you need a different cadence.
+  # Give each entry a descriptive id (used in the job `if` condition).
+  #
+  # IMPORTANT: when you add a schedule here, also add a matching
+  #            entry in `jobs.run.strategy.matrix.include` below.
+  # ────────────────────────────────────────────────────────────
+  schedule:
+    # Every day at 03:00 UTC
+    - cron: "0 3 * * *" # schedule-id: daily
+
+  # Allow manual triggering from the Actions tab.
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        description: "Cron endpoint to invoke (leave 'all' to run every endpoint)"
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - /api/cron/expire-orders
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Don't cancel siblings if one endpoint fails.
+      fail-fast: false
+
+      # ──────────────────────────────────────────────────────
+      # CRON ENDPOINT REGISTRY
+      #
+      # To add a new cron endpoint:
+      #   1. Add a schedule entry under `on.schedule` above
+      #      (if it needs a cadence not already listed).
+      #   2. Add an `include` entry here with:
+      #        name       – human-readable label
+      #        endpoint   – path relative to DEPLOY_URL
+      #        method     – HTTP method the route expects
+      #        schedule   – cron expression matching the one
+      #                     in `on.schedule` that should trigger it
+      # ──────────────────────────────────────────────────────
+      matrix:
+        include:
+          - name: Expire stale orders
+            endpoint: /api/cron/expire-orders
+            method: POST
+            schedule: "0 3 * * *"
+
+    name: ${{ matrix.name }}
+
+    # Run when:
+    #   • manually dispatched (workflow_dispatch) AND either no endpoint filter
+    #     was given or the filter matches this matrix entry, OR
+    #   • the schedule cron expression matches this entry's schedule.
+    if: >-
+      github.event_name == 'workflow_dispatch'
+        && (github.event.inputs.endpoint == 'all' || github.event.inputs.endpoint == matrix.endpoint)
+      || github.event_name == 'schedule'
+        && github.event.schedule == matrix.schedule
+
+    steps:
+      - name: Call ${{ matrix.endpoint }}
+        env:
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+
+          url="${DEPLOY_URL}${{ matrix.endpoint }}"
+          method="${{ matrix.method }}"
+
+          echo "::group::Request"
+          echo "→ ${method} ${url}"
+          echo "::endgroup::"
+
+          response=$(curl -s -w "\n%{http_code}" \
+            -X "${method}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json" \
+            "${url}")
+
+          # Split body and status code
+          http_code=$(echo "${response}" | tail -n1)
+          body=$(echo "${response}" | sed '$d')
+
+          echo "::group::Response (HTTP ${http_code})"
+          echo "${body}"
+          echo "::endgroup::"
+
+          if [[ "${http_code}" -lt 200 || "${http_code}" -ge 300 ]]; then
+            echo "::error::Cron endpoint returned HTTP ${http_code}"
+            exit 1
+          fi
