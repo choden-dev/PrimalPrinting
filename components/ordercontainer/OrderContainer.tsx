@@ -11,6 +11,7 @@ import {
 	useMediaQuery,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CartContextProvider } from "@/contexts/CartContext";
@@ -181,23 +182,20 @@ const OrderContainerInner = ({
 	// Show loading spinner while resuming an order
 	const isResuming = (resumeOrderId || pickupForOrderId) && !resumeChecked;
 
-	if (isResuming) {
-		return (
-			<>
-				<Box textAlign="center" py={16}>
-					<Spinner size="xl" color="brown.700" />
-					<Text mt={4} color="gray.500" fontSize="lg">
-						⏳ Resuming your order…
-					</Text>
-				</Box>
-				<Footer contactInfo={contactInfo} />
-			</>
-		);
-	}
+	let content: ReactNode;
 
-	// Show the step-based flow once we're past the upload stage
-	if (orderStep !== OrderStep.UPLOAD) {
-		return (
+	if (isResuming) {
+		content = (
+			<Box textAlign="center" py={16}>
+				<Spinner size="xl" color="brown.700" />
+				<Text mt={4} color="gray.500" fontSize="lg">
+					⏳ Resuming your order…
+				</Text>
+			</Box>
+		);
+	} else if (orderStep !== OrderStep.UPLOAD) {
+		// Show the step-based flow once we're past the upload stage
+		content = (
 			<>
 				<ProcessingOverlay show={isProcessing} items={currentlyUploading} />
 				<Box maxWidth="900px" margin="0 auto">
@@ -223,150 +221,162 @@ const OrderContainerInner = ({
 					onPaymentSuccess={handlePaymentSuccess}
 					onPickupConfirmed={handlePickupConfirmed}
 				/>
-				<Footer contactInfo={contactInfo} />
+			</>
+		);
+	} else {
+		content = (
+			<>
+				<ProcessingOverlay show={isProcessing} items={currentlyUploading} />
+				{pendingOrders.length > 0 && (
+					<Box
+						bg="blue.50"
+						border="1px solid"
+						borderColor="blue.200"
+						borderRadius="8px"
+						padding="0.75rem 1rem"
+						marginTop="1rem"
+						marginBottom="0.5rem"
+					>
+						<Text fontSize="sm" color="blue.800" mb={2} fontWeight={600}>
+							📋 You have {pendingOrders.length} in-progress order
+							{pendingOrders.length !== 1 ? "s" : ""}
+						</Text>
+						<Box display="flex" flexDir="column" gap={2}>
+							{pendingOrders.map((o) => (
+								<Box
+									key={o.id}
+									display="flex"
+									alignItems="center"
+									justifyContent="space-between"
+									bg="white"
+									borderRadius="6px"
+									padding="0.5rem 0.75rem"
+									flexWrap="wrap"
+									gap={2}
+								>
+									<Box display="flex" alignItems="center" gap={2} fontSize="sm">
+										<Text fontFamily="mono" fontWeight={600}>
+											{o.orderNumber}
+										</Text>
+										<Text color="gray.500">
+											{o.files?.length || 0} file
+											{(o.files?.length || 0) !== 1 ? "s" : ""} · $
+											{((o.pricing?.total || 0) / 100).toFixed(2)}
+										</Text>
+									</Box>
+									<Box display="flex" gap={1}>
+										<Button
+											size="xs"
+											colorScheme="blue"
+											onClick={() =>
+												router.push(
+													o.status === OrderStatus.PAID
+														? `/order?pickupFor=${o.id}`
+														: `/order?resume=${o.id}`,
+												)
+											}
+										>
+											{o.status === OrderStatus.PAID
+												? "Select Pickup"
+												: "Resume"}
+										</Button>
+										{o.status !== OrderStatus.PAID && (
+											<Button
+												size="xs"
+												colorScheme="red"
+												variant="ghost"
+												onClick={async () => {
+													if (
+														!window.confirm(
+															`Delete order ${o.orderNumber}? This cannot be undone.`,
+														)
+													)
+														return;
+													try {
+														const res = await fetch(
+															`/api/shop/${o.id}/delete`,
+															{
+																method: "DELETE",
+															},
+														);
+														if (!res.ok) {
+															const data = await res.json();
+															throw new Error(
+																data.error || "Failed to delete.",
+															);
+														}
+														setPendingOrders((prev) =>
+															prev.filter((p) => p.id !== o.id),
+														);
+													} catch (err) {
+														window.alert(
+															err instanceof Error
+																? err.message
+																: "Failed to delete order.",
+														);
+													}
+												}}
+											>
+												Delete
+											</Button>
+										)}
+									</Box>
+								</Box>
+							))}
+						</Box>
+					</Box>
+				)}
+				<ExtraInfo />
+				<Box
+					paddingTop="1rem"
+					display="grid"
+					columnGap="1rem"
+					rowGap="1rem"
+					gridTemplateColumns={smallScreen ? "1fr" : "3fr 1.5fr"}
+				>
+					<Box
+						border="1px"
+						borderColor="brown.200"
+						bg="white"
+						padding="1rem"
+						borderRadius="8px"
+						position="relative"
+						overflowX="visible"
+					>
+						<Box
+							position="absolute"
+							top="0"
+							left="-2rem"
+							h="100%"
+							w="2.8rem"
+							overflowY="hidden"
+							backgroundImage="/binder.png"
+						/>
+						<Tabs variant="enclosed" colorScheme="brown">
+							<TabList padding="0 1rem">
+								<Tab fontWeight="700">Upload PDF</Tab>
+							</TabList>
+							<TabPanels>
+								<TabPanel>
+									<PdfOrder />
+								</TabPanel>
+							</TabPanels>
+						</Tabs>
+					</Box>
+					<Cart
+						smallScreen={smallScreen}
+						onProceedToPayment={handleProceedToPayment}
+						setIsProcessing={setIsProcessing}
+						setCurrentlyUploading={setCurrentlyUploading}
+					/>
+				</Box>
 			</>
 		);
 	}
 
 	return (
 		<>
-			<ProcessingOverlay show={isProcessing} items={currentlyUploading} />
-			{pendingOrders.length > 0 && (
-				<Box
-					bg="blue.50"
-					border="1px solid"
-					borderColor="blue.200"
-					borderRadius="8px"
-					padding="0.75rem 1rem"
-					marginTop="1rem"
-					marginBottom="0.5rem"
-				>
-					<Text fontSize="sm" color="blue.800" mb={2} fontWeight={600}>
-						📋 You have {pendingOrders.length} in-progress order
-						{pendingOrders.length !== 1 ? "s" : ""}
-					</Text>
-					<Box display="flex" flexDir="column" gap={2}>
-						{pendingOrders.map((o) => (
-							<Box
-								key={o.id}
-								display="flex"
-								alignItems="center"
-								justifyContent="space-between"
-								bg="white"
-								borderRadius="6px"
-								padding="0.5rem 0.75rem"
-								flexWrap="wrap"
-								gap={2}
-							>
-								<Box display="flex" alignItems="center" gap={2} fontSize="sm">
-									<Text fontFamily="mono" fontWeight={600}>
-										{o.orderNumber}
-									</Text>
-									<Text color="gray.500">
-										{o.files?.length || 0} file
-										{(o.files?.length || 0) !== 1 ? "s" : ""} · $
-										{((o.pricing?.total || 0) / 100).toFixed(2)}
-									</Text>
-								</Box>
-								<Box display="flex" gap={1}>
-									<Button
-										size="xs"
-										colorScheme="blue"
-										onClick={() =>
-											router.push(
-												o.status === OrderStatus.PAID
-													? `/order?pickupFor=${o.id}`
-													: `/order?resume=${o.id}`,
-											)
-										}
-									>
-										{o.status === OrderStatus.PAID ? "Select Pickup" : "Resume"}
-									</Button>
-									{o.status !== OrderStatus.PAID && (
-										<Button
-											size="xs"
-											colorScheme="red"
-											variant="ghost"
-											onClick={async () => {
-												if (
-													!window.confirm(
-														`Delete order ${o.orderNumber}? This cannot be undone.`,
-													)
-												)
-													return;
-												try {
-													const res = await fetch(`/api/shop/${o.id}/delete`, {
-														method: "DELETE",
-													});
-													if (!res.ok) {
-														const data = await res.json();
-														throw new Error(data.error || "Failed to delete.");
-													}
-													setPendingOrders((prev) =>
-														prev.filter((p) => p.id !== o.id),
-													);
-												} catch (err) {
-													window.alert(
-														err instanceof Error
-															? err.message
-															: "Failed to delete order.",
-													);
-												}
-											}}
-										>
-											Delete
-										</Button>
-									)}
-								</Box>
-							</Box>
-						))}
-					</Box>
-				</Box>
-			)}
-			<ExtraInfo />
-			<Box
-				paddingTop="1rem"
-				display="grid"
-				columnGap="1rem"
-				rowGap="1rem"
-				gridTemplateColumns={smallScreen ? "1fr" : "3fr 1.5fr"}
-			>
-				<Box
-					border="1px"
-					borderColor="brown.200"
-					bg="white"
-					padding="1rem"
-					borderRadius="8px"
-					position="relative"
-					overflowX="visible"
-				>
-					<Box
-						position="absolute"
-						top="0"
-						left="-2rem"
-						h="100%"
-						w="2.8rem"
-						overflowY="hidden"
-						backgroundImage="/binder.png"
-					/>
-					<Tabs variant="enclosed" colorScheme="brown">
-						<TabList padding="0 1rem">
-							<Tab fontWeight="700">Upload PDF</Tab>
-						</TabList>
-						<TabPanels>
-							<TabPanel>
-								<PdfOrder />
-							</TabPanel>
-						</TabPanels>
-					</Tabs>
-				</Box>
-				<Cart
-					smallScreen={smallScreen}
-					onProceedToPayment={handleProceedToPayment}
-					setIsProcessing={setIsProcessing}
-					setCurrentlyUploading={setCurrentlyUploading}
-				/>
-			</Box>
+			{content}
 			<Footer contactInfo={contactInfo} />
 		</>
 	);
