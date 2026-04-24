@@ -66,18 +66,17 @@ jobs:
 
     name: ${{ matrix.name }}
 
-    # Run when:
-    #   • manually dispatched (workflow_dispatch) AND either no endpoint filter
-    #     was given or the filter matches this matrix entry, OR
-    #   • the schedule cron expression matches this entry's schedule.
-    if: >-
-      ${{ github.event_name == 'workflow_dispatch'
-        && (github.event.inputs.endpoint == 'all' || github.event.inputs.endpoint == matrix.endpoint)
-      || github.event_name == 'schedule'
-        && github.event.schedule == matrix.schedule }}
-
     steps:
+      # Run when:
+      #   • manually dispatched (workflow_dispatch) AND either no endpoint filter
+      #     was given or the filter matches this matrix entry, OR
+      #   • the schedule cron expression matches this entry's schedule.
       - name: Call ${{ matrix.endpoint }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+            && (github.event.inputs.endpoint == 'all' || github.event.inputs.endpoint == matrix.endpoint)
+          || github.event_name == 'schedule'
+            && github.event.schedule == matrix.schedule
         env:
           DEPLOY_URL: ${{ vars.DEPLOY_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
