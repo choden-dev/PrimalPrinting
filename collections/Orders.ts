@@ -72,6 +72,7 @@ export const Orders: CollectionConfig = {
 				beforeDocumentControls: [
 					"@/components/admin/ApprovePaymentButton",
 					"@/components/admin/MarkPickedUpButton",
+					"@/components/admin/ResendConfirmationButton",
 					"@/components/admin/OrderFilesViewer",
 				],
 			},
