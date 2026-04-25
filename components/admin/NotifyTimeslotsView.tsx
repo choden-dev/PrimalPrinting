@@ -154,7 +154,13 @@ export default function NotifyTimeslotsView() {
 				padding: "40px 24px",
 			}}
 		>
-			<div style={{ marginBottom: 24 }}>
+			<a
+				href="/admin"
+				style={{ fontSize: "13px", color: "#666", textDecoration: "none" }}
+			>
+				← Back to Dashboard
+			</a>
+			<div style={{ marginBottom: 24, marginTop: 12 }}>
 				<h1
 					style={{
 						fontSize: 24,
