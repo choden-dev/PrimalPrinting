@@ -122,8 +122,12 @@ const OrderContainerInner = ({
 				setActiveOrderId(order.id);
 				setActiveOrderNumber(order.orderNumber);
 
-				// If pickupFor query param, force pickup step (if order is PAID)
-				if (pickupForOrderId && order.status === OrderStatus.PAID) {
+				// If pickupFor query param, force pickup step (if order is PAID or AWAITING_PICKUP)
+				if (
+					pickupForOrderId &&
+					(order.status === OrderStatus.PAID ||
+						order.status === OrderStatus.AWAITING_PICKUP)
+				) {
 					setOrderStep(OrderStep.PICKUP);
 				} else {
 					setOrderStep(statusToStep(order.status));
@@ -151,7 +155,8 @@ const OrderContainerInner = ({
 					(o: { status: string }) =>
 						o.status === OrderStatus.DRAFT ||
 						o.status === OrderStatus.AWAITING_PAYMENT ||
-						o.status === OrderStatus.PAID,
+						o.status === OrderStatus.PAID ||
+						o.status === OrderStatus.AWAITING_PICKUP,
 				);
 				setPendingOrders(pending);
 			} catch {
@@ -270,17 +275,21 @@ const OrderContainerInner = ({
 											colorScheme="blue"
 											onClick={() =>
 												router.push(
-													o.status === OrderStatus.PAID
+													o.status === OrderStatus.PAID ||
+														o.status === OrderStatus.AWAITING_PICKUP
 														? `/order?pickupFor=${o.id}`
 														: `/order?resume=${o.id}`,
 												)
 											}
 										>
-											{o.status === OrderStatus.PAID
-												? "Select Pickup"
-												: "Resume"}
+											{o.status === OrderStatus.AWAITING_PICKUP
+												? "Change Pickup"
+												: o.status === OrderStatus.PAID
+													? "Select Pickup"
+													: "Resume"}
 										</Button>
-										{o.status !== OrderStatus.PAID && (
+										{o.status !== OrderStatus.PAID &&
+											o.status !== OrderStatus.AWAITING_PICKUP && (
 											<Button
 												size="xs"
 												colorScheme="red"

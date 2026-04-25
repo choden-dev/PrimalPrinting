@@ -219,6 +219,70 @@ export async function sendTimeslotsAvailableEmail(params: {
 	});
 }
 
+/**
+ * Send a notification email when an admin updates a timeslot's date/time.
+ * Each affected customer receives one email per order in that timeslot,
+ * showing the diff of what changed and their order summary.
+ */
+export async function sendTimeslotChangedEmail(params: {
+	to: string;
+	customerName: string;
+	orderNumber: string;
+	files: OrderFile[];
+	pricing: PricingInfo | undefined;
+	previous: TimeslotInfo;
+	updated: TimeslotInfo;
+}): Promise<void> {
+	const { to, customerName, orderNumber, files, pricing, previous, updated } =
+		params;
+
+	const formatDate = (d: string | undefined) =>
+		d
+			? new Date(d).toLocaleDateString("en-NZ", {
+					weekday: "long",
+					day: "numeric",
+					month: "long",
+					year: "numeric",
+				})
+			: "TBD";
+
+	const previousDate = formatDate(previous.date);
+	const newDate = formatDate(updated.date);
+	const dateChanged = previousDate !== newDate;
+	const startTimeChanged = previous.startTime !== updated.startTime;
+	const endTimeChanged = previous.endTime !== updated.endTime;
+
+	const common = await buildCommonLocals(customerName);
+
+	const html = renderTemplate("timeslotChanged", {
+		...common,
+		orderNumber,
+		files: formatFilesForTemplate(files),
+		...formatPricingForTemplate(pricing),
+		// Diff flags
+		dateChanged,
+		previousDate,
+		newDate,
+		startTimeChanged,
+		previousStartTime: previous.startTime,
+		newStartTime: updated.startTime,
+		endTimeChanged,
+		previousEndTime: previous.endTime,
+		newEndTime: updated.endTime,
+		// Updated pickup details
+		pickupDate: newDate,
+		pickupTime: `${updated.startTime} – ${updated.endTime}`,
+		pickupLabel: updated.label,
+	});
+
+	await getTransporter().sendMail({
+		from: fromAddress(),
+		to,
+		subject: `Pickup Time Updated — ${orderNumber}`,
+		html,
+	});
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 function formatCents(cents: number | undefined | null): string {

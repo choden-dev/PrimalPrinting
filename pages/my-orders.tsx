@@ -170,6 +170,18 @@ const MyOrders: NextPage<PageProps> = ({ contactInfo }) => {
 				</Button>
 			);
 		}
+		if (order.status === OrderStatus.AWAITING_PICKUP) {
+			return (
+				<Button
+					size="sm"
+					colorScheme="orange"
+					variant="outline"
+					onClick={() => router.push(`/order?pickupFor=${order.id}`)}
+				>
+					Change Pickup
+				</Button>
+			);
+		}
 		return null;
 	};
 

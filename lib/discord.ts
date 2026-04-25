@@ -102,6 +102,59 @@ export async function notifyBankTransferSubmitted(params: {
 }
 
 /**
+ * Post a daily rollup of orders received today.
+ * Summarises total count, revenue, and pickup status.
+ */
+export async function notifyDailyOrderSummary(params: {
+	totalOrders: number;
+	totalRevenueCents: number;
+	awaitingPickup: number;
+	pickupSelected: number;
+}): Promise<void> {
+	const { totalOrders, totalRevenueCents, awaitingPickup, pickupSelected } =
+		params;
+
+	if (totalOrders === 0) {
+		await sendDiscordWebhook({
+			embeds: [
+				{
+					title: "📊 Daily Order Summary",
+					description: "No new paid orders today.",
+					color: COLORS.INFO,
+					timestamp: new Date().toISOString(),
+				},
+			],
+		});
+		return;
+	}
+
+	const revenue = `$${(totalRevenueCents / 100).toFixed(2)}`;
+
+	await sendDiscordWebhook({
+		embeds: [
+			{
+				title: "📊 Daily Order Summary",
+				description: `**${totalOrders}** order${totalOrders !== 1 ? "s" : ""} paid today — **${revenue}** total revenue.`,
+				color: COLORS.INFO,
+				fields: [
+					{
+						name: "Awaiting Pickup Selection",
+						value: String(awaitingPickup),
+						inline: true,
+					},
+					{
+						name: "Pickup Selected",
+						value: String(pickupSelected),
+						inline: true,
+					},
+				],
+				timestamp: new Date().toISOString(),
+			},
+		],
+	});
+}
+
+/**
  * Notify admins that a customer selected a pickup timeslot.
  * The admin needs to prepare the order for collection.
  */

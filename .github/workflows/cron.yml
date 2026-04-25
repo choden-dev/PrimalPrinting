@@ -23,6 +23,8 @@ on:
   schedule:
     # Every day at 03:00 UTC
     - cron: "0 3 * * *" # schedule-id: daily
+    # Every day at 18:00 UTC (morning NZT next day)
+    - cron: "0 18 * * *" # schedule-id: evening
 
   # Allow manual triggering from the Actions tab.
   workflow_dispatch:
@@ -35,6 +37,7 @@ on:
         options:
           - all
           - /api/cron/expire-orders
+          - /api/cron/daily-order-summary
 
 jobs:
   run:
@@ -63,6 +66,10 @@ jobs:
             endpoint: /api/cron/expire-orders
             method: POST
             schedule: "0 3 * * *"
+          - name: Daily order summary
+            endpoint: /api/cron/daily-order-summary
+            method: POST
+            schedule: "0 18 * * *"
 
     name: ${{ matrix.name }}
 
