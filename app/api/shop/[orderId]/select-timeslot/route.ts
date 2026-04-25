@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { pickupProfileToHtml, sendOrderConfirmationEmail } from "@/lib/email";
 import { getAuthenticatedCustomer } from "../../../../../lib/auth";
 import { notifyPickupSlotSelected } from "../../../../../lib/discord";
-import { sendOrderConfirmationEmail } from "../../../../../lib/email";
 import { getPayloadClient } from "../../../../../lib/payload";
 
 type RouteContext = { params: Promise<{ orderId: string }> };
@@ -12,7 +12,9 @@ type RouteContext = { params: Promise<{ orderId: string }> };
  * Customer selects (or changes) a pickup timeslot.
  * - PAID → AWAITING_PICKUP (first selection)
  * - AWAITING_PICKUP → AWAITING_PICKUP (re-selection / change)
- * Triggers order confirmation email with pickup details.
+ *
+ * Enforces capacity limits and includes pickup instructions in the response.
+ * Triggers order confirmation email with pickup details and instructions.
  *
  * Body: `{ "timeslotId": "..." }`
  */
@@ -68,18 +70,37 @@ export async function POST(request: NextRequest, context: RouteContext) {
 		const timeslot = await payload.findByID({
 			collection: "timeslots",
 			id: timeslotId,
+			depth: 1, // populate pickupInstructionProfile
 		});
 
-		if (!timeslot || !timeslot.isActive) {
+		if (!timeslot?.isActive) {
 			return NextResponse.json(
 				{ error: "Selected timeslot is not available." },
 				{ status: 400 },
 			);
 		}
 
-		const isChangingTimeslot = order.status === "AWAITING_PICKUP";
+		// ── Capacity check ───────────────────────────────────────────
+		const maxCap =
+			typeof timeslot.maxCapacity === "number" ? timeslot.maxCapacity : null;
+		const currentBooked =
+			typeof timeslot.bookedCount === "number" ? timeslot.bookedCount : 0;
 
-		// Update the order — only transition status if coming from PAID
+		if (maxCap !== null && currentBooked >= maxCap) {
+			return NextResponse.json(
+				{ error: "This timeslot is fully booked. Please choose another." },
+				{ status: 409 },
+			);
+		}
+
+		const isChangingTimeslot = order.status === "AWAITING_PICKUP";
+		const previousTimeslotId = isChangingTimeslot
+			? typeof order.pickupTimeslot === "object" && order.pickupTimeslot
+				? (order.pickupTimeslot as { id: string }).id
+				: (order.pickupTimeslot as string | null)
+			: null;
+
+		// ── Update the order ─────────────────────────────────────────
 		const updateData: Record<string, unknown> = {
 			pickupTimeslot: timeslotId,
 		};
@@ -92,6 +113,51 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			id: orderId,
 			data: updateData,
 		});
+
+		// ── Update booked counts ─────────────────────────────────────
+		// Increment new timeslot's bookedCount
+		await payload.update({
+			collection: "timeslots",
+			id: timeslotId,
+			data: { bookedCount: currentBooked + 1 },
+		});
+
+		// Decrement old timeslot's bookedCount (if changing)
+		if (
+			isChangingTimeslot &&
+			previousTimeslotId &&
+			previousTimeslotId !== timeslotId
+		) {
+			try {
+				const oldSlot = await payload.findByID({
+					collection: "timeslots",
+					id: previousTimeslotId,
+				});
+				if (oldSlot) {
+					const oldBooked =
+						typeof oldSlot.bookedCount === "number" ? oldSlot.bookedCount : 0;
+					await payload.update({
+						collection: "timeslots",
+						id: previousTimeslotId,
+						data: { bookedCount: Math.max(0, oldBooked - 1) },
+					});
+				}
+			} catch (err) {
+				console.error("Failed to decrement old timeslot bookedCount:", err);
+			}
+		}
+
+		// ── Extract pickup instructions ──────────────────────────────
+		const profile =
+			typeof timeslot.pickupInstructionProfile === "object" &&
+			timeslot.pickupInstructionProfile
+				? (timeslot.pickupInstructionProfile as {
+						id: string;
+						name: string;
+						shortSummary?: string;
+						instructions?: unknown[];
+					})
+				: null;
 
 		// Notify admin via Discord so they can prepare the order
 		try {
@@ -130,6 +196,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 					endTime: timeslot.endTime || "",
 					label: timeslot.label || "",
 				},
+				pickupInstructionsHtml: pickupProfileToHtml(
+					timeslot.pickupInstructionProfile,
+				),
 			});
 		} catch (emailError) {
 			// Log but don't fail the request – order is already updated
@@ -144,6 +213,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				status: updated.status,
 				pickupTimeslot: timeslot,
 			},
+			pickupInstructionProfile: profile
+				? {
+						id: profile.id,
+						name: profile.name,
+						shortSummary: profile.shortSummary || null,
+						instructions: profile.instructions || [],
+					}
+				: null,
 			message: isChangingTimeslot
 				? "Pickup timeslot updated. Confirmation email sent."
 				: "Pickup timeslot confirmed. Confirmation email sent.",

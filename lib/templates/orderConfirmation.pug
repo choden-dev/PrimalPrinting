@@ -34,6 +34,10 @@ html
               p
                 strong Slot:&nbsp;
                 | #{pickupLabel}
+            if pickupInstructionsHtml
+              .pickup-instructions
+                h4 📋 Pickup Instructions
+                div !{pickupInstructionsHtml}
 
         p If you have any questions, please contact us:
         +contactAndFooter(contactEmail, contactPhone)

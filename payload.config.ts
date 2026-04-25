@@ -10,10 +10,13 @@ import { AboutSections } from "./collections/AboutSections";
 import { Customers } from "./collections/Customers";
 import { Media } from "./collections/Media";
 import { Orders } from "./collections/Orders";
+import { PickupInstructionProfiles } from "./collections/PickupInstructionProfiles";
+import { Schedules } from "./collections/Schedules";
 import { Timeslots } from "./collections/Timeslots";
 import { Users } from "./collections/Users";
 import { BankDetails } from "./globals/BankDetails";
 import { ContactInfo } from "./globals/ContactInfo";
+import { ScheduleSettings } from "./globals/ScheduleSettings";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -38,8 +41,17 @@ export default (async () =>
 			},
 		}),
 		editor: lexicalEditor(),
-		collections: [Users, Customers, Orders, Timeslots, AboutSections, Media],
-		globals: [ContactInfo, BankDetails],
+		collections: [
+			Users,
+			Customers,
+			Orders,
+			Timeslots,
+			Schedules,
+			PickupInstructionProfiles,
+			AboutSections,
+			Media,
+		],
+		globals: [ContactInfo, BankDetails, ScheduleSettings],
 		plugins: [
 			...(process.env.R2_S3_ENDPOINT
 				? [
@@ -95,6 +107,13 @@ export default (async () =>
 						path: "/notify-timeslots",
 						meta: {
 							title: "Notify Customers — Timeslots",
+						},
+					},
+					scheduleCalendar: {
+						Component: "@/components/admin/ScheduleCalendarView",
+						path: "/schedule-calendar",
+						meta: {
+							title: "Schedule Calendar",
 						},
 					},
 				},

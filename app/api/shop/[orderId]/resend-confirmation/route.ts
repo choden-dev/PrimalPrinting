@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isPayloadAdmin } from "../../../../../lib/auth";
 import {
+	pickupProfileToHtml,
 	sendBankTransferReceivedEmail,
 	sendOrderConfirmationEmail,
 	sendPaymentConfirmationEmail,
@@ -72,6 +73,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 					endTime: timeslot.endTime || "",
 					label: timeslot.label || "",
 				},
+				pickupInstructionsHtml: pickupProfileToHtml(
+					timeslot.pickupInstructionProfile,
+				),
 			});
 
 			return NextResponse.json({

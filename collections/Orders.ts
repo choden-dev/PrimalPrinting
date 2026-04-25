@@ -100,6 +100,42 @@ export const Orders: CollectionConfig = {
 	},
 	hooks: {
 		afterDelete: [
+			// Decrement bookedCount on the timeslot when an order is deleted
+			async ({ doc, req }) => {
+				if (!doc?.pickupTimeslot) return;
+
+				try {
+					const payload = req.payload;
+					const timeslotId =
+						typeof doc.pickupTimeslot === "object"
+							? doc.pickupTimeslot.id
+							: doc.pickupTimeslot;
+
+					if (!timeslotId) return;
+
+					const timeslot = await payload.findByID({
+						collection: "timeslots",
+						id: String(timeslotId),
+					});
+
+					if (timeslot) {
+						const currentBooked =
+							typeof timeslot.bookedCount === "number"
+								? timeslot.bookedCount
+								: 0;
+						await payload.update({
+							collection: "timeslots",
+							id: String(timeslotId),
+							data: { bookedCount: Math.max(0, currentBooked - 1) },
+						});
+					}
+				} catch (error) {
+					console.error(
+						`Failed to decrement bookedCount for order ${doc.orderNumber}:`,
+						error,
+					);
+				}
+			},
 			// Clean up all associated R2 files when an order is deleted
 			async ({ doc }) => {
 				if (!doc) return;

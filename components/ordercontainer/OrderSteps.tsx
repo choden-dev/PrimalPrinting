@@ -126,9 +126,9 @@ export default function OrderSteps({
 				<Text fontSize="sm" fontWeight={600} mb={2}>
 					📋 Order Summary
 				</Text>
-				{orderDetails.files.map((file, i) => (
+				{orderDetails.files.map((file) => (
 					<Box
-						key={`${file.fileName}-${i}`}
+						key={`${file.fileName}-${file.copies}-${file.colorMode}`}
 						display="flex"
 						justifyContent="space-between"
 						alignItems="center"
@@ -345,8 +345,8 @@ export default function OrderSteps({
 				<Divider mb={6} />
 				<TimeslotSelector
 					orderId={orderId}
-					onSuccess={() => onPickupConfirmed()}
-					onError={(err) => console.error("Timeslot error:", err)}
+					onTimeslotSelected={() => onPickupConfirmed()}
+					onCancel={() => router.push("/my-orders")}
 				/>
 			</Box>
 		);
@@ -375,9 +375,9 @@ export default function OrderSteps({
 						<Heading size="sm" mb={3}>
 							Order Summary
 						</Heading>
-						{orderDetails.files?.map((file, i) => (
+						{orderDetails.files?.map((file) => (
 							<Box
-								key={`${file.fileName}-${i}`}
+								key={`${file.fileName}-${file.copies}-${file.colorMode}`}
 								p={3}
 								bg="gray.50"
 								borderRadius="6px"
