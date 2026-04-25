@@ -52,69 +52,18 @@ export default function OrdersByTimeslotView() {
 		setLoading(true);
 		setError(null);
 		try {
-			// Fetch active timeslots sorted by date
-			const timeslotRes = await fetch(
-				`/api/timeslots?where[isActive][equals]=true&limit=500&sort=date&depth=0`,
+			// Single API call replaces N+2 sequential requests
+			const res = await fetch(
+				`/api/admin/orders-by-timeslot?filter=${filter}`,
 			);
-			if (!timeslotRes.ok) throw new Error("Failed to fetch timeslots.");
-			const timeslotData = await timeslotRes.json();
-			const allTimeslots: TimeslotData[] = timeslotData.docs || [];
-
-			// Client-side date filtering for "upcoming" (today + 7 days)
-			const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
-			const nextWeek = new Date();
-			nextWeek.setDate(nextWeek.getDate() + 7);
-			const nextWeekStr = nextWeek.toLocaleDateString("en-CA");
-
-			const timeslots =
-				filter === "upcoming"
-					? allTimeslots.filter((slot) => {
-							const d = slot.date.includes("T")
-								? slot.date.split("T")[0]
-								: slot.date;
-							return d >= todayStr && d <= nextWeekStr;
-						})
-					: allTimeslots;
-
-			// For each timeslot, fetch orders assigned to it
-			const results: TimeslotWithOrders[] = [];
-
-			for (const slot of timeslots) {
-				const orderRes = await fetch(
-					`/api/orders?where[pickupTimeslot][equals]=${slot.id}&depth=1&limit=50&sort=-createdAt`,
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(
+					err.error || "Failed to fetch orders by timeslot.",
 				);
-				if (!orderRes.ok) continue;
-				const orderData = await orderRes.json();
-
-				if (orderData.docs && orderData.docs.length > 0) {
-					results.push({
-						timeslot: slot,
-						orders: orderData.docs,
-					});
-				}
 			}
-
-			// Also add a "No timeslot" group for paid orders without a slot
-			const unassignedRes = await fetch(
-				`/api/orders?where[status][in]=PAID&where[pickupTimeslot][exists]=false&depth=1&limit=50`,
-			);
-			if (unassignedRes.ok) {
-				const unassignedData = await unassignedRes.json();
-				if (unassignedData.docs && unassignedData.docs.length > 0) {
-					results.unshift({
-						timeslot: {
-							id: "unassigned",
-							date: "",
-							startTime: "",
-							endTime: "",
-							label: "⚠️ Paid — No Pickup Time Selected",
-						},
-						orders: unassignedData.docs,
-					});
-				}
-			}
-
-			setData(results);
+			const json = await res.json();
+			setData(json.groups || []);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to load data.");
 		} finally {
