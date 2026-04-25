@@ -290,45 +290,45 @@ const OrderContainerInner = ({
 										</Button>
 										{o.status !== OrderStatus.PAID &&
 											o.status !== OrderStatus.AWAITING_PICKUP && (
-											<Button
-												size="xs"
-												colorScheme="red"
-												variant="ghost"
-												onClick={async () => {
-													if (
-														!window.confirm(
-															`Delete order ${o.orderNumber}? This cannot be undone.`,
+												<Button
+													size="xs"
+													colorScheme="red"
+													variant="ghost"
+													onClick={async () => {
+														if (
+															!window.confirm(
+																`Delete order ${o.orderNumber}? This cannot be undone.`,
+															)
 														)
-													)
-														return;
-													try {
-														const res = await fetch(
-															`/api/shop/${o.id}/delete`,
-															{
-																method: "DELETE",
-															},
-														);
-														if (!res.ok) {
-															const data = await res.json();
-															throw new Error(
-																data.error || "Failed to delete.",
+															return;
+														try {
+															const res = await fetch(
+																`/api/shop/${o.id}/delete`,
+																{
+																	method: "DELETE",
+																},
+															);
+															if (!res.ok) {
+																const data = await res.json();
+																throw new Error(
+																	data.error || "Failed to delete.",
+																);
+															}
+															setPendingOrders((prev) =>
+																prev.filter((p) => p.id !== o.id),
+															);
+														} catch (err) {
+															window.alert(
+																err instanceof Error
+																	? err.message
+																	: "Failed to delete order.",
 															);
 														}
-														setPendingOrders((prev) =>
-															prev.filter((p) => p.id !== o.id),
-														);
-													} catch (err) {
-														window.alert(
-															err instanceof Error
-																? err.message
-																: "Failed to delete order.",
-														);
-													}
-												}}
-											>
-												Delete
-											</Button>
-										)}
+													}}
+												>
+													Delete
+												</Button>
+											)}
 									</Box>
 								</Box>
 							))}
