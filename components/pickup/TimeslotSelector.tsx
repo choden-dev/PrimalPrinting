@@ -44,8 +44,17 @@ interface TimeslotResponse {
 	hasMore: boolean;
 }
 
+interface CurrentTimeslot {
+	date: string;
+	startTime: string;
+	endTime: string;
+	label?: string;
+}
+
 interface TimeslotSelectorProps {
 	orderId: string;
+	/** If provided, indicates the user is changing an existing timeslot. */
+	currentTimeslot?: CurrentTimeslot | null;
 	onTimeslotSelected: (
 		timeslotId: string,
 		pickupInstructions?: unknown[],
@@ -106,9 +115,11 @@ async function fetchTimeslots(page: number): Promise<TimeslotResponse> {
  */
 export function TimeslotSelector({
 	orderId,
+	currentTimeslot,
 	onTimeslotSelected,
 	onCancel,
 }: TimeslotSelectorProps) {
+	const isChanging = !!currentTimeslot;
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
@@ -204,8 +215,35 @@ export function TimeslotSelector({
 			transition="opacity 0.15s ease"
 		>
 			<Heading size="md" mb={4}>
-				Select a Pickup Timeslot
+				{isChanging ? "Change Pickup Timeslot" : "Select a Pickup Timeslot"}
 			</Heading>
+
+			{/* Show current timeslot when changing */}
+			{isChanging && currentTimeslot && (
+				<Box
+					p={4}
+					mb={5}
+					bg="orange.50"
+					borderRadius="lg"
+					borderLeft="4px solid"
+					borderLeftColor="orange.400"
+				>
+					<Text fontSize="xs" fontWeight={700} color="orange.700" mb={1}>
+						CURRENT TIMESLOT
+					</Text>
+					<Text fontWeight={600} fontSize="sm">
+						{formatDateHeading(
+							currentTimeslot.date.includes("T")
+								? currentTimeslot.date.split("T")[0]
+								: currentTimeslot.date,
+						)}
+					</Text>
+					<Text fontSize="sm" color="gray.600">
+						{currentTimeslot.startTime} – {currentTimeslot.endTime}
+						{currentTimeslot.label ? ` · ${currentTimeslot.label}` : ""}
+					</Text>
+				</Box>
+			)}
 
 			{submitError && (
 				<Alert status="error" mb={3} borderRadius="md">
@@ -328,9 +366,9 @@ export function TimeslotSelector({
 					onClick={handleSubmit}
 					isDisabled={!selectedId || submitting}
 					isLoading={submitting}
-					loadingText="Confirming..."
+					loadingText={isChanging ? "Updating..." : "Confirming..."}
 				>
-					Confirm Timeslot
+					{isChanging ? "Update Timeslot" : "Confirm Timeslot"}
 				</Button>
 				<Button variant="outline" onClick={onCancel}>
 					Cancel
