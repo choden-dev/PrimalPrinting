@@ -102,6 +102,68 @@ export async function notifyBankTransferSubmitted(params: {
 }
 
 /**
+ * Post a daily rollup of today's orders so admins know what needs attention.
+ */
+export async function notifyDailyOrderSummary(params: {
+	totalOrders: number;
+	needsPickupSelection: number;
+	needsPrinting: number;
+	pendingVerification: number;
+}): Promise<void> {
+	const {
+		totalOrders,
+		needsPickupSelection,
+		needsPrinting,
+		pendingVerification,
+	} = params;
+
+	if (totalOrders === 0) return;
+
+	const actionNeeded =
+		needsPickupSelection + needsPrinting + pendingVerification;
+	const color = actionNeeded > 0 ? COLORS.WARNING : COLORS.INFO;
+
+	const fields: EmbedField[] = [];
+
+	if (pendingVerification > 0) {
+		fields.push({
+			name: "⏳ Pending Payment Verification",
+			value: String(pendingVerification),
+			inline: true,
+		});
+	}
+	if (needsPickupSelection > 0) {
+		fields.push({
+			name: "📍 Awaiting Pickup Selection",
+			value: String(needsPickupSelection),
+			inline: true,
+		});
+	}
+	if (needsPrinting > 0) {
+		fields.push({
+			name: "🖨️ Ready to Print",
+			value: String(needsPrinting),
+			inline: true,
+		});
+	}
+
+	await sendDiscordWebhook({
+		embeds: [
+			{
+				title:
+					actionNeeded > 0
+						? "📋 Daily Order Summary — Action Needed"
+						: "📋 Daily Order Summary",
+				description: `**${totalOrders}** order${totalOrders !== 1 ? "s" : ""} paid today.${actionNeeded > 0 ? ` **${actionNeeded}** need${actionNeeded !== 1 ? "" : "s"} attention.` : " All orders are on track."}`,
+				color,
+				fields,
+				timestamp: new Date().toISOString(),
+			},
+		],
+	});
+}
+
+/**
  * Notify admins that a customer selected a pickup timeslot.
  * The admin needs to prepare the order for collection.
  */

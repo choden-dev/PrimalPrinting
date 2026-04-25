@@ -9,8 +9,9 @@ type RouteContext = { params: Promise<{ orderId: string }> };
 /**
  * POST /api/orders/:orderId/select-timeslot
  *
- * Customer selects a pickup timeslot for a PAID order.
- * Transitions: PAID → AWAITING_PICKUP
+ * Customer selects (or changes) a pickup timeslot.
+ * - PAID → AWAITING_PICKUP (first selection)
+ * - AWAITING_PICKUP → AWAITING_PICKUP (re-selection / change)
  * Triggers order confirmation email with pickup details.
  *
  * Body: `{ "timeslotId": "..." }`
@@ -54,10 +55,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			return NextResponse.json({ error: "Order not found." }, { status: 404 });
 		}
 
-		if (order.status !== "PAID") {
+		if (order.status !== "PAID" && order.status !== "AWAITING_PICKUP") {
 			return NextResponse.json(
 				{
-					error: `Cannot select timeslot for order in ${order.status} status. Order must be PAID.`,
+					error: `Cannot select timeslot for order in ${order.status} status. Order must be PAID or AWAITING_PICKUP.`,
 				},
 				{ status: 400 },
 			);
@@ -76,14 +77,20 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		// Transition to AWAITING_PICKUP
+		const isChangingTimeslot = order.status === "AWAITING_PICKUP";
+
+		// Update the order — only transition status if coming from PAID
+		const updateData: Record<string, unknown> = {
+			pickupTimeslot: timeslotId,
+		};
+		if (!isChangingTimeslot) {
+			updateData.status = "AWAITING_PICKUP";
+		}
+
 		const updated = await payload.update({
 			collection: "orders",
 			id: orderId,
-			data: {
-				status: "AWAITING_PICKUP",
-				pickupTimeslot: timeslotId,
-			},
+			data: updateData,
 		});
 
 		// Notify admin via Discord so they can prepare the order
@@ -137,7 +144,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				status: updated.status,
 				pickupTimeslot: timeslot,
 			},
-			message: "Pickup timeslot confirmed. Confirmation email sent.",
+			message: isChangingTimeslot
+				? "Pickup timeslot updated. Confirmation email sent."
+				: "Pickup timeslot confirmed. Confirmation email sent.",
 		});
 	} catch (error) {
 		console.error("Error selecting timeslot:", error);

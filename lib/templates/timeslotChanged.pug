@@ -1,0 +1,71 @@
+include _mixins
+
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    include _styles
+  body
+    .container
+      .header
+        h1 Pickup Time Updated
+        p Order ##{orderNumber}
+
+      .content
+        p Hi #{customerName},
+
+        p We wanted to let you know that the pickup timeslot for your order has been updated. Please review the changes below:
+
+        .section
+          .info-box
+            h3 📅 What Changed
+            if dateChanged
+              p
+                strong Previous Date:&nbsp;
+                | #{previousDate}
+              p
+                strong New Date:&nbsp;
+                | #{newDate}
+            if startTimeChanged
+              p
+                strong Previous Start Time:&nbsp;
+                | #{previousStartTime}
+              p
+                strong New Start Time:&nbsp;
+                | #{newStartTime}
+            if endTimeChanged
+              p
+                strong Previous End Time:&nbsp;
+                | #{previousEndTime}
+              p
+                strong New End Time:&nbsp;
+                | #{newEndTime}
+
+        .section
+          .pickup-box
+            h3 📍 Updated Pickup Details
+            p
+              strong Date:&nbsp;
+              | #{pickupDate}
+            p
+              strong Time:&nbsp;
+              | #{pickupTime}
+            if pickupLabel
+              p
+                strong Slot:&nbsp;
+                | #{pickupLabel}
+
+        +fileList(files)
+
+        +pricingTable(subtotal, tax, total)
+
+        p If this new time doesn't work for you, please visit your orders page to select a different pickup slot.
+        p
+          a.btn(href=ordersUrl) View My Orders
+
+        p If you have any questions, please contact us:
+        +contactAndFooter(contactEmail, contactPhone)
+
+      .footer
+        p Primal Printing — Thank you for your order!

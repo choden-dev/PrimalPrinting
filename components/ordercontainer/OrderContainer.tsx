@@ -122,8 +122,12 @@ const OrderContainerInner = ({
 				setActiveOrderId(order.id);
 				setActiveOrderNumber(order.orderNumber);
 
-				// If pickupFor query param, force pickup step (if order is PAID)
-				if (pickupForOrderId && order.status === OrderStatus.PAID) {
+				// If pickupFor query param, force pickup step (if order is PAID or AWAITING_PICKUP)
+				if (
+					pickupForOrderId &&
+					(order.status === OrderStatus.PAID ||
+						order.status === OrderStatus.AWAITING_PICKUP)
+				) {
 					setOrderStep(OrderStep.PICKUP);
 				} else {
 					setOrderStep(statusToStep(order.status));
@@ -151,7 +155,8 @@ const OrderContainerInner = ({
 					(o: { status: string }) =>
 						o.status === OrderStatus.DRAFT ||
 						o.status === OrderStatus.AWAITING_PAYMENT ||
-						o.status === OrderStatus.PAID,
+						o.status === OrderStatus.PAID ||
+						o.status === OrderStatus.AWAITING_PICKUP,
 				);
 				setPendingOrders(pending);
 			} catch {
@@ -270,56 +275,60 @@ const OrderContainerInner = ({
 											colorScheme="blue"
 											onClick={() =>
 												router.push(
-													o.status === OrderStatus.PAID
+													o.status === OrderStatus.PAID ||
+														o.status === OrderStatus.AWAITING_PICKUP
 														? `/order?pickupFor=${o.id}`
 														: `/order?resume=${o.id}`,
 												)
 											}
 										>
-											{o.status === OrderStatus.PAID
-												? "Select Pickup"
-												: "Resume"}
+											{o.status === OrderStatus.AWAITING_PICKUP
+												? "Change Pickup"
+												: o.status === OrderStatus.PAID
+													? "Select Pickup"
+													: "Resume"}
 										</Button>
-										{o.status !== OrderStatus.PAID && (
-											<Button
-												size="xs"
-												colorScheme="red"
-												variant="ghost"
-												onClick={async () => {
-													if (
-														!window.confirm(
-															`Delete order ${o.orderNumber}? This cannot be undone.`,
+										{o.status !== OrderStatus.PAID &&
+											o.status !== OrderStatus.AWAITING_PICKUP && (
+												<Button
+													size="xs"
+													colorScheme="red"
+													variant="ghost"
+													onClick={async () => {
+														if (
+															!window.confirm(
+																`Delete order ${o.orderNumber}? This cannot be undone.`,
+															)
 														)
-													)
-														return;
-													try {
-														const res = await fetch(
-															`/api/shop/${o.id}/delete`,
-															{
-																method: "DELETE",
-															},
-														);
-														if (!res.ok) {
-															const data = await res.json();
-															throw new Error(
-																data.error || "Failed to delete.",
+															return;
+														try {
+															const res = await fetch(
+																`/api/shop/${o.id}/delete`,
+																{
+																	method: "DELETE",
+																},
+															);
+															if (!res.ok) {
+																const data = await res.json();
+																throw new Error(
+																	data.error || "Failed to delete.",
+																);
+															}
+															setPendingOrders((prev) =>
+																prev.filter((p) => p.id !== o.id),
+															);
+														} catch (err) {
+															window.alert(
+																err instanceof Error
+																	? err.message
+																	: "Failed to delete order.",
 															);
 														}
-														setPendingOrders((prev) =>
-															prev.filter((p) => p.id !== o.id),
-														);
-													} catch (err) {
-														window.alert(
-															err instanceof Error
-																? err.message
-																: "Failed to delete order.",
-														);
-													}
-												}}
-											>
-												Delete
-											</Button>
-										)}
+													}}
+												>
+													Delete
+												</Button>
+											)}
 									</Box>
 								</Box>
 							))}
