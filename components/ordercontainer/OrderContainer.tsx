@@ -83,8 +83,8 @@ const OrderContainerInner = ({
 			case OrderStatus.AWAITING_PAYMENT:
 				return OrderStep.PAYMENT;
 			case OrderStatus.PAID:
-				return OrderStep.PICKUP;
 			case OrderStatus.AWAITING_PICKUP:
+				return OrderStep.PICKUP;
 			case OrderStatus.PRINTED:
 			case OrderStatus.PICKED_UP:
 				return OrderStep.COMPLETE;

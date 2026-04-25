@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface PickupProfileInfo {
 	id: string;
@@ -28,6 +28,9 @@ interface TimeslotSelectorProps {
 	) => void;
 	onCancel: () => void;
 }
+
+/** Number of date-groups to show per page. */
+const DATES_PER_PAGE = 3;
 
 /** Group timeslots by date for display. */
 function groupByDate(slots: Timeslot[]): Map<string, Timeslot[]> {
@@ -61,7 +64,8 @@ function formatDateHeading(dateStr: string): string {
 
 /**
  * Component to select a pickup timeslot for an order.
- * Fetches available timeslots and displays them grouped by date.
+ * Fetches available timeslots and displays them grouped by date
+ * with pagination so the list doesn't get cut off.
  * Shows capacity info and pickup instruction profile names.
  */
 export function TimeslotSelector({
@@ -74,6 +78,7 @@ export function TimeslotSelector({
 	const [error, setError] = useState<string | null>(null);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
+	const [page, setPage] = useState(0);
 
 	// Fetch available timeslots
 	useEffect(() => {
@@ -96,6 +101,16 @@ export function TimeslotSelector({
 
 		fetchTimeslots();
 	}, []);
+
+	// Group timeslots by date and paginate by date-groups
+	const grouped = useMemo(() => groupByDate(timeslots), [timeslots]);
+	const dateKeys = useMemo(() => Array.from(grouped.keys()), [grouped]);
+	const totalPages = Math.max(1, Math.ceil(dateKeys.length / DATES_PER_PAGE));
+
+	const visibleDateKeys = useMemo(() => {
+		const start = page * DATES_PER_PAGE;
+		return dateKeys.slice(start, start + DATES_PER_PAGE);
+	}, [dateKeys, page]);
 
 	// Handle timeslot selection submission
 	const handleSubmit = useCallback(async () => {
@@ -164,108 +179,154 @@ export function TimeslotSelector({
 		);
 	}
 
-	const grouped = groupByDate(timeslots);
-
 	return (
 		<div style={{ padding: "8px 0" }}>
 			<h2 style={{ marginBottom: "16px" }}>Select a Pickup Timeslot</h2>
 
-			{Array.from(grouped.entries()).map(([dateKey, slots]) => (
-				<div key={dateKey} style={{ marginBottom: "20px" }}>
-					<h3
-						style={{
-							fontSize: "15px",
-							fontWeight: 600,
-							color: "#333",
-							marginBottom: "8px",
-							borderBottom: "1px solid #eee",
-							paddingBottom: "4px",
-						}}
-					>
-						{formatDateHeading(dateKey)}
-					</h3>
-					<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-						{slots.map((slot) => {
-							const isSelected = selectedId === slot.id;
-							return (
-								<label
-									key={slot.id}
-									style={{
-										padding: "12px 16px",
-										border: isSelected ? "2px solid #1565c0" : "1px solid #ddd",
-										borderRadius: "8px",
-										cursor: "pointer",
-										backgroundColor: isSelected ? "#e3f2fd" : "#fff",
-										transition: "all 0.15s ease",
-									}}
-								>
-									<div
+			{visibleDateKeys.map((dateKey) => {
+				const slots = grouped.get(dateKey) || [];
+				return (
+					<div key={dateKey} style={{ marginBottom: "20px" }}>
+						<h3
+							style={{
+								fontSize: "15px",
+								fontWeight: 600,
+								color: "#333",
+								marginBottom: "8px",
+								borderBottom: "1px solid #eee",
+								paddingBottom: "4px",
+							}}
+						>
+							{formatDateHeading(dateKey)}
+						</h3>
+						<div
+							style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+						>
+							{slots.map((slot) => {
+								const isSelected = selectedId === slot.id;
+								return (
+									<label
+										key={slot.id}
 										style={{
-											display: "flex",
-											alignItems: "center",
-											gap: "10px",
+											padding: "12px 16px",
+											border: isSelected
+												? "2px solid #1565c0"
+												: "1px solid #ddd",
+											borderRadius: "8px",
+											cursor: "pointer",
+											backgroundColor: isSelected ? "#e3f2fd" : "#fff",
+											transition: "all 0.15s ease",
 										}}
 									>
-										<input
-											type="radio"
-											name="timeslot"
-											value={slot.id}
-											checked={isSelected}
-											onChange={() => setSelectedId(slot.id)}
-											style={{ marginRight: "4px" }}
-										/>
-										<div style={{ flex: 1 }}>
-											<div style={{ fontWeight: 600 }}>
-												{slot.startTime} – {slot.endTime}
-												{slot.label ? ` · ${slot.label}` : ""}
-											</div>
-											<div
-												style={{
-													display: "flex",
-													gap: "12px",
-													fontSize: "13px",
-													color: "#666",
-													marginTop: "4px",
-												}}
-											>
-												{/* Capacity indicator */}
-												<span>
-													{slot.availableSpots !== null ? (
-														<>
-															<span
-																style={{
-																	color:
-																		slot.availableSpots <= 2
-																			? "#e65100"
-																			: "#2e7d32",
-																	fontWeight: 500,
-																}}
-															>
-																{slot.availableSpots}
-															</span>{" "}
-															spot{slot.availableSpots !== 1 ? "s" : ""}{" "}
-															remaining
-														</>
-													) : (
-														"Open availability"
-													)}
-												</span>
-
-												{/* Pickup method */}
-												{slot.pickupInstructionProfile && (
-													<span style={{ color: "#1565c0" }}>
-														📍 {slot.pickupInstructionProfile.name}
+										<div
+											style={{
+												display: "flex",
+												alignItems: "center",
+												gap: "10px",
+											}}
+										>
+											<input
+												type="radio"
+												name="timeslot"
+												value={slot.id}
+												checked={isSelected}
+												onChange={() => setSelectedId(slot.id)}
+												style={{ marginRight: "4px" }}
+											/>
+											<div style={{ flex: 1 }}>
+												<div style={{ fontWeight: 600 }}>
+													{slot.startTime} – {slot.endTime}
+													{slot.label ? ` · ${slot.label}` : ""}
+												</div>
+												<div
+													style={{
+														display: "flex",
+														gap: "12px",
+														fontSize: "13px",
+														color: "#666",
+														marginTop: "4px",
+													}}
+												>
+													{/* Capacity indicator */}
+													<span>
+														{slot.availableSpots !== null ? (
+															<>
+																<span
+																	style={{
+																		color:
+																			slot.availableSpots <= 2
+																				? "#e65100"
+																				: "#2e7d32",
+																		fontWeight: 500,
+																	}}
+																>
+																	{slot.availableSpots}
+																</span>{" "}
+																spot{slot.availableSpots !== 1 ? "s" : ""}{" "}
+																remaining
+															</>
+														) : (
+															"Open availability"
+														)}
 													</span>
-												)}
+
+													{/* Pickup method */}
+													{slot.pickupInstructionProfile && (
+														<span style={{ color: "#1565c0" }}>
+															📍 {slot.pickupInstructionProfile.name}
+														</span>
+													)}
+												</div>
 											</div>
 										</div>
-									</div>
-								</label>
-							);
-						})}
+									</label>
+								);
+							})}
+						</div>
 					</div>
+				);
+			})}
+
+			{/* Pagination controls */}
+			{totalPages > 1 && (
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						gap: "12px",
+						marginBottom: "16px",
+					}}
+				>
+					<button
+						type="button"
+						onClick={() => setPage((p) => Math.max(0, p - 1))}
+						disabled={page === 0}
+						style={{
+							...paginationButtonStyle,
+							opacity: page === 0 ? 0.4 : 1,
+							cursor: page === 0 ? "not-allowed" : "pointer",
+						}}
+					>
+						← Previous
+					</button>
+					<span style={{ fontSize: "14px", color: "#666" }}>
+						Page {page + 1} of {totalPages}
+					</span>
+					<button
+						type="button"
+						onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+						disabled={page >= totalPages - 1}
+						style={{
+							...paginationButtonStyle,
+							opacity: page >= totalPages - 1 ? 0.4 : 1,
+							cursor: page >= totalPages - 1 ? "not-allowed" : "pointer",
+						}}
+					>
+						Next →
+					</button>
 				</div>
-			))}
+			)}
 
 			<div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
 				<button
@@ -300,6 +361,15 @@ const cancelButtonStyle: React.CSSProperties = {
 	borderRadius: "6px",
 	cursor: "pointer",
 	fontSize: "14px",
+};
+
+const paginationButtonStyle: React.CSSProperties = {
+	padding: "8px 16px",
+	background: "#f5f5f5",
+	border: "1px solid #ddd",
+	borderRadius: "6px",
+	fontSize: "14px",
+	fontWeight: 500,
 };
 
 export default TimeslotSelector;
