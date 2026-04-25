@@ -6,4 +6,4 @@ pre-commit:
 pre-push:
   jobs:
     - name: run ci tests
-      run: pnpm biome ci --changed --since=main
+      run: pnpm biome ci .
