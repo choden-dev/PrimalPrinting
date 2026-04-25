@@ -114,19 +114,7 @@ export async function notifyDailyOrderSummary(params: {
 	const { totalOrders, totalRevenueCents, awaitingPickup, pickupSelected } =
 		params;
 
-	if (totalOrders === 0) {
-		await sendDiscordWebhook({
-			embeds: [
-				{
-					title: "📊 Daily Order Summary",
-					description: "No new paid orders today.",
-					color: COLORS.INFO,
-					timestamp: new Date().toISOString(),
-				},
-			],
-		});
-		return;
-	}
+	if (totalOrders === 0) return;
 
 	const revenue = `$${(totalRevenueCents / 100).toFixed(2)}`;
 
