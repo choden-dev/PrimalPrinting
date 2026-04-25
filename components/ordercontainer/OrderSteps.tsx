@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Button, Divider, Heading, Text } from "@chakra-ui/react";
-import React from "react";
 import { useRouter } from "next/router";
+import type React from "react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { OrderStatus } from "../../types/orderStatus";
@@ -84,7 +84,8 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 
 		if (n.type === "text" || (!n.type && typeof n.text === "string")) {
 			let content: React.ReactNode = n.text || "";
-			if (n.format && n.format & 1) content = <strong key={key}>{content}</strong>;
+			if (n.format && n.format & 1)
+				content = <strong key={key}>{content}</strong>;
 			if (n.format && n.format & 2) content = <em key={key}>{content}</em>;
 			if (n.format && n.format & 4) content = <u key={key}>{content}</u>;
 			return content;
@@ -94,7 +95,11 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 
 		switch (n.type) {
 			case "paragraph":
-				return <Text key={key} mb={2}>{children}</Text>;
+				return (
+					<Text key={key} mb={2}>
+						{children}
+					</Text>
+				);
 			case "heading": {
 				if (n.tag === "h1") return <h1 key={key}>{children}</h1>;
 				if (n.tag === "h2") return <h2 key={key}>{children}</h2>;
@@ -102,14 +107,30 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 				return <h3 key={key}>{children}</h3>;
 			}
 			case "list":
-				return n.listType === "number"
-					? <ol key={key} style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}>{children}</ol>
-					: <ul key={key} style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}>{children}</ul>;
+				return n.listType === "number" ? (
+					<ol
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ol>
+				) : (
+					<ul
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ul>
+				);
 			case "listitem":
 				return <li key={key}>{children}</li>;
 			case "link":
 			case "autolink":
-				return <a key={key} href={n.url || "#"}>{children}</a>;
+				return (
+					<a key={key} href={n.url || "#"}>
+						{children}
+					</a>
+				);
 			case "linebreak":
 				return <br key={key} />;
 			default:
@@ -118,7 +139,11 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 	});
 }
 
-function RichTextContent({ content }: { content: unknown }): React.ReactElement | null {
+function RichTextContent({
+	content,
+}: {
+	content: unknown;
+}): React.ReactElement | null {
 	if (!content || typeof content !== "object") return null;
 	const root = (content as { root?: { children?: unknown[] } }).root;
 	if (!root?.children) return null;
@@ -496,18 +521,20 @@ export default function OrderSteps({
 								📍 Pickup Details
 							</Heading>
 							<Text>
-								<strong>Date:</strong>{" "}
-								{(() => {
+								<strong>Date:</strong> {(() => {
 									const d = orderDetails.pickupTimeslot?.date || "";
 									const dateOnly = d.includes("T") ? d.split("T")[0] : d;
 									return dateOnly
-										? new Date(`${dateOnly}T12:00:00Z`).toLocaleDateString("en-NZ", {
-												weekday: "long",
-												day: "numeric",
-												month: "long",
-												year: "numeric",
-												timeZone: "UTC",
-											})
+										? new Date(`${dateOnly}T12:00:00Z`).toLocaleDateString(
+												"en-NZ",
+												{
+													weekday: "long",
+													day: "numeric",
+													month: "long",
+													year: "numeric",
+													timeZone: "UTC",
+												},
+											)
 										: "TBD";
 								})()}
 							</Text>
@@ -517,7 +544,8 @@ export default function OrderSteps({
 							</Text>
 						</Box>
 
-						{typeof orderDetails.pickupTimeslot.pickupInstructionProfile === "object" &&
+						{typeof orderDetails.pickupTimeslot.pickupInstructionProfile ===
+							"object" &&
 							orderDetails.pickupTimeslot.pickupInstructionProfile && (
 								<Box
 									p={4}
@@ -530,15 +558,24 @@ export default function OrderSteps({
 										📋 Pickup Instructions —{" "}
 										{orderDetails.pickupTimeslot.pickupInstructionProfile.name}
 									</Heading>
-									{orderDetails.pickupTimeslot.pickupInstructionProfile.shortSummary && (
+									{orderDetails.pickupTimeslot.pickupInstructionProfile
+										.shortSummary && (
 										<Text fontWeight={500} mb={2}>
-											{orderDetails.pickupTimeslot.pickupInstructionProfile.shortSummary}
+											{
+												orderDetails.pickupTimeslot.pickupInstructionProfile
+													.shortSummary
+											}
 										</Text>
 									)}
 									{orderDetails.pickupTimeslot.pickupInstructionProfile.instructions
 										?.filter(
-											(block): block is PickupInstructionBlock & { content: unknown } =>
-												block.blockType === "richText" && Boolean(block.content),
+											(
+												block,
+											): block is PickupInstructionBlock & {
+												content: unknown;
+											} =>
+												block.blockType === "richText" &&
+												Boolean(block.content),
 										)
 										.map((block) => (
 											<Box
