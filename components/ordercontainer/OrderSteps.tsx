@@ -182,14 +182,16 @@ export default function OrderSteps({
 					if (order.status === OrderStatus.PAID && step === OrderStep.PAYMENT) {
 						onPaymentSuccess();
 					}
-					// If already has a timeslot, jump to complete
+					// If already has a timeslot, jump to complete — but not
+					// when the user is on the PICKUP step to change their timeslot.
 					if (
 						[
 							OrderStatus.AWAITING_PICKUP,
 							OrderStatus.PRINTED,
 							OrderStatus.PICKED_UP,
 						].includes(order.status) &&
-						step !== OrderStep.COMPLETE
+						step !== OrderStep.COMPLETE &&
+						step !== OrderStep.PICKUP
 					) {
 						onPickupConfirmed();
 					}
