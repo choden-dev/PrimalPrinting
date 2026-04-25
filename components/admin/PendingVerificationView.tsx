@@ -11,7 +11,7 @@ interface OrderData {
 	bankTransferProofKey: string | null;
 	bankTransferVerified: boolean | null;
 	pricing: { total: number };
-	files: { fileName: string; copies: number }[];
+	files: { fileName: string; copies: number; colorMode?: string }[];
 	customer: { name: string; email: string } | string;
 	createdAt: string;
 }
