@@ -593,6 +593,12 @@ export default function OrderSteps({
 				)}
 
 				<Box display="flex" gap={4} justifyContent="center" flexWrap="wrap">
+					<Button
+						colorScheme="green"
+						onClick={() => router.push(`/order?pickupFor=${orderId}`)}
+					>
+						Change Pickup
+					</Button>
 					<Button colorScheme="blue" onClick={() => router.push("/my-orders")}>
 						View My Orders
 					</Button>
