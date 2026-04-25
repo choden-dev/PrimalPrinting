@@ -320,9 +320,7 @@ function nodeToHtml(node: any): string {
 
 	const children = node.children
 		? // biome-ignore lint/suspicious/noExplicitAny: recursive structure
-			node.children
-				.map((c: any) => nodeToHtml(c))
-				.join("")
+			node.children.map((c: any) => nodeToHtml(c)).join("")
 		: "";
 
 	switch (node.type) {
