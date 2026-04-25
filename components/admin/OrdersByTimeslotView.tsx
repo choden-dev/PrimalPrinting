@@ -52,30 +52,34 @@ export default function OrdersByTimeslotView() {
 		setLoading(true);
 		setError(null);
 		try {
-			// Build date range query to limit timeslots fetched
-			let dateFilter = "";
-			if (filter === "upcoming") {
-				const today = new Date();
-				const todayStr = today.toLocaleDateString("en-CA"); // YYYY-MM-DD
-				const nextWeek = new Date(today);
-				nextWeek.setDate(nextWeek.getDate() + 7);
-				const nextWeekStr = nextWeek.toLocaleDateString("en-CA");
-				dateFilter = `&where[date][greater_than_equal]=${todayStr}&where[date][less_than_equal]=${nextWeekStr}`;
-			}
-
-			// Fetch timeslots with server-side filtering
+			// Fetch active timeslots sorted by date
 			const timeslotRes = await fetch(
-				`/api/timeslots?limit=200&sort=date${dateFilter}&depth=0`,
+				`/api/timeslots?where[isActive][equals]=true&limit=500&sort=date&depth=0`,
 			);
 			if (!timeslotRes.ok) throw new Error("Failed to fetch timeslots.");
 			const timeslotData = await timeslotRes.json();
-			const timeslots: TimeslotData[] = timeslotData.docs || [];
+			const allTimeslots: TimeslotData[] = timeslotData.docs || [];
+
+			// Client-side date filtering for "upcoming" (today + 7 days)
+			const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+			const nextWeek = new Date();
+			nextWeek.setDate(nextWeek.getDate() + 7);
+			const nextWeekStr = nextWeek.toLocaleDateString("en-CA");
+
+			const timeslots =
+				filter === "upcoming"
+					? allTimeslots.filter((slot) => {
+							const d = slot.date.includes("T")
+								? slot.date.split("T")[0]
+								: slot.date;
+							return d >= todayStr && d <= nextWeekStr;
+						})
+					: allTimeslots;
 
 			// For each timeslot, fetch orders assigned to it
 			const results: TimeslotWithOrders[] = [];
 
 			for (const slot of timeslots) {
-
 				const orderRes = await fetch(
 					`/api/orders?where[pickupTimeslot][equals]=${slot.id}&depth=1&limit=50&sort=-createdAt`,
 				);
