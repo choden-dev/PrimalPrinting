@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { OrderStatus } from "../../types/orderStatus";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { OrderStatusValue } from "../../types/orderStatus";
+import { OrderStatus, PAID_STATUSES } from "../../types/orderStatus";
 import BackToDashboard from "./BackToDashboard";
 
 interface TimeslotData {
@@ -19,7 +20,13 @@ interface OrderData {
 	paymentMethod: string | null;
 	bankTransferVerified: boolean | null;
 	pricing: { total: number };
-	files: { fileName: string; copies: number; colorMode?: string }[];
+	files: {
+		fileName: string;
+		copies: number;
+		colorMode?: string;
+		stagingKey?: string;
+		permanentKey?: string;
+	}[];
 	customer: { name: string; email: string } | string;
 	pickedUpAt: string | null;
 }
@@ -125,6 +132,116 @@ export default function OrdersByTimeslotView() {
 		}
 		return { name: "—", email: "—" };
 	};
+
+	/** Resolve the correct R2 key for a file based on order payment status */
+	const getFileKey = useCallback(
+		(
+			file: OrderData["files"][number],
+			orderStatus: string,
+		): { key: string; staging: boolean } | null => {
+			const isPaid = PAID_STATUSES.includes(orderStatus as OrderStatusValue);
+			if (isPaid && file.permanentKey) {
+				return { key: file.permanentKey, staging: false };
+			}
+			if (file.stagingKey) {
+				return { key: file.stagingKey, staging: true };
+			}
+			return null;
+		},
+		[],
+	);
+
+	/** Fetch a presigned URL and open it in a new tab */
+	const handleDownloadFile = useCallback(
+		async (file: OrderData["files"][number], orderStatus: string) => {
+			const resolved = getFileKey(file, orderStatus);
+			if (!resolved) return;
+
+			try {
+				const params = new URLSearchParams({
+					key: resolved.key,
+					staging: resolved.staging.toString(),
+				});
+				const res = await fetch(`/api/admin/file-url?${params}`);
+				if (!res.ok) throw new Error("Failed to get file URL");
+				const { url } = await res.json();
+				window.open(url, "_blank");
+			} catch {
+				window.alert(`Failed to open file: ${file.fileName}`);
+			}
+		},
+		[getFileKey],
+	);
+
+	/** Download all files for all orders in a timeslot group sequentially */
+	const downloadingRef = useRef(false);
+	const handleDownloadAllFiles = useCallback(
+		async (orders: OrderData[]) => {
+			if (downloadingRef.current) return;
+			downloadingRef.current = true;
+
+			try {
+				// Collect all files with their resolved keys
+				const filesToDownload: {
+					key: string;
+					staging: boolean;
+					fileName: string;
+				}[] = [];
+				for (const order of orders) {
+					for (const file of order.files || []) {
+						const resolved = getFileKey(file, order.status);
+						if (resolved) {
+							filesToDownload.push({ ...resolved, fileName: file.fileName });
+						}
+					}
+				}
+
+				if (filesToDownload.length === 0) {
+					window.alert("No downloadable files found.");
+					return;
+				}
+
+				// Fetch all presigned URLs in parallel
+				const urlResults = await Promise.all(
+					filesToDownload.map(async ({ key, staging, fileName }) => {
+						try {
+							const params = new URLSearchParams({
+								key,
+								staging: staging.toString(),
+							});
+							const res = await fetch(`/api/admin/file-url?${params}`);
+							if (!res.ok) return null;
+							const { url } = await res.json();
+							return { url, fileName };
+						} catch {
+							return null;
+						}
+					}),
+				);
+
+				// Open each file in a new tab with a small delay to avoid popup blockers
+				const validUrls = urlResults.filter(Boolean) as {
+					url: string;
+					fileName: string;
+				}[];
+				for (let i = 0; i < validUrls.length; i++) {
+					window.open(validUrls[i].url, "_blank");
+					if (i < validUrls.length - 1) {
+						await new Promise((r) => setTimeout(r, 300));
+					}
+				}
+
+				if (validUrls.length < filesToDownload.length) {
+					window.alert(
+						`Opened ${validUrls.length} of ${filesToDownload.length} files. Some files could not be loaded.`,
+					);
+				}
+			} finally {
+				downloadingRef.current = false;
+			}
+		},
+		[getFileKey],
+	);
 
 	return (
 		<div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -285,16 +402,40 @@ export default function OrdersByTimeslotView() {
 									</span>
 								)}
 							</div>
-							<span
+							<div
 								style={{
-									background: "rgba(255,255,255,0.2)",
-									padding: "2px 10px",
-									borderRadius: "12px",
-									fontSize: "12px",
+									display: "flex",
+									alignItems: "center",
+									gap: "8px",
 								}}
 							>
-								{orders.length} order{orders.length !== 1 ? "s" : ""}
-							</span>
+								<span
+									style={{
+										background: "rgba(255,255,255,0.2)",
+										padding: "2px 10px",
+										borderRadius: "12px",
+										fontSize: "12px",
+									}}
+								>
+									{orders.length} order{orders.length !== 1 ? "s" : ""}
+								</span>
+								<button
+									type="button"
+									onClick={() => handleDownloadAllFiles(orders)}
+									style={{
+										padding: "3px 10px",
+										fontSize: "12px",
+										fontWeight: 600,
+										background: "rgba(255,255,255,0.15)",
+										color: "#fff",
+										border: "1px solid rgba(255,255,255,0.3)",
+										borderRadius: "4px",
+										cursor: "pointer",
+									}}
+								>
+									⬇ Download All Files
+								</button>
+							</div>
 						</div>
 
 						{/* Orders table */}
@@ -393,14 +534,47 @@ export default function OrdersByTimeslotView() {
 												</div>
 											</td>
 											<td style={{ padding: "10px 12px" }}>
-												{order.files?.map((f) => (
-													<div
-														key={`${f.fileName}-${f.copies}-${f.colorMode}`}
-														style={{ fontSize: "12px" }}
-													>
-														{f.fileName} ×{f.copies}
-													</div>
-												))}
+												{order.files?.map((f) => {
+													const hasKey = !!(f.stagingKey || f.permanentKey);
+													return (
+														<div
+															key={`${f.fileName}-${f.copies}-${f.colorMode}`}
+															style={{
+																fontSize: "12px",
+																display: "flex",
+																alignItems: "center",
+																gap: "6px",
+																marginBottom: "2px",
+															}}
+														>
+															<span>
+																{f.fileName} ×{f.copies}
+															</span>
+															{hasKey && (
+																<button
+																	type="button"
+																	title={`Download ${f.fileName}`}
+																	onClick={() =>
+																		handleDownloadFile(f, order.status)
+																	}
+																	style={{
+																		padding: "1px 6px",
+																		fontSize: "11px",
+																		background: "#e3f2fd",
+																		color: "#1565c0",
+																		border: "1px solid #90caf9",
+																		borderRadius: "3px",
+																		cursor: "pointer",
+																		whiteSpace: "nowrap",
+																		flexShrink: 0,
+																	}}
+																>
+																	⬇ Open
+																</button>
+															)}
+														</div>
+													);
+												})}
 											</td>
 											<td
 												style={{
