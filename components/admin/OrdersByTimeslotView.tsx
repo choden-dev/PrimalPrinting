@@ -66,10 +66,12 @@ export default function OrdersByTimeslotView() {
 			for (const slot of timeslots) {
 				// Filter: only upcoming if selected
 				if (filter === "upcoming") {
-					const slotDate = new Date(slot.date);
-					const today = new Date();
-					today.setHours(0, 0, 0, 0);
-					if (slotDate < today) continue;
+					// slot.date is a YYYY-MM-DD string — compare as strings to avoid timezone issues
+					const todayStr = new Date().toLocaleDateString("en-CA"); // en-CA gives YYYY-MM-DD
+					const slotDateStr = slot.date.includes("T")
+						? slot.date.split("T")[0]
+						: slot.date;
+					if (slotDateStr < todayStr) continue;
 				}
 
 				const orderRes = await fetch(
@@ -78,12 +80,11 @@ export default function OrdersByTimeslotView() {
 				if (!orderRes.ok) continue;
 				const orderData = await orderRes.json();
 
-				if (orderData.docs && orderData.docs.length > 0) {
-					results.push({
-						timeslot: slot,
-						orders: orderData.docs,
-					});
-				}
+				// Show all timeslots (even empty ones) so admin can see the full schedule
+				results.push({
+					timeslot: slot,
+					orders: orderData.docs || [],
+				});
 			}
 
 			// Also add a "No timeslot" group for paid orders without a slot
@@ -276,12 +277,19 @@ export default function OrdersByTimeslotView() {
 			)}
 
 			{data.map(({ timeslot, orders }) => {
-				const dateLabel = timeslot.date
-					? new Date(timeslot.date).toLocaleDateString("en-NZ", {
+				// Parse date safely — use noon UTC to avoid timezone shift
+				const dateStr = timeslot.date
+					? timeslot.date.includes("T")
+						? timeslot.date.split("T")[0]
+						: timeslot.date
+					: "";
+				const dateLabel = dateStr
+					? new Date(`${dateStr}T12:00:00Z`).toLocaleDateString("en-NZ", {
 							weekday: "long",
 							day: "numeric",
 							month: "long",
 							year: "numeric",
+							timeZone: "UTC",
 						})
 					: "";
 
