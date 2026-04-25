@@ -144,25 +144,18 @@ export async function GET(request: NextRequest) {
 				orderNumber: order.orderNumber,
 				status: order.status,
 				paymentMethod: (order.paymentMethod as string) || null,
-				bankTransferVerified:
-					(order.bankTransferVerified as boolean) ?? null,
+				bankTransferVerified: (order.bankTransferVerified as boolean) ?? null,
 				pricing: order.pricing as { total: number },
-				files: (order.files || []).map(
-					(f: Record<string, unknown>) => ({
-						fileName: f.fileName as string,
-						copies: f.copies as number,
-						colorMode: (f.colorMode as string) || undefined,
-					}),
-				),
+				files: (order.files || []).map((f: Record<string, unknown>) => ({
+					fileName: f.fileName as string,
+					copies: f.copies as number,
+					colorMode: (f.colorMode as string) || undefined,
+				})),
 				customer:
 					typeof order.customer === "object" && order.customer
 						? {
-								name:
-									(order.customer as { name?: string }).name ||
-									"—",
-								email:
-									(order.customer as { email?: string })
-										.email || "—",
+								name: (order.customer as { name?: string }).name || "—",
+								email: (order.customer as { email?: string }).email || "—",
 							}
 						: String(order.customer),
 				pickedUpAt: (order.pickedUpAt as string) || null,

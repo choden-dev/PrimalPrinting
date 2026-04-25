@@ -53,14 +53,10 @@ export default function OrdersByTimeslotView() {
 		setError(null);
 		try {
 			// Single API call replaces N+2 sequential requests
-			const res = await fetch(
-				`/api/admin/orders-by-timeslot?filter=${filter}`,
-			);
+			const res = await fetch(`/api/admin/orders-by-timeslot?filter=${filter}`);
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
-				throw new Error(
-					err.error || "Failed to fetch orders by timeslot.",
-				);
+				throw new Error(err.error || "Failed to fetch orders by timeslot.");
 			}
 			const json = await res.json();
 			setData(json.groups || []);
