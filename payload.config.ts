@@ -90,6 +90,13 @@ export default (async () =>
 							title: "Verify Bank Transfers",
 						},
 					},
+					notifyTimeslots: {
+						Component: "@/components/admin/NotifyTimeslotsView",
+						path: "/notify-timeslots",
+						meta: {
+							title: "Notify Customers — Timeslots",
+						},
+					},
 				},
 				afterNavLinks: ["@/components/admin/AdminNavLinks"],
 			},

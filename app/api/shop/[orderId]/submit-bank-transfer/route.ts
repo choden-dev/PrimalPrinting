@@ -129,6 +129,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			console.error("Failed to send Discord notification:", discordError);
 		}
 
+		// Check if there are any active timeslots available
+		let hasTimeslots = false;
+		try {
+			const timeslots = await payload.find({
+				collection: "timeslots",
+				where: { isActive: { equals: true } },
+				limit: 1,
+			});
+			hasTimeslots = timeslots.totalDocs > 0;
+		} catch {
+			// Default to false if check fails
+		}
+
 		// Send confirmation email to the customer
 		try {
 			await sendBankTransferReceivedEmail({
@@ -136,6 +149,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				customerName: customer.name,
 				orderNumber: updated.orderNumber || "",
 				total: order.pricing?.total,
+				hasTimeslots,
 			});
 		} catch (emailError) {
 			console.error("Failed to send bank transfer email:", emailError);

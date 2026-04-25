@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { sendPaymentConfirmationEmail } from "../../../../lib/email";
 import { getPayloadClient } from "../../../../lib/payload";
 import { transferOrderFiles } from "../../../../lib/r2";
 
@@ -122,6 +123,50 @@ export async function POST(request: NextRequest) {
 				console.error(
 					`Stripe webhook: File transfer failed for order ${order.orderNumber}:`,
 					transferError,
+				);
+			}
+			// Send payment confirmation email to the customer
+			try {
+				const customerData =
+					typeof order.customer === "object"
+						? order.customer
+						: await payload.findByID({
+								collection: "customers",
+								id: order.customer,
+							});
+
+				if (customerData?.email) {
+					// Check if there are active timeslots available
+					let hasTimeslots = false;
+					try {
+						const timeslots = await payload.find({
+							collection: "timeslots",
+							where: { isActive: { equals: true } },
+							limit: 1,
+						});
+						hasTimeslots = timeslots.totalDocs > 0;
+					} catch {
+						// Default to false if check fails
+					}
+
+					await sendPaymentConfirmationEmail({
+						to: customerData.email,
+						customerName: customerData.name || "Customer",
+						orderNumber: order.orderNumber || "",
+						files: order.files || [],
+						pricing: order.pricing,
+						hasTimeslots,
+					});
+
+					console.log(
+						`Stripe webhook: Confirmation email sent for order ${order.orderNumber}.`,
+					);
+				}
+			} catch (emailError) {
+				// Log but don't fail — order is already PAID
+				console.error(
+					`Stripe webhook: Failed to send confirmation email for order ${order.orderNumber}:`,
+					emailError,
 				);
 			}
 		} catch (error) {
