@@ -1,0 +1,47 @@
+//- ── Shared mixins for email templates ──────────────────────────────────
+
+//- Render a list of order files with their details.
+mixin fileList(files)
+  .section
+    h2 Order Items
+    each file in files
+      .file-item
+        .file-name #{file.fileName}
+        .file-details #{file.pageCount} pages · #{file.copies} #{file.copies === 1 ? 'copy' : 'copies'} · #{file.colorLabel} · #{file.paperSize} · #{file.sidedLabel}
+
+//- Render the pricing breakdown table.
+mixin pricingTable(subtotal, tax, total)
+  .section
+    h2 Pricing
+    table.pricing-table
+      tr
+        td.label Subtotal
+        td.value #{subtotal}
+      tr
+        td.label Tax
+        td.value #{tax}
+      tr.total
+        td.label Total
+        td.value #{total}
+
+//- Render the contact info and footer.
+mixin contactAndFooter(contactEmail, contactPhone)
+  if contactEmail
+    p Email: #{contactEmail}
+  if contactPhone
+    p Phone: #{contactPhone}
+
+//- Render the "select timeslot" action or "coming soon" info box.
+mixin timeslotNextStep(hasTimeslots, ordersUrl)
+  if hasTimeslots
+    .action-box
+      h3 📅 Next Step: Select a Pickup Slot
+      p Pickup timeslots are available now! Head to your orders page to choose when you'd like to collect your prints.
+      p
+        a.btn(href=ordersUrl) Select Pickup Slot
+  else
+    .info-box
+      h3 ⏳ Pickup Timeslots Coming Soon
+      p There are no pickup timeslots available right now — don't worry! We'll send you another email as soon as timeslots are available so you can choose a pickup time.
+      if block
+        block
