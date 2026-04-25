@@ -133,7 +133,13 @@ export async function GET(request: NextRequest) {
 			paymentMethod: string | null;
 			bankTransferVerified: boolean | null;
 			pricing: { total: number };
-			files: { fileName: string; copies: number; colorMode?: string }[];
+			files: {
+				fileName: string;
+				copies: number;
+				colorMode?: string;
+				stagingKey?: string;
+				permanentKey?: string;
+			}[];
 			customer: { name: string; email: string } | string;
 			pickedUpAt: string | null;
 		}
@@ -150,6 +156,8 @@ export async function GET(request: NextRequest) {
 					fileName: f.fileName as string,
 					copies: f.copies as number,
 					colorMode: (f.colorMode as string) || undefined,
+					stagingKey: (f.stagingKey as string) || undefined,
+					permanentKey: (f.permanentKey as string) || undefined,
 				})),
 				customer:
 					typeof order.customer === "object" && order.customer
