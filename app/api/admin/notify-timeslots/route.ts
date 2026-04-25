@@ -75,7 +75,10 @@ export async function POST(request: NextRequest) {
 			{
 				email: string;
 				name: string;
-				orders: { orderNumber: string }[];
+				orders: {
+					orderNumber: string;
+					files: NonNullable<(typeof orders.docs)[number]["files"]>;
+				}[];
 			}
 		>();
 
@@ -88,12 +91,18 @@ export async function POST(request: NextRequest) {
 			if (existing) {
 				existing.orders.push({
 					orderNumber: order.orderNumber || order.id,
+					files: order.files || [],
 				});
 			} else {
 				customerMap.set(customer.email, {
 					email: customer.email,
 					name: customer.name || "Customer",
-					orders: [{ orderNumber: order.orderNumber || order.id }],
+					orders: [
+						{
+							orderNumber: order.orderNumber || order.id,
+							files: order.files || [],
+						},
+					],
 				});
 			}
 		}

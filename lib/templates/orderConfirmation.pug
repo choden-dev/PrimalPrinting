@@ -1,29 +1,11 @@
+include _mixins
+
 doctype html
 html
   head
     meta(charset="utf-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    style.
-      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-      .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
-      .header { background: #1a1a2e; color: #ffffff; padding: 32px 24px; text-align: center; }
-      .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
-      .header p { margin: 8px 0 0; opacity: 0.8; font-size: 14px; }
-      .content { padding: 24px; }
-      .section { margin-bottom: 24px; }
-      .section h2 { font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 12px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; }
-      .file-item { background: #f9f9f9; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
-      .file-name { font-weight: 600; margin-bottom: 4px; }
-      .file-details { font-size: 13px; color: #666; }
-      .pricing-table { width: 100%; border-collapse: collapse; }
-      .pricing-table td { padding: 6px 0; }
-      .pricing-table .label { color: #666; }
-      .pricing-table .value { text-align: right; font-weight: 500; }
-      .pricing-table .total td { border-top: 2px solid #1a1a2e; padding-top: 10px; font-weight: 700; font-size: 18px; }
-      .pickup-box { background: #e8f5e9; border-radius: 8px; padding: 16px; border-left: 4px solid #4caf50; }
-      .pickup-box h3 { margin: 0 0 8px; color: #2e7d32; }
-      .pickup-box p { margin: 4px 0; }
-      .footer { padding: 24px; text-align: center; font-size: 13px; color: #999; border-top: 1px solid #eee; }
+    include _styles
   body
     .container
       .header
@@ -35,25 +17,9 @@ html
 
         p Your order has been confirmed and payment received. Here's your order summary:
 
-        .section
-          h2 Order Items
-          each file in files
-            .file-item
-              .file-name #{file.fileName}
-              .file-details #{file.pageCount} pages · #{file.copies} #{file.copies === 1 ? 'copy' : 'copies'} · #{file.colorLabel} · #{file.paperSize} · #{file.sidedLabel}
+        +fileList(files)
 
-        .section
-          h2 Pricing
-          table.pricing-table
-            tr
-              td.label Subtotal
-              td.value #{subtotal}
-            tr
-              td.label Tax
-              td.value #{tax}
-            tr.total
-              td.label Total
-              td.value #{total}
+        +pricingTable(subtotal, tax, total)
 
         .section
           .pickup-box
@@ -70,10 +36,7 @@ html
                 | #{pickupLabel}
 
         p If you have any questions, please contact us:
-        if contactEmail
-          p Email: #{contactEmail}
-        if contactPhone
-          p Phone: #{contactPhone}
+        +contactAndFooter(contactEmail, contactPhone)
 
       .footer
         p Primal Printing — Thank you for your order!

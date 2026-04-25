@@ -99,7 +99,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				to: customer.email,
 				customerName,
 				orderNumber,
-				total: order.pricing?.total,
+				files: order.files || [],
+				pricing: order.pricing,
 				hasTimeslots,
 			});
 

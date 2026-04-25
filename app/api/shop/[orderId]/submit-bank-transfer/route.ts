@@ -148,7 +148,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 				to: customer.email,
 				customerName: customer.name,
 				orderNumber: updated.orderNumber || "",
-				total: order.pricing?.total,
+				files: order.files || [],
+				pricing: order.pricing,
 				hasTimeslots,
 			});
 		} catch (emailError) {

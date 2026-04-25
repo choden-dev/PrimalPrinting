@@ -100,28 +100,20 @@ export async function sendOrderConfirmationEmail(params: {
 			})
 		: "TBD";
 
-	const contact = await getContactInfo();
+	const common = await buildCommonLocals(customerName);
 
 	const html = renderTemplate("orderConfirmation", {
-		customerName: customerName || "Customer",
+		...common,
 		orderNumber,
-		files: files.map((f) => ({
-			...f,
-			colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
-			sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
-		})),
-		subtotal: formatCents(pricing?.subtotal),
-		tax: formatCents(pricing?.tax),
-		total: formatCents(pricing?.total),
+		files: formatFilesForTemplate(files),
+		...formatPricingForTemplate(pricing),
 		pickupDate: formattedDate,
 		pickupTime: `${timeslot.startTime} – ${timeslot.endTime}`,
 		pickupLabel: timeslot.label,
-		contactEmail: contact.email,
-		contactPhone: contact.phone,
 	});
 
 	await getTransporter().sendMail({
-		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		from: fromAddress(),
 		to,
 		subject: `Order Confirmed — ${orderNumber}`,
 		html,
@@ -136,26 +128,25 @@ export async function sendBankTransferReceivedEmail(params: {
 	to: string;
 	customerName: string;
 	orderNumber: string;
-	total: number | undefined;
+	files: OrderFile[];
+	pricing: PricingInfo | undefined;
 	hasTimeslots: boolean;
 }): Promise<void> {
-	const { to, customerName, orderNumber, total, hasTimeslots } = params;
+	const { to, customerName, orderNumber, files, pricing, hasTimeslots } =
+		params;
 
-	const contact = await getContactInfo();
-	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
+	const common = await buildCommonLocals(customerName);
 
 	const html = renderTemplate("paymentPendingVerification", {
-		customerName: customerName || "Customer",
+		...common,
 		orderNumber,
-		total: formatCents(total),
+		files: formatFilesForTemplate(files),
+		...formatPricingForTemplate(pricing),
 		hasTimeslots,
-		ordersUrl,
-		contactEmail: contact.email,
-		contactPhone: contact.phone,
 	});
 
 	await getTransporter().sendMail({
-		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		from: fromAddress(),
 		to,
 		subject: hasTimeslots
 			? `Payment Received — ${orderNumber} — Select Your Pickup Slot`
@@ -180,28 +171,18 @@ export async function sendPaymentConfirmationEmail(params: {
 	const { to, customerName, orderNumber, files, pricing, hasTimeslots } =
 		params;
 
-	const contact = await getContactInfo();
-	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
+	const common = await buildCommonLocals(customerName);
 
 	const html = renderTemplate("paymentConfirmation", {
-		customerName: customerName || "Customer",
+		...common,
 		orderNumber,
-		files: files.map((f) => ({
-			...f,
-			colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
-			sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
-		})),
-		subtotal: formatCents(pricing?.subtotal),
-		tax: formatCents(pricing?.tax),
-		total: formatCents(pricing?.total),
+		files: formatFilesForTemplate(files),
+		...formatPricingForTemplate(pricing),
 		hasTimeslots,
-		ordersUrl,
-		contactEmail: contact.email,
-		contactPhone: contact.phone,
 	});
 
 	await getTransporter().sendMail({
-		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		from: fromAddress(),
 		to,
 		subject: `Payment Confirmed — ${orderNumber} — ${hasTimeslots ? "Select Your Pickup Slot" : "We'll Notify You When Timeslots Are Ready"}`,
 		html,
@@ -216,25 +197,24 @@ export async function sendPaymentConfirmationEmail(params: {
 export async function sendTimeslotsAvailableEmail(params: {
 	to: string;
 	customerName: string;
-	orders: { orderNumber: string }[];
+	orders: { orderNumber: string; files: OrderFile[] }[];
 }): Promise<void> {
 	const { to, customerName, orders } = params;
 
-	const contact = await getContactInfo();
-	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
+	const common = await buildCommonLocals(customerName);
 
 	const html = renderTemplate("timeslotsAvailable", {
-		customerName: customerName || "Customer",
-		orders,
-		ordersUrl,
-		contactEmail: contact.email,
-		contactPhone: contact.phone,
+		...common,
+		orders: orders.map((o) => ({
+			...o,
+			files: formatFilesForTemplate(o.files),
+		})),
 	});
 
 	await getTransporter().sendMail({
-		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		from: fromAddress(),
 		to,
-		subject: `Pickup Timeslots Available — Select Your Slot Now`,
+		subject: "Pickup Timeslots Available — Select Your Slot Now",
 		html,
 	});
 }
@@ -244,4 +224,42 @@ export async function sendTimeslotsAvailableEmail(params: {
 function formatCents(cents: number | undefined | null): string {
 	if (cents == null) return "$0.00";
 	return `$${(cents / 100).toFixed(2)}`;
+}
+
+/** Map raw OrderFile[] into template-friendly objects with display labels. */
+function formatFilesForTemplate(files: OrderFile[]): Record<string, unknown>[] {
+	return files.map((f) => ({
+		...f,
+		colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
+		sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
+	}));
+}
+
+/** Format a PricingInfo into display-ready strings. */
+function formatPricingForTemplate(pricing: PricingInfo | undefined): {
+	subtotal: string;
+	tax: string;
+	total: string;
+} {
+	return {
+		subtotal: formatCents(pricing?.subtotal),
+		tax: formatCents(pricing?.tax),
+		total: formatCents(pricing?.total),
+	};
+}
+
+/** Build the common template locals shared by every email. */
+async function buildCommonLocals(customerName: string) {
+	const contact = await getContactInfo();
+	return {
+		customerName: customerName || "Customer",
+		ordersUrl: `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`,
+		contactEmail: contact.email,
+		contactPhone: contact.phone,
+	};
+}
+
+/** Build the "from" address used by every outgoing email. */
+function fromAddress(): string {
+	return `"Primal Printing" <${process.env.GMAIL_USER}>`;
 }
