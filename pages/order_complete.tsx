@@ -69,7 +69,11 @@ interface OrderDetails {
  * Render Payload/Lexical rich text JSON as React elements.
  * Handles basic node types: paragraph, text, list, heading.
  */
-function RichTextContent({ content }: { content: unknown }): React.ReactElement | null {
+function RichTextContent({
+	content,
+}: {
+	content: unknown;
+}): React.ReactElement | null {
 	if (!content || typeof content !== "object") return null;
 
 	const root = (content as { root?: { children?: unknown[] } }).root;
@@ -95,7 +99,8 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 
 		if (n.type === "text" || (!n.type && typeof n.text === "string")) {
 			let content: React.ReactNode = n.text || "";
-			if (n.format && n.format & 1) content = <strong key={key}>{content}</strong>;
+			if (n.format && n.format & 1)
+				content = <strong key={key}>{content}</strong>;
 			if (n.format && n.format & 2) content = <em key={key}>{content}</em>;
 			if (n.format && n.format & 4) content = <u key={key}>{content}</u>;
 			return content;
@@ -105,7 +110,11 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 
 		switch (n.type) {
 			case "paragraph":
-				return <Text key={key} mb={2}>{children}</Text>;
+				return (
+					<Text key={key} mb={2}>
+						{children}
+					</Text>
+				);
 			case "heading": {
 				if (n.tag === "h1") return <h1 key={key}>{children}</h1>;
 				if (n.tag === "h2") return <h2 key={key}>{children}</h2>;
@@ -113,14 +122,30 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 				return <h3 key={key}>{children}</h3>;
 			}
 			case "list":
-				return n.listType === "number"
-					? <ol key={key} style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}>{children}</ol>
-					: <ul key={key} style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}>{children}</ul>;
+				return n.listType === "number" ? (
+					<ol
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ol>
+				) : (
+					<ul
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ul>
+				);
 			case "listitem":
 				return <li key={key}>{children}</li>;
 			case "link":
 			case "autolink":
-				return <a key={key} href={n.url || "#"}>{children}</a>;
+				return (
+					<a key={key} href={n.url || "#"}>
+						{children}
+					</a>
+				);
 			case "linebreak":
 				return <br key={key} />;
 			default:
