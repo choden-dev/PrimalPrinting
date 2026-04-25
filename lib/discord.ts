@@ -102,40 +102,61 @@ export async function notifyBankTransferSubmitted(params: {
 }
 
 /**
- * Post a daily rollup of orders received today.
- * Summarises total count, revenue, and pickup status.
+ * Post a daily rollup of today's orders so admins know what needs attention.
  */
 export async function notifyDailyOrderSummary(params: {
 	totalOrders: number;
-	totalRevenueCents: number;
-	awaitingPickup: number;
-	pickupSelected: number;
+	needsPickupSelection: number;
+	needsPrinting: number;
+	pendingVerification: number;
 }): Promise<void> {
-	const { totalOrders, totalRevenueCents, awaitingPickup, pickupSelected } =
-		params;
+	const {
+		totalOrders,
+		needsPickupSelection,
+		needsPrinting,
+		pendingVerification,
+	} = params;
 
 	if (totalOrders === 0) return;
 
-	const revenue = `$${(totalRevenueCents / 100).toFixed(2)}`;
+	const actionNeeded =
+		needsPickupSelection + needsPrinting + pendingVerification;
+	const color = actionNeeded > 0 ? COLORS.WARNING : COLORS.INFO;
+
+	const fields: EmbedField[] = [];
+
+	if (pendingVerification > 0) {
+		fields.push({
+			name: "⏳ Pending Payment Verification",
+			value: String(pendingVerification),
+			inline: true,
+		});
+	}
+	if (needsPickupSelection > 0) {
+		fields.push({
+			name: "📍 Awaiting Pickup Selection",
+			value: String(needsPickupSelection),
+			inline: true,
+		});
+	}
+	if (needsPrinting > 0) {
+		fields.push({
+			name: "🖨️ Ready to Print",
+			value: String(needsPrinting),
+			inline: true,
+		});
+	}
 
 	await sendDiscordWebhook({
 		embeds: [
 			{
-				title: "📊 Daily Order Summary",
-				description: `**${totalOrders}** order${totalOrders !== 1 ? "s" : ""} paid today — **${revenue}** total revenue.`,
-				color: COLORS.INFO,
-				fields: [
-					{
-						name: "Awaiting Pickup Selection",
-						value: String(awaitingPickup),
-						inline: true,
-					},
-					{
-						name: "Pickup Selected",
-						value: String(pickupSelected),
-						inline: true,
-					},
-				],
+				title:
+					actionNeeded > 0
+						? "📋 Daily Order Summary — Action Needed"
+						: "📋 Daily Order Summary",
+				description: `**${totalOrders}** order${totalOrders !== 1 ? "s" : ""} paid today.${actionNeeded > 0 ? ` **${actionNeeded}** need${actionNeeded !== 1 ? "" : "s"} attention.` : " All orders are on track."}`,
+				color,
+				fields,
 				timestamp: new Date().toISOString(),
 			},
 		],

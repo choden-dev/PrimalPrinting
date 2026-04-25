@@ -38,26 +38,29 @@ export async function POST(request: NextRequest) {
 		});
 
 		const totalOrders = orders.length;
-		const totalRevenueCents = orders.reduce(
-			(sum, o) => sum + ((o.pricing as { total?: number })?.total || 0),
-			0,
-		);
-		const pickupSelected = orders.filter((o) => o.pickupTimeslot).length;
-		const awaitingPickup = totalOrders - pickupSelected;
+		const needsPickupSelection = orders.filter(
+			(o) => o.status === "PAID" && !o.pickupTimeslot,
+		).length;
+		const needsPrinting = orders.filter(
+			(o) => o.status === "AWAITING_PICKUP",
+		).length;
+		const pendingVerification = orders.filter(
+			(o) => o.status === "PENDING_VERIFICATION",
+		).length;
 
 		await notifyDailyOrderSummary({
 			totalOrders,
-			totalRevenueCents,
-			awaitingPickup,
-			pickupSelected,
+			needsPickupSelection,
+			needsPrinting,
+			pendingVerification,
 		});
 
 		return NextResponse.json({
 			success: true,
 			totalOrders,
-			totalRevenueCents,
-			awaitingPickup,
-			pickupSelected,
+			needsPickupSelection,
+			needsPrinting,
+			pendingVerification,
 			message: `Daily summary posted: ${totalOrders} order(s).`,
 		});
 	} catch (error) {
