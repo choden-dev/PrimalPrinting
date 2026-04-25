@@ -23,13 +23,16 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_cf5df0bc440da11fabc68c09ebfaadac } from '@/components/admin/ApprovePaymentButton'
 import { default as default_1c77336337a4e79b4b5cb9debbef4b54 } from '@/components/admin/MarkPickedUpButton'
+import { default as default_3ec9b1a9218b9b4a731731975ef019e3 } from '@/components/admin/ResendConfirmationButton'
 import { default as default_e67e040884f73da757168d32ed5b3a48 } from '@/components/admin/OrderFilesViewer'
 import { default as default_f5da5fa50c48fc2ef14afcb84f969fcf } from '@/components/admin/AdminNavLinks'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { default as default_2a932438fc60530ff9cbda67fae50c5e } from '@/components/admin/OrdersByTimeslotView'
 import { default as default_ae6d727f69bea18ad23ef405314d6459 } from '@/components/admin/PendingVerificationView'
+import { default as default_357e94cb16882b41b62ce8427705d759 } from '@/components/admin/NotifyTimeslotsView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -56,10 +59,12 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/admin/ApprovePaymentButton#default": default_cf5df0bc440da11fabc68c09ebfaadac,
   "@/components/admin/MarkPickedUpButton#default": default_1c77336337a4e79b4b5cb9debbef4b54,
+  "@/components/admin/ResendConfirmationButton#default": default_3ec9b1a9218b9b4a731731975ef019e3,
   "@/components/admin/OrderFilesViewer#default": default_e67e040884f73da757168d32ed5b3a48,
   "@/components/admin/AdminNavLinks#default": default_f5da5fa50c48fc2ef14afcb84f969fcf,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/components/admin/OrdersByTimeslotView#default": default_2a932438fc60530ff9cbda67fae50c5e,
   "@/components/admin/PendingVerificationView#default": default_ae6d727f69bea18ad23ef405314d6459,
+  "@/components/admin/NotifyTimeslotsView#default": default_357e94cb16882b41b62ce8427705d759,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
