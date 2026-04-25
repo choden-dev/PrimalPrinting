@@ -76,14 +76,6 @@ const OrderContainerInner = ({
 	const resumeOrderId = router.query.resume as string | undefined;
 	const pickupForOrderId = router.query.pickupFor as string | undefined;
 
-	// Reset resumeChecked when the query params change so the resume
-	// effect re-runs (e.g. user clicks "Change Pickup" from the pending list
-	// while already on the /order page).
-	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional — we need to re-run when query params change
-	useEffect(() => {
-		setResumeChecked(false);
-	}, [resumeOrderId, pickupForOrderId]);
-
 	// Determine the correct step for a resumed order based on its status
 	const statusToStep = useCallback((status: string): OrderStepValue => {
 		switch (status) {
@@ -101,31 +93,26 @@ const OrderContainerInner = ({
 		}
 	}, []);
 
-	// Resume an existing order or jump to pickup selection
+	// Resume an existing order or jump to pickup selection.
+	// Resets resumeChecked to false and re-fetches whenever the query
+	// params change (e.g. clicking "Change Pickup" while already on
+	// the /order page).
 	useEffect(() => {
 		const orderIdToResume = resumeOrderId || pickupForOrderId;
-		if (!orderIdToResume || resumeChecked) return;
+		if (!orderIdToResume) return;
+
+		setResumeChecked(false);
 
 		async function resumeOrder() {
 			try {
 				const res = await fetch(`/api/shop/${orderIdToResume}`);
-				if (!res.ok) {
-					setResumeChecked(true);
-					return;
-				}
+				if (!res.ok) return;
+
 				const data = await res.json();
 				const order = data.order;
 
-				if (!order?.status) {
-					setResumeChecked(true);
-					return;
-				}
-
-				if (order.status === OrderStatus.EXPIRED) {
-					// Can't resume expired orders
-					setResumeChecked(true);
-					return;
-				}
+				if (!order?.status) return;
+				if (order.status === OrderStatus.EXPIRED) return;
 
 				setActiveOrderId(order.id);
 				setActiveOrderNumber(order.orderNumber);
@@ -148,7 +135,7 @@ const OrderContainerInner = ({
 		}
 
 		resumeOrder();
-	}, [resumeOrderId, pickupForOrderId, resumeChecked, statusToStep]);
+	}, [resumeOrderId, pickupForOrderId, statusToStep]);
 
 	// Fetch any in-progress orders for authenticated users
 	useEffect(() => {
