@@ -76,6 +76,14 @@ const OrderContainerInner = ({
 	const resumeOrderId = router.query.resume as string | undefined;
 	const pickupForOrderId = router.query.pickupFor as string | undefined;
 
+	// Reset resumeChecked when the query params change so the resume
+	// effect re-runs (e.g. user clicks "Change Pickup" from the pending list
+	// while already on the /order page).
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional — we need to re-run when query params change
+	useEffect(() => {
+		setResumeChecked(false);
+	}, [resumeOrderId, pickupForOrderId]);
+
 	// Determine the correct step for a resumed order based on its status
 	const statusToStep = useCallback((status: string): OrderStepValue => {
 		switch (status) {
