@@ -80,11 +80,12 @@ export default function OrdersByTimeslotView() {
 				if (!orderRes.ok) continue;
 				const orderData = await orderRes.json();
 
-				// Show all timeslots (even empty ones) so admin can see the full schedule
-				results.push({
-					timeslot: slot,
-					orders: orderData.docs || [],
-				});
+				if (orderData.docs && orderData.docs.length > 0) {
+					results.push({
+						timeslot: slot,
+						orders: orderData.docs,
+					});
+				}
 			}
 
 			// Also add a "No timeslot" group for paid orders without a slot
