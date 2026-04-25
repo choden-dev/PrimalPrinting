@@ -440,20 +440,34 @@ export default function OrderSteps({
 	// ── Pickup step ────────────────────────────────────────────────
 
 	if (step === OrderStep.PICKUP) {
+		const hasExistingTimeslot = !!orderDetails?.pickupTimeslot;
+
 		return (
 			<Box {...containerProps}>
 				<StepIndicator />
 				<Heading size="lg" mb={2}>
-					📍 Select Pickup Time
+					{hasExistingTimeslot
+						? "📍 Change Pickup Time"
+						: "📍 Select Pickup Time"}
 				</Heading>
 				<Text color="gray.600" mb={4}>
-					Order <strong>{orderNumber}</strong> has been paid. Choose when
-					you&apos;d like to collect it.
+					{hasExistingTimeslot ? (
+						<>
+							Order <strong>{orderNumber}</strong> already has a pickup time.
+							Select a new timeslot below.
+						</>
+					) : (
+						<>
+							Order <strong>{orderNumber}</strong> has been paid. Choose when
+							you&apos;d like to collect it.
+						</>
+					)}
 				</Text>
 				<OrderSummary />
 				<Divider mb={6} />
 				<TimeslotSelector
 					orderId={orderId}
+					currentTimeslot={orderDetails?.pickupTimeslot ?? null}
 					onTimeslotSelected={() => onPickupConfirmed()}
 					onCancel={() => router.push("/my-orders")}
 				/>
