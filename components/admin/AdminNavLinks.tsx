@@ -44,6 +44,14 @@ export default function AdminNavLinks() {
 			>
 				📦 Orders by Timeslot
 			</Link>
+			<Link
+				href="/admin/notify-timeslots"
+				style={linkStyle}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				📧 Notify Timeslots
+			</Link>
 		</>
 	);
 }

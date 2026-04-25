@@ -137,15 +137,19 @@ export async function sendBankTransferReceivedEmail(params: {
 	customerName: string;
 	orderNumber: string;
 	total: number | undefined;
+	hasTimeslots: boolean;
 }): Promise<void> {
-	const { to, customerName, orderNumber, total } = params;
+	const { to, customerName, orderNumber, total, hasTimeslots } = params;
 
 	const contact = await getContactInfo();
+	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
 
 	const html = renderTemplate("paymentPendingVerification", {
 		customerName: customerName || "Customer",
 		orderNumber,
 		total: formatCents(total),
+		hasTimeslots,
+		ordersUrl,
 		contactEmail: contact.email,
 		contactPhone: contact.phone,
 	});
@@ -153,7 +157,84 @@ export async function sendBankTransferReceivedEmail(params: {
 	await getTransporter().sendMail({
 		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
 		to,
-		subject: `Payment Received — ${orderNumber} — Select Your Pickup Slot`,
+		subject: hasTimeslots
+			? `Payment Received — ${orderNumber} — Select Your Pickup Slot`
+			: `Payment Received — ${orderNumber} — We'll Notify You When Timeslots Are Ready`,
+		html,
+	});
+}
+
+/**
+ * Send a payment confirmation email after Stripe payment succeeds.
+ * Tells the customer to select a pickup timeslot, or to wait for one
+ * if none are currently available.
+ */
+export async function sendPaymentConfirmationEmail(params: {
+	to: string;
+	customerName: string;
+	orderNumber: string;
+	files: OrderFile[];
+	pricing: PricingInfo | undefined;
+	hasTimeslots: boolean;
+}): Promise<void> {
+	const { to, customerName, orderNumber, files, pricing, hasTimeslots } =
+		params;
+
+	const contact = await getContactInfo();
+	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
+
+	const html = renderTemplate("paymentConfirmation", {
+		customerName: customerName || "Customer",
+		orderNumber,
+		files: files.map((f) => ({
+			...f,
+			colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
+			sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
+		})),
+		subtotal: formatCents(pricing?.subtotal),
+		tax: formatCents(pricing?.tax),
+		total: formatCents(pricing?.total),
+		hasTimeslots,
+		ordersUrl,
+		contactEmail: contact.email,
+		contactPhone: contact.phone,
+	});
+
+	await getTransporter().sendMail({
+		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		to,
+		subject: `Payment Confirmed — ${orderNumber} — ${hasTimeslots ? "Select Your Pickup Slot" : "We'll Notify You When Timeslots Are Ready"}`,
+		html,
+	});
+}
+
+/**
+ * Send a bulk notification email to customers whose orders are PAID
+ * but have no pickup timeslot selected, letting them know that
+ * timeslots are now available.
+ */
+export async function sendTimeslotsAvailableEmail(params: {
+	to: string;
+	customerName: string;
+	orders: { orderNumber: string }[];
+}): Promise<void> {
+	const { to, customerName, orders } = params;
+
+	const contact = await getContactInfo();
+	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
+
+	const html = renderTemplate("timeslotsAvailable", {
+		customerName: customerName || "Customer",
+		orders,
+		ordersUrl,
+		contactEmail: contact.email,
+		contactPhone: contact.phone,
+	});
+
+	await getTransporter().sendMail({
+		from: `"Primal Printing" <${process.env.GMAIL_USER}>`,
+		to,
+		subject: `Pickup Timeslots Available — Select Your Slot Now`,
 		html,
 	});
 }
