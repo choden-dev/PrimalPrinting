@@ -257,9 +257,9 @@ export default function PendingVerificationView() {
 								<strong style={{ fontSize: "13px", color: "#666" }}>
 									Files:
 								</strong>
-								{order.files?.map((f, i) => (
+								{order.files?.map((f) => (
 									<span
-										key={`${f.fileName}-${i}`}
+										key={`${f.fileName}-${f.copies}-${f.colorMode}`}
 										style={{
 											marginLeft: "8px",
 											fontSize: "13px",

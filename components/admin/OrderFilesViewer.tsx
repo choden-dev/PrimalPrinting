@@ -56,9 +56,9 @@ export const OrderFilesViewer: React.FC = () => {
 				📄 Order Files
 			</h4>
 
-			{files.map((file, index) => (
-				<FileRow
-					key={`${file.fileName}-${index}`}
+					{files.map((file) => (
+						<FileRow
+							key={`${file.fileName}-${file.copies}-${file.colorMode}`}
 					file={file}
 					isPaid={isPaid}
 				/>

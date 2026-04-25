@@ -433,9 +433,9 @@ export default function OrdersByTimeslotView() {
 												</div>
 											</td>
 											<td style={{ padding: "10px 12px" }}>
-												{order.files?.map((f, i) => (
+												{order.files?.map((f) => (
 													<div
-														key={`${f.fileName}-${i}`}
+														key={`${f.fileName}-${f.copies}-${f.colorMode}`}
 														style={{ fontSize: "12px" }}
 													>
 														{f.fileName} ×{f.copies}
