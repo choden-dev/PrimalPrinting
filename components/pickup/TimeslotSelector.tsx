@@ -49,6 +49,10 @@ interface CurrentTimeslot {
 	startTime: string;
 	endTime: string;
 	label?: string;
+	pickupInstructionProfile?:
+		| { id: string; name: string; shortSummary?: string }
+		| string
+		| null;
 }
 
 interface TimeslotSelectorProps {
@@ -232,16 +236,21 @@ export function TimeslotSelector({
 						CURRENT TIMESLOT
 					</Text>
 					<Text fontWeight={600} fontSize="sm">
-						{formatDateHeading(
-							currentTimeslot.date.includes("T")
-								? currentTimeslot.date.split("T")[0]
-								: currentTimeslot.date,
-						)}
-					</Text>
-					<Text fontSize="sm" color="gray.600">
 						{currentTimeslot.startTime} – {currentTimeslot.endTime}
 						{currentTimeslot.label ? ` · ${currentTimeslot.label}` : ""}
 					</Text>
+					{typeof currentTimeslot.pickupInstructionProfile === "object" &&
+						currentTimeslot.pickupInstructionProfile && (
+							<Text fontSize="sm" color="blue.600" mt={1}>
+								📍 {currentTimeslot.pickupInstructionProfile.name}
+								{currentTimeslot.pickupInstructionProfile.shortSummary && (
+									<Text as="span" color="gray.500">
+										{" "}
+										— {currentTimeslot.pickupInstructionProfile.shortSummary}
+									</Text>
+								)}
+							</Text>
+						)}
 				</Box>
 			)}
 
