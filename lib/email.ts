@@ -136,10 +136,12 @@ export async function sendBankTransferReceivedEmail(params: {
 	to: string;
 	customerName: string;
 	orderNumber: string;
-	total: number | undefined;
+	files: OrderFile[];
+	pricing: PricingInfo | undefined;
 	hasTimeslots: boolean;
 }): Promise<void> {
-	const { to, customerName, orderNumber, total, hasTimeslots } = params;
+	const { to, customerName, orderNumber, files, pricing, hasTimeslots } =
+		params;
 
 	const contact = await getContactInfo();
 	const ordersUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}/my-orders`;
@@ -147,7 +149,14 @@ export async function sendBankTransferReceivedEmail(params: {
 	const html = renderTemplate("paymentPendingVerification", {
 		customerName: customerName || "Customer",
 		orderNumber,
-		total: formatCents(total),
+		files: files.map((f) => ({
+			...f,
+			colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
+			sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
+		})),
+		subtotal: formatCents(pricing?.subtotal),
+		tax: formatCents(pricing?.tax),
+		total: formatCents(pricing?.total),
 		hasTimeslots,
 		ordersUrl,
 		contactEmail: contact.email,
@@ -216,7 +225,7 @@ export async function sendPaymentConfirmationEmail(params: {
 export async function sendTimeslotsAvailableEmail(params: {
 	to: string;
 	customerName: string;
-	orders: { orderNumber: string }[];
+	orders: { orderNumber: string; files: OrderFile[] }[];
 }): Promise<void> {
 	const { to, customerName, orders } = params;
 
@@ -225,7 +234,14 @@ export async function sendTimeslotsAvailableEmail(params: {
 
 	const html = renderTemplate("timeslotsAvailable", {
 		customerName: customerName || "Customer",
-		orders,
+		orders: orders.map((o) => ({
+			...o,
+			files: o.files.map((f) => ({
+				...f,
+				colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
+				sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
+			})),
+		})),
 		ordersUrl,
 		contactEmail: contact.email,
 		contactPhone: contact.phone,
