@@ -2,70 +2,108 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+interface PickupProfileInfo {
+	id: string;
+	name: string;
+	shortSummary: string | null;
+}
+
 interface Timeslot {
 	id: string;
 	date: string;
 	startTime: string;
 	endTime: string;
 	label: string;
+	maxCapacity: number | null;
+	bookedCount: number;
+	availableSpots: number | null;
+	pickupInstructionProfile: PickupProfileInfo | null;
 }
 
 interface TimeslotSelectorProps {
 	orderId: string;
-	onSuccess: (timeslot: Timeslot) => void;
-	onError?: (error: string) => void;
+	onTimeslotSelected: (
+		timeslotId: string,
+		pickupInstructions?: unknown[],
+	) => void;
+	onCancel: () => void;
+}
+
+/** Group timeslots by date for display. */
+function groupByDate(slots: Timeslot[]): Map<string, Timeslot[]> {
+	const map = new Map<string, Timeslot[]>();
+	for (const slot of slots) {
+		const dateKey =
+			typeof slot.date === "string" ? slot.date.split("T")[0] : "";
+		const existing = map.get(dateKey);
+		if (existing) {
+			existing.push(slot);
+		} else {
+			map.set(dateKey, [slot]);
+		}
+	}
+	return map;
+}
+
+/** Format a date string into a user-friendly label. */
+function formatDateHeading(dateStr: string): string {
+	try {
+		return new Date(dateStr).toLocaleDateString("en-NZ", {
+			weekday: "long",
+			day: "numeric",
+			month: "long",
+			year: "numeric",
+		});
+	} catch {
+		return dateStr;
+	}
 }
 
 /**
- * Pickup timeslot selector component.
- *
- * Fetches available timeslots from the API and lets the customer
- * pick one for their paid order. Grouped by date for easy scanning.
- *
- * ```tsx
- * <TimeslotSelector
- *   orderId={order.id}
- *   onSuccess={(slot) => console.log("Selected:", slot)}
- * />
- * ```
+ * Component to select a pickup timeslot for an order.
+ * Fetches available timeslots and displays them grouped by date.
+ * Shows capacity info and pickup instruction profile names.
  */
 export function TimeslotSelector({
 	orderId,
-	onSuccess,
-	onError,
+	onTimeslotSelected,
+	onCancel,
 }: TimeslotSelectorProps) {
 	const [timeslots, setTimeslots] = useState<Timeslot[]>([]);
-	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [submitting, setSubmitting] = useState(false);
 
+	// Fetch available timeslots
 	useEffect(() => {
-		async function fetchTimeslots() {
+		const fetchTimeslots = async () => {
 			try {
+				setLoading(true);
+				setError(null);
 				const res = await fetch("/api/pickup-slots");
+				if (!res.ok) {
+					throw new Error("Failed to load timeslots");
+				}
 				const data = await res.json();
-				if (!res.ok)
-					throw new Error(data.error || "Failed to fetch timeslots.");
 				setTimeslots(data.timeslots || []);
 			} catch (err) {
-				setError(
-					err instanceof Error ? err.message : "Failed to load timeslots.",
-				);
+				setError(err instanceof Error ? err.message : "Unknown error");
 			} finally {
 				setLoading(false);
 			}
-		}
+		};
+
 		fetchTimeslots();
 	}, []);
 
-	const handleConfirm = useCallback(async () => {
+	// Handle timeslot selection submission
+	const handleSubmit = useCallback(async () => {
 		if (!selectedId) return;
 
-		setSubmitting(true);
-		setError(null);
-
 		try {
+			setSubmitting(true);
+			setError(null);
 			const res = await fetch(`/api/shop/${orderId}/select-timeslot`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -74,137 +112,194 @@ export function TimeslotSelector({
 
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.error || "Failed to select timeslot.");
+				throw new Error(data.error || "Failed to select timeslot");
 			}
 
-			const selected = timeslots.find((t) => t.id === selectedId);
-			if (selected) onSuccess(selected);
+			const data = await res.json();
+			onTimeslotSelected(
+				selectedId,
+				data.pickupInstructionProfile?.instructions,
+			);
 		} catch (err) {
-			const msg =
-				err instanceof Error ? err.message : "Failed to select timeslot.";
-			setError(msg);
-			onError?.(msg);
+			setError(err instanceof Error ? err.message : "Unknown error");
 		} finally {
 			setSubmitting(false);
 		}
-	}, [selectedId, orderId, timeslots, onSuccess, onError]);
-
-	// Group timeslots by date
-	const grouped = timeslots.reduce<Record<string, Timeslot[]>>((acc, slot) => {
-		const dateKey = slot.date?.split("T")[0] || "unknown";
-		if (!acc[dateKey]) acc[dateKey] = [];
-		acc[dateKey].push(slot);
-		return acc;
-	}, {});
+	}, [selectedId, orderId, onTimeslotSelected]);
 
 	if (loading) {
 		return (
-			<div style={{ textAlign: "center", padding: "24px", color: "#666" }}>
-				Loading available timeslots…
+			<div style={{ padding: "20px", textAlign: "center" }}>
+				Loading timeslots...
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div style={{ padding: "20px" }}>
+				<div style={{ color: "#c62828", marginBottom: "12px" }}>
+					Error: {error}
+				</div>
+				<button type="button" onClick={onCancel} style={cancelButtonStyle}>
+					Back
+				</button>
 			</div>
 		);
 	}
 
 	if (timeslots.length === 0) {
 		return (
-			<div
-				style={{
-					padding: "16px",
-					background: "#fff3e0",
-					borderRadius: "8px",
-					color: "#e65100",
-				}}
-			>
-				No pickup timeslots are currently available. Please check back later.
+			<div style={{ padding: "20px" }}>
+				<p style={{ marginBottom: "12px" }}>
+					No timeslots available at the moment.
+				</p>
+				<p style={{ fontSize: "14px", color: "#666" }}>
+					We&apos;ll notify you by email when pickup slots become available.
+				</p>
+				<button type="button" onClick={onCancel} style={cancelButtonStyle}>
+					Back
+				</button>
 			</div>
 		);
 	}
 
+	const grouped = groupByDate(timeslots);
+
 	return (
-		<div>
-			<h3 style={{ margin: "0 0 16px", fontSize: "18px" }}>
-				📅 Select a Pickup Time
-			</h3>
+		<div style={{ padding: "8px 0" }}>
+			<h2 style={{ marginBottom: "16px" }}>Select a Pickup Timeslot</h2>
 
-			{Object.entries(grouped)
-				.sort(([a], [b]) => a.localeCompare(b))
-				.map(([dateKey, slots]) => {
-					const dateLabel = new Date(dateKey).toLocaleDateString("en-NZ", {
-						weekday: "long",
-						day: "numeric",
-						month: "long",
-						year: "numeric",
-					});
+			{Array.from(grouped.entries()).map(([dateKey, slots]) => (
+				<div key={dateKey} style={{ marginBottom: "20px" }}>
+					<h3
+						style={{
+							fontSize: "15px",
+							fontWeight: 600,
+							color: "#333",
+							marginBottom: "8px",
+							borderBottom: "1px solid #eee",
+							paddingBottom: "4px",
+						}}
+					>
+						{formatDateHeading(dateKey)}
+					</h3>
+					<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+						{slots.map((slot) => {
+							const isSelected = selectedId === slot.id;
+							return (
+								<label
+									key={slot.id}
+									style={{
+										padding: "12px 16px",
+										border: isSelected ? "2px solid #1565c0" : "1px solid #ddd",
+										borderRadius: "8px",
+										cursor: "pointer",
+										backgroundColor: isSelected ? "#e3f2fd" : "#fff",
+										transition: "all 0.15s ease",
+									}}
+								>
+									<div
+										style={{
+											display: "flex",
+											alignItems: "center",
+											gap: "10px",
+										}}
+									>
+										<input
+											type="radio"
+											name="timeslot"
+											value={slot.id}
+											checked={isSelected}
+											onChange={() => setSelectedId(slot.id)}
+											style={{ marginRight: "4px" }}
+										/>
+										<div style={{ flex: 1 }}>
+											<div style={{ fontWeight: 600 }}>
+												{slot.startTime} – {slot.endTime}
+												{slot.label ? ` · ${slot.label}` : ""}
+											</div>
+											<div
+												style={{
+													display: "flex",
+													gap: "12px",
+													fontSize: "13px",
+													color: "#666",
+													marginTop: "4px",
+												}}
+											>
+												{/* Capacity indicator */}
+												<span>
+													{slot.availableSpots !== null ? (
+														<>
+															<span
+																style={{
+																	color:
+																		slot.availableSpots <= 2
+																			? "#e65100"
+																			: "#2e7d32",
+																	fontWeight: 500,
+																}}
+															>
+																{slot.availableSpots}
+															</span>{" "}
+															spot{slot.availableSpots !== 1 ? "s" : ""}{" "}
+															remaining
+														</>
+													) : (
+														"Open availability"
+													)}
+												</span>
 
-					return (
-						<div key={dateKey} style={{ marginBottom: "16px" }}>
-							<h4
-								style={{
-									margin: "0 0 8px",
-									fontSize: "14px",
-									color: "#666",
-									textTransform: "uppercase",
-									letterSpacing: "0.5px",
-								}}
-							>
-								{dateLabel}
-							</h4>
-							<div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-								{slots.map((slot) => {
-									const isSelected = selectedId === slot.id;
-									return (
-										<button
-											key={slot.id}
-											type="button"
-											onClick={() => setSelectedId(slot.id)}
-											style={{
-												padding: "10px 16px",
-												border: `2px solid ${isSelected ? "#1a1a2e" : "#e0e0e0"}`,
-												borderRadius: "8px",
-												background: isSelected ? "#1a1a2e" : "#fff",
-												color: isSelected ? "#fff" : "#333",
-												cursor: "pointer",
-												fontSize: "14px",
-												fontWeight: isSelected ? 600 : 400,
-												transition: "all 0.15s ease",
-											}}
-										>
-											{slot.startTime} – {slot.endTime}
-										</button>
-									);
-								})}
-							</div>
-						</div>
-					);
-				})}
+												{/* Pickup method */}
+												{slot.pickupInstructionProfile && (
+													<span style={{ color: "#1565c0" }}>
+														📍 {slot.pickupInstructionProfile.name}
+													</span>
+												)}
+											</div>
+										</div>
+									</div>
+								</label>
+							);
+						})}
+					</div>
+				</div>
+			))}
 
-			{error && (
-				<p style={{ color: "#d32f2f", fontSize: "14px", marginBottom: "12px" }}>
-					{error}
-				</p>
-			)}
-
-			<button
-				type="button"
-				onClick={handleConfirm}
-				disabled={!selectedId || submitting}
-				style={{
-					width: "100%",
-					padding: "14px",
-					marginTop: "8px",
-					background: !selectedId || submitting ? "#ccc" : "#1a1a2e",
-					color: "#fff",
-					border: "none",
-					borderRadius: "8px",
-					fontSize: "16px",
-					fontWeight: 600,
-					cursor: !selectedId || submitting ? "not-allowed" : "pointer",
-				}}
-			>
-				{submitting ? "⏳ Confirming…" : "✅ Confirm Pickup Time"}
-			</button>
+			<div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+				<button
+					type="button"
+					onClick={handleSubmit}
+					disabled={!selectedId || submitting}
+					style={{
+						padding: "10px 24px",
+						background: !selectedId || submitting ? "#ccc" : "#1565c0",
+						color: "#fff",
+						border: "none",
+						borderRadius: "6px",
+						cursor: !selectedId || submitting ? "not-allowed" : "pointer",
+						fontWeight: 600,
+						fontSize: "14px",
+					}}
+				>
+					{submitting ? "Confirming..." : "Confirm Timeslot"}
+				</button>
+				<button type="button" onClick={onCancel} style={cancelButtonStyle}>
+					Cancel
+				</button>
+			</div>
 		</div>
 	);
 }
+
+const cancelButtonStyle: React.CSSProperties = {
+	padding: "10px 24px",
+	background: "#f5f5f5",
+	border: "1px solid #ddd",
+	borderRadius: "6px",
+	cursor: "pointer",
+	fontSize: "14px",
+};
 
 export default TimeslotSelector;

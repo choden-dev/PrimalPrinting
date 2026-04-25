@@ -11,7 +11,7 @@ interface OrderData {
 	bankTransferProofKey: string | null;
 	bankTransferVerified: boolean | null;
 	pricing: { total: number };
-	files: { fileName: string; copies: number }[];
+	files: { fileName: string; copies: number; colorMode?: string }[];
 	customer: { name: string; email: string } | string;
 	createdAt: string;
 }
@@ -257,9 +257,9 @@ export default function PendingVerificationView() {
 								<strong style={{ fontSize: "13px", color: "#666" }}>
 									Files:
 								</strong>
-								{order.files?.map((f, i) => (
+								{order.files?.map((f) => (
 									<span
-										key={`${f.fileName}-${i}`}
+										key={`${f.fileName}-${f.copies}-${f.colorMode}`}
 										style={{
 											marginLeft: "8px",
 											fontSize: "13px",

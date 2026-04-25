@@ -88,8 +88,17 @@ export async function sendOrderConfirmationEmail(params: {
 	files: OrderFile[];
 	pricing: PricingInfo | undefined;
 	timeslot: TimeslotInfo;
+	pickupInstructionsHtml?: string | null;
 }): Promise<void> {
-	const { to, customerName, orderNumber, files, pricing, timeslot } = params;
+	const {
+		to,
+		customerName,
+		orderNumber,
+		files,
+		pricing,
+		timeslot,
+		pickupInstructionsHtml,
+	} = params;
 
 	const formattedDate = timeslot.date
 		? new Date(timeslot.date).toLocaleDateString("en-NZ", {
@@ -110,6 +119,7 @@ export async function sendOrderConfirmationEmail(params: {
 		pickupDate: formattedDate,
 		pickupTime: `${timeslot.startTime} – ${timeslot.endTime}`,
 		pickupLabel: timeslot.label,
+		pickupInstructionsHtml: pickupInstructionsHtml || null,
 	});
 
 	await getTransporter().sendMail({
@@ -284,6 +294,86 @@ export async function sendTimeslotChangedEmail(params: {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
+
+/**
+ * Convert Payload rich-text (Lexical/Slate) block content into simple HTML
+ * suitable for email templates. Handles the common node types.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: rich text nodes are loosely typed
+export function richTextToHtml(nodes: any[] | null | undefined): string {
+	if (!nodes || nodes.length === 0) return "";
+	return nodes.map(nodeToHtml).join("");
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: rich text nodes vary in shape
+function nodeToHtml(node: any): string {
+	if (!node) return "";
+
+	// Lexical text node
+	if (node.type === "text" || (!node.type && typeof node.text === "string")) {
+		let text: string = escapeHtml(node.text || "");
+		if (node.bold || node.format === 1) text = `<strong>${text}</strong>`;
+		if (node.italic || node.format === 2) text = `<em>${text}</em>`;
+		if (node.underline || node.format === 4) text = `<u>${text}</u>`;
+		return text;
+	}
+
+	const children = node.children
+		? // biome-ignore lint/suspicious/noExplicitAny: recursive structure
+			node.children.map((c: any) => nodeToHtml(c)).join("")
+		: "";
+
+	switch (node.type) {
+		case "paragraph":
+			return `<p>${children}</p>`;
+		case "heading":
+			return `<h${node.tag || 3}>${children}</h${node.tag || 3}>`;
+		case "list":
+			return node.listType === "number"
+				? `<ol>${children}</ol>`
+				: `<ul>${children}</ul>`;
+		case "listitem":
+			return `<li>${children}</li>`;
+		case "link":
+		case "autolink":
+			return `<a href="${escapeHtml(node.url || "#")}">${children}</a>`;
+		case "quote":
+			return `<blockquote>${children}</blockquote>`;
+		case "linebreak":
+			return "<br/>";
+		case "root":
+			return children;
+		default:
+			return children || "";
+	}
+}
+
+function escapeHtml(s: string): string {
+	return s
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
+}
+
+/**
+ * Extract rich text HTML from a pickup instruction profile object.
+ * Works with the PickupInstructionProfiles collection's blocks field.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: profile shape varies when populated vs ID
+export function pickupProfileToHtml(profile: any): string | null {
+	if (!profile || typeof profile === "string") return null;
+	const blocks = profile.instructions;
+	if (!Array.isArray(blocks) || blocks.length === 0) return null;
+
+	const parts: string[] = [];
+	for (const block of blocks) {
+		if (block.blockType === "richText" && block.content?.root?.children) {
+			parts.push(richTextToHtml(block.content.root.children));
+		}
+	}
+	return parts.length > 0 ? parts.join("") : null;
+}
 
 function formatCents(cents: number | undefined | null): string {
 	if (cents == null) return "$0.00";

@@ -179,12 +179,12 @@ export function CartContextProvider(props: React.PropsWithChildren) {
 
 	const calculateTotalPrice = useCallback(() => {
 		let sum = 0;
-		uploadedPdfs.map((pdf) => {
+		for (const pdf of uploadedPdfs) {
 			sum += pdf.getDisplayPrice();
-		});
-		cartPackages.map((cartPackage) => {
+		}
+		for (const cartPackage of cartPackages) {
 			sum += cartPackage.getDisplayPrice();
-		});
+		}
 		setDisplayPriceString(sum.toFixed(2));
 	}, [cartPackages, uploadedPdfs]);
 

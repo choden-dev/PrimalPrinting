@@ -19,7 +19,7 @@ interface OrderData {
 	paymentMethod: string | null;
 	bankTransferVerified: boolean | null;
 	pricing: { total: number };
-	files: { fileName: string; copies: number }[];
+	files: { fileName: string; copies: number; colorMode?: string }[];
 	customer: { name: string; email: string } | string;
 	pickedUpAt: string | null;
 }
@@ -52,26 +52,34 @@ export default function OrdersByTimeslotView() {
 		setLoading(true);
 		setError(null);
 		try {
-			// Fetch timeslots
+			// Fetch active timeslots sorted by date
 			const timeslotRes = await fetch(
-				`/api/timeslots?limit=100&sort=date&depth=0`,
+				`/api/timeslots?where[isActive][equals]=true&limit=500&sort=date&depth=0`,
 			);
 			if (!timeslotRes.ok) throw new Error("Failed to fetch timeslots.");
 			const timeslotData = await timeslotRes.json();
-			const timeslots: TimeslotData[] = timeslotData.docs || [];
+			const allTimeslots: TimeslotData[] = timeslotData.docs || [];
+
+			// Client-side date filtering for "upcoming" (today + 7 days)
+			const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+			const nextWeek = new Date();
+			nextWeek.setDate(nextWeek.getDate() + 7);
+			const nextWeekStr = nextWeek.toLocaleDateString("en-CA");
+
+			const timeslots =
+				filter === "upcoming"
+					? allTimeslots.filter((slot) => {
+							const d = slot.date.includes("T")
+								? slot.date.split("T")[0]
+								: slot.date;
+							return d >= todayStr && d <= nextWeekStr;
+						})
+					: allTimeslots;
 
 			// For each timeslot, fetch orders assigned to it
 			const results: TimeslotWithOrders[] = [];
 
 			for (const slot of timeslots) {
-				// Filter: only upcoming if selected
-				if (filter === "upcoming") {
-					const slotDate = new Date(slot.date);
-					const today = new Date();
-					today.setHours(0, 0, 0, 0);
-					if (slotDate < today) continue;
-				}
-
 				const orderRes = await fetch(
 					`/api/orders?where[pickupTimeslot][equals]=${slot.id}&depth=1&limit=50&sort=-createdAt`,
 				);
@@ -276,12 +284,19 @@ export default function OrdersByTimeslotView() {
 			)}
 
 			{data.map(({ timeslot, orders }) => {
-				const dateLabel = timeslot.date
-					? new Date(timeslot.date).toLocaleDateString("en-NZ", {
+				// Parse date safely — use noon UTC to avoid timezone shift
+				const dateStr = timeslot.date
+					? timeslot.date.includes("T")
+						? timeslot.date.split("T")[0]
+						: timeslot.date
+					: "";
+				const dateLabel = dateStr
+					? new Date(`${dateStr}T12:00:00Z`).toLocaleDateString("en-NZ", {
 							weekday: "long",
 							day: "numeric",
 							month: "long",
 							year: "numeric",
+							timeZone: "UTC",
 						})
 					: "";
 
@@ -433,9 +448,9 @@ export default function OrdersByTimeslotView() {
 												</div>
 											</td>
 											<td style={{ padding: "10px 12px" }}>
-												{order.files?.map((f, i) => (
+												{order.files?.map((f) => (
 													<div
-														key={`${f.fileName}-${i}`}
+														key={`${f.fileName}-${f.copies}-${f.colorMode}`}
 														style={{ fontSize: "12px" }}
 													>
 														{f.fileName} ×{f.copies}

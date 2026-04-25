@@ -52,6 +52,14 @@ export default function AdminNavLinks() {
 			>
 				📧 Notify Timeslots
 			</Link>
+			<Link
+				href="/admin/schedule-calendar"
+				style={linkStyle}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				📅 Schedule Calendar
+			</Link>
 		</>
 	);
 }

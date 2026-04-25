@@ -30,6 +30,7 @@ import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc056
 import { default as default_2a932438fc60530ff9cbda67fae50c5e } from '@/components/admin/OrdersByTimeslotView'
 import { default as default_ae6d727f69bea18ad23ef405314d6459 } from '@/components/admin/PendingVerificationView'
 import { default as default_357e94cb16882b41b62ce8427705d759 } from '@/components/admin/NotifyTimeslotsView'
+import { default as default_f0bf1af8c7fcbee7729125193a4368fe } from '@/components/admin/ScheduleCalendarView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -66,5 +67,6 @@ export const importMap = {
   "@/components/admin/OrdersByTimeslotView#default": default_2a932438fc60530ff9cbda67fae50c5e,
   "@/components/admin/PendingVerificationView#default": default_ae6d727f69bea18ad23ef405314d6459,
   "@/components/admin/NotifyTimeslotsView#default": default_357e94cb16882b41b62ce8427705d759,
+  "@/components/admin/ScheduleCalendarView#default": default_f0bf1af8c7fcbee7729125193a4368fe,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

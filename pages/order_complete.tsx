@@ -34,6 +34,18 @@ export async function getServerSideProps() {
 	}
 }
 
+interface PickupInstructionBlock {
+	blockType: string;
+	content?: unknown;
+}
+
+interface PickupInstructionProfileData {
+	id: string;
+	name: string;
+	shortSummary?: string;
+	instructions?: PickupInstructionBlock[];
+}
+
 interface OrderDetails {
 	orderNumber: string;
 	status: string;
@@ -49,7 +61,97 @@ interface OrderDetails {
 		startTime: string;
 		endTime: string;
 		label: string;
+		pickupInstructionProfile?: PickupInstructionProfileData | string | null;
 	} | null;
+}
+
+/**
+ * Render Payload/Lexical rich text JSON as React elements.
+ * Handles basic node types: paragraph, text, list, heading.
+ */
+function RichTextContent({
+	content,
+}: {
+	content: unknown;
+}): React.ReactElement | null {
+	if (!content || typeof content !== "object") return null;
+
+	const root = (content as { root?: { children?: unknown[] } }).root;
+	if (!root?.children) return null;
+
+	return <>{renderNodes(root.children)}</>;
+}
+
+type RichTextNode = {
+	type?: string;
+	text?: string;
+	format?: number;
+	tag?: string;
+	listType?: string;
+	url?: string;
+	children?: RichTextNode[];
+};
+
+function renderNodes(nodes: unknown[]): React.ReactNode[] {
+	return nodes.map((node, i) => {
+		const n = node as RichTextNode;
+		const key = `${n.type || "node"}-${i}`;
+
+		if (n.type === "text" || (!n.type && typeof n.text === "string")) {
+			let content: React.ReactNode = n.text || "";
+			if (n.format && n.format & 1)
+				content = <strong key={key}>{content}</strong>;
+			if (n.format && n.format & 2) content = <em key={key}>{content}</em>;
+			if (n.format && n.format & 4) content = <u key={key}>{content}</u>;
+			return content;
+		}
+
+		const children = n.children ? renderNodes(n.children) : [];
+
+		switch (n.type) {
+			case "paragraph":
+				return (
+					<Text key={key} mb={2}>
+						{children}
+					</Text>
+				);
+			case "heading": {
+				if (n.tag === "h1") return <h1 key={key}>{children}</h1>;
+				if (n.tag === "h2") return <h2 key={key}>{children}</h2>;
+				if (n.tag === "h4") return <h4 key={key}>{children}</h4>;
+				return <h3 key={key}>{children}</h3>;
+			}
+			case "list":
+				return n.listType === "number" ? (
+					<ol
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ol>
+				) : (
+					<ul
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ul>
+				);
+			case "listitem":
+				return <li key={key}>{children}</li>;
+			case "link":
+			case "autolink":
+				return (
+					<a key={key} href={n.url || "#"}>
+						{children}
+					</a>
+				);
+			case "linebreak":
+				return <br key={key} />;
+			default:
+				return <span key={key}>{children}</span>;
+		}
+	});
 }
 
 /**
@@ -133,9 +235,9 @@ const OrderComplete: NextPage<PageProps> = ({ contactInfo }) => {
 							<Heading size="sm" mb={3}>
 								Order Items
 							</Heading>
-							{order.files?.map((file, i) => (
+							{order.files?.map((file) => (
 								<Box
-									key={`${file.fileName}-${i}`}
+									key={`${file.fileName}-${file.copies}-${file.colorMode}`}
 									p={3}
 									bg="gray.50"
 									borderRadius="6px"
@@ -217,6 +319,54 @@ const OrderComplete: NextPage<PageProps> = ({ contactInfo }) => {
 											{order.pickupTimeslot.endTime}
 										</Text>
 									</Box>
+
+									{/* Pickup Instructions */}
+									{typeof order.pickupTimeslot.pickupInstructionProfile ===
+										"object" &&
+										order.pickupTimeslot.pickupInstructionProfile && (
+											<Box
+												mt={3}
+												p={4}
+												bg="blue.50"
+												borderRadius="8px"
+												borderLeft="4px solid"
+												borderLeftColor="blue.400"
+											>
+												<Heading size="sm" color="blue.700" mb={2}>
+													📋 Pickup Instructions —{" "}
+													{order.pickupTimeslot.pickupInstructionProfile.name}
+												</Heading>
+												{order.pickupTimeslot.pickupInstructionProfile
+													.shortSummary && (
+													<Text fontWeight={500} mb={2}>
+														{
+															order.pickupTimeslot.pickupInstructionProfile
+																.shortSummary
+														}
+													</Text>
+												)}
+												{order.pickupTimeslot.pickupInstructionProfile.instructions
+													?.filter(
+														(
+															block,
+														): block is PickupInstructionBlock & {
+															content: unknown;
+														} =>
+															block.blockType === "richText" &&
+															Boolean(block.content),
+													)
+													.map((block) => (
+														<Box
+															key={block.blockType}
+															fontSize="sm"
+															color="gray.700"
+															mb={1}
+														>
+															<RichTextContent content={block.content} />
+														</Box>
+													))}
+											</Box>
+										)}
 								</>
 							)}
 

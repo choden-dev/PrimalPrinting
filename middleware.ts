@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
 		secret: process.env.NEXTAUTH_SECRET,
 	});
 
-	if (!token || !token.customerId) {
+	if (!token?.customerId) {
 		return NextResponse.json(
 			{ error: "Authentication required. Please sign in with Google." },
 			{ status: 401 },

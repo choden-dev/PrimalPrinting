@@ -2,6 +2,7 @@
 
 import { Box, Button, Divider, Heading, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import type React from "react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { OrderStatus } from "../../types/orderStatus";
@@ -21,8 +22,28 @@ interface OrderStepsProps {
 	onPickupConfirmed: () => void;
 }
 
+interface PickupInstructionBlock {
+	blockType: string;
+	id?: string;
+	content?: unknown;
+}
+
+interface PickupInstructionProfileData {
+	id: string;
+	name: string;
+	shortSummary?: string;
+	instructions?: PickupInstructionBlock[];
+}
+
 interface OrderDetails {
 	id: string;
+	pickupTimeslot?: {
+		date: string;
+		startTime: string;
+		endTime: string;
+		label: string;
+		pickupInstructionProfile?: PickupInstructionProfileData | string | null;
+	} | null;
 	orderNumber: string;
 	status: string;
 	pricing: { subtotal: number; tax: number; total: number };
@@ -43,6 +64,92 @@ interface OrderDetails {
  * 2. Pickup — select a timeslot
  * 3. Complete — confirmation screen
  */
+
+// ── Rich text renderer ──────────────────────────────────────────────────
+
+type RichTextNode = {
+	type?: string;
+	text?: string;
+	format?: number;
+	tag?: string;
+	listType?: string;
+	url?: string;
+	children?: RichTextNode[];
+};
+
+function renderNodes(nodes: unknown[]): React.ReactNode[] {
+	return nodes.map((node, i) => {
+		const n = node as RichTextNode;
+		const key = `${n.type || "node"}-${i}`;
+
+		if (n.type === "text" || (!n.type && typeof n.text === "string")) {
+			let content: React.ReactNode = n.text || "";
+			if (n.format && n.format & 1)
+				content = <strong key={key}>{content}</strong>;
+			if (n.format && n.format & 2) content = <em key={key}>{content}</em>;
+			if (n.format && n.format & 4) content = <u key={key}>{content}</u>;
+			return content;
+		}
+
+		const children = n.children ? renderNodes(n.children) : [];
+
+		switch (n.type) {
+			case "paragraph":
+				return (
+					<Text key={key} mb={2}>
+						{children}
+					</Text>
+				);
+			case "heading": {
+				if (n.tag === "h1") return <h1 key={key}>{children}</h1>;
+				if (n.tag === "h2") return <h2 key={key}>{children}</h2>;
+				if (n.tag === "h4") return <h4 key={key}>{children}</h4>;
+				return <h3 key={key}>{children}</h3>;
+			}
+			case "list":
+				return n.listType === "number" ? (
+					<ol
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ol>
+				) : (
+					<ul
+						key={key}
+						style={{ paddingLeft: "1.5rem", marginBottom: "0.5rem" }}
+					>
+						{children}
+					</ul>
+				);
+			case "listitem":
+				return <li key={key}>{children}</li>;
+			case "link":
+			case "autolink":
+				return (
+					<a key={key} href={n.url || "#"}>
+						{children}
+					</a>
+				);
+			case "linebreak":
+				return <br key={key} />;
+			default:
+				return <span key={key}>{children}</span>;
+		}
+	});
+}
+
+function RichTextContent({
+	content,
+}: {
+	content: unknown;
+}): React.ReactElement | null {
+	if (!content || typeof content !== "object") return null;
+	const root = (content as { root?: { children?: unknown[] } }).root;
+	if (!root?.children) return null;
+	return <>{renderNodes(root.children)}</>;
+}
+
 export default function OrderSteps({
 	step,
 	orderId,
@@ -126,9 +233,9 @@ export default function OrderSteps({
 				<Text fontSize="sm" fontWeight={600} mb={2}>
 					📋 Order Summary
 				</Text>
-				{orderDetails.files.map((file, i) => (
+				{orderDetails.files.map((file) => (
 					<Box
-						key={`${file.fileName}-${i}`}
+						key={`${file.fileName}-${file.copies}-${file.colorMode}`}
 						display="flex"
 						justifyContent="space-between"
 						alignItems="center"
@@ -345,8 +452,8 @@ export default function OrderSteps({
 				<Divider mb={6} />
 				<TimeslotSelector
 					orderId={orderId}
-					onSuccess={() => onPickupConfirmed()}
-					onError={(err) => console.error("Timeslot error:", err)}
+					onTimeslotSelected={() => onPickupConfirmed()}
+					onCancel={() => router.push("/my-orders")}
 				/>
 			</Box>
 		);
@@ -375,9 +482,9 @@ export default function OrderSteps({
 						<Heading size="sm" mb={3}>
 							Order Summary
 						</Heading>
-						{orderDetails.files?.map((file, i) => (
+						{orderDetails.files?.map((file) => (
 							<Box
-								key={`${file.fileName}-${i}`}
+								key={`${file.fileName}-${file.copies}-${file.colorMode}`}
 								p={3}
 								bg="gray.50"
 								borderRadius="6px"
@@ -396,6 +503,92 @@ export default function OrderSteps({
 						<Text fontWeight={700} fontSize="lg">
 							Total: ${(totalCents / 100).toFixed(2)}
 						</Text>
+					</Box>
+				)}
+
+				{/* Pickup details & instructions */}
+				{orderDetails?.pickupTimeslot && (
+					<Box textAlign="left" mb={6}>
+						<Box
+							p={4}
+							bg="green.50"
+							borderRadius="8px"
+							borderLeft="4px solid"
+							borderLeftColor="green.400"
+							mb={3}
+						>
+							<Heading size="sm" color="green.700" mb={2}>
+								📍 Pickup Details
+							</Heading>
+							<Text>
+								<strong>Date:</strong> {(() => {
+									const d = orderDetails.pickupTimeslot?.date || "";
+									const dateOnly = d.includes("T") ? d.split("T")[0] : d;
+									return dateOnly
+										? new Date(`${dateOnly}T12:00:00Z`).toLocaleDateString(
+												"en-NZ",
+												{
+													weekday: "long",
+													day: "numeric",
+													month: "long",
+													year: "numeric",
+													timeZone: "UTC",
+												},
+											)
+										: "TBD";
+								})()}
+							</Text>
+							<Text>
+								<strong>Time:</strong> {orderDetails.pickupTimeslot.startTime} –{" "}
+								{orderDetails.pickupTimeslot.endTime}
+							</Text>
+						</Box>
+
+						{typeof orderDetails.pickupTimeslot.pickupInstructionProfile ===
+							"object" &&
+							orderDetails.pickupTimeslot.pickupInstructionProfile && (
+								<Box
+									p={4}
+									bg="blue.50"
+									borderRadius="8px"
+									borderLeft="4px solid"
+									borderLeftColor="blue.400"
+								>
+									<Heading size="sm" color="blue.700" mb={2}>
+										📋 Pickup Instructions —{" "}
+										{orderDetails.pickupTimeslot.pickupInstructionProfile.name}
+									</Heading>
+									{orderDetails.pickupTimeslot.pickupInstructionProfile
+										.shortSummary && (
+										<Text fontWeight={500} mb={2}>
+											{
+												orderDetails.pickupTimeslot.pickupInstructionProfile
+													.shortSummary
+											}
+										</Text>
+									)}
+									{orderDetails.pickupTimeslot.pickupInstructionProfile.instructions
+										?.filter(
+											(
+												block,
+											): block is PickupInstructionBlock & {
+												content: unknown;
+											} =>
+												block.blockType === "richText" &&
+												Boolean(block.content),
+										)
+										.map((block) => (
+											<Box
+												key={block.id || block.blockType}
+												fontSize="sm"
+												color="gray.700"
+												mb={1}
+											>
+												<RichTextContent content={block.content} />
+											</Box>
+										))}
+								</Box>
+							)}
 					</Box>
 				)}
 
