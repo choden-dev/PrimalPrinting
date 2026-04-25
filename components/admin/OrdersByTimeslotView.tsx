@@ -175,70 +175,73 @@ export default function OrdersByTimeslotView() {
 
 	/** Download all files for all orders in a timeslot group sequentially */
 	const downloadingRef = useRef(false);
-	const handleDownloadAllFiles = useCallback(async (orders: OrderData[]) => {
-		if (downloadingRef.current) return;
-		downloadingRef.current = true;
+	const handleDownloadAllFiles = useCallback(
+		async (orders: OrderData[]) => {
+			if (downloadingRef.current) return;
+			downloadingRef.current = true;
 
-		try {
-			// Collect all files with their resolved keys
-			const filesToDownload: {
-				key: string;
-				staging: boolean;
-				fileName: string;
-			}[] = [];
-			for (const order of orders) {
-				for (const file of order.files || []) {
-					const resolved = getFileKey(file, order.status);
-					if (resolved) {
-						filesToDownload.push({ ...resolved, fileName: file.fileName });
+			try {
+				// Collect all files with their resolved keys
+				const filesToDownload: {
+					key: string;
+					staging: boolean;
+					fileName: string;
+				}[] = [];
+				for (const order of orders) {
+					for (const file of order.files || []) {
+						const resolved = getFileKey(file, order.status);
+						if (resolved) {
+							filesToDownload.push({ ...resolved, fileName: file.fileName });
+						}
 					}
 				}
-			}
 
-			if (filesToDownload.length === 0) {
-				window.alert("No downloadable files found.");
-				return;
-			}
-
-			// Fetch all presigned URLs in parallel
-			const urlResults = await Promise.all(
-				filesToDownload.map(async ({ key, staging, fileName }) => {
-					try {
-						const params = new URLSearchParams({
-							key,
-							staging: staging.toString(),
-						});
-						const res = await fetch(`/api/admin/file-url?${params}`);
-						if (!res.ok) return null;
-						const { url } = await res.json();
-						return { url, fileName };
-					} catch {
-						return null;
-					}
-				}),
-			);
-
-			// Open each file in a new tab with a small delay to avoid popup blockers
-			const validUrls = urlResults.filter(Boolean) as {
-				url: string;
-				fileName: string;
-			}[];
-			for (let i = 0; i < validUrls.length; i++) {
-				window.open(validUrls[i].url, "_blank");
-				if (i < validUrls.length - 1) {
-					await new Promise((r) => setTimeout(r, 300));
+				if (filesToDownload.length === 0) {
+					window.alert("No downloadable files found.");
+					return;
 				}
-			}
 
-			if (validUrls.length < filesToDownload.length) {
-				window.alert(
-					`Opened ${validUrls.length} of ${filesToDownload.length} files. Some files could not be loaded.`,
+				// Fetch all presigned URLs in parallel
+				const urlResults = await Promise.all(
+					filesToDownload.map(async ({ key, staging, fileName }) => {
+						try {
+							const params = new URLSearchParams({
+								key,
+								staging: staging.toString(),
+							});
+							const res = await fetch(`/api/admin/file-url?${params}`);
+							if (!res.ok) return null;
+							const { url } = await res.json();
+							return { url, fileName };
+						} catch {
+							return null;
+						}
+					}),
 				);
+
+				// Open each file in a new tab with a small delay to avoid popup blockers
+				const validUrls = urlResults.filter(Boolean) as {
+					url: string;
+					fileName: string;
+				}[];
+				for (let i = 0; i < validUrls.length; i++) {
+					window.open(validUrls[i].url, "_blank");
+					if (i < validUrls.length - 1) {
+						await new Promise((r) => setTimeout(r, 300));
+					}
+				}
+
+				if (validUrls.length < filesToDownload.length) {
+					window.alert(
+						`Opened ${validUrls.length} of ${filesToDownload.length} files. Some files could not be loaded.`,
+					);
+				}
+			} finally {
+				downloadingRef.current = false;
 			}
-		} finally {
-			downloadingRef.current = false;
-		}
-	}, [getFileKey]);
+		},
+		[getFileKey],
+	);
 
 	return (
 		<div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
