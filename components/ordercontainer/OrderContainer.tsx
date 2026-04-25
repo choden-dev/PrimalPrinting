@@ -83,8 +83,8 @@ const OrderContainerInner = ({
 			case OrderStatus.AWAITING_PAYMENT:
 				return OrderStep.PAYMENT;
 			case OrderStatus.PAID:
-				return OrderStep.PICKUP;
 			case OrderStatus.AWAITING_PICKUP:
+				return OrderStep.PICKUP;
 			case OrderStatus.PRINTED:
 			case OrderStatus.PICKED_UP:
 				return OrderStep.COMPLETE;
@@ -93,31 +93,26 @@ const OrderContainerInner = ({
 		}
 	}, []);
 
-	// Resume an existing order or jump to pickup selection
+	// Resume an existing order or jump to pickup selection.
+	// Resets resumeChecked to false and re-fetches whenever the query
+	// params change (e.g. clicking "Change Pickup" while already on
+	// the /order page).
 	useEffect(() => {
 		const orderIdToResume = resumeOrderId || pickupForOrderId;
-		if (!orderIdToResume || resumeChecked) return;
+		if (!orderIdToResume) return;
+
+		setResumeChecked(false);
 
 		async function resumeOrder() {
 			try {
 				const res = await fetch(`/api/shop/${orderIdToResume}`);
-				if (!res.ok) {
-					setResumeChecked(true);
-					return;
-				}
+				if (!res.ok) return;
+
 				const data = await res.json();
 				const order = data.order;
 
-				if (!order?.status) {
-					setResumeChecked(true);
-					return;
-				}
-
-				if (order.status === OrderStatus.EXPIRED) {
-					// Can't resume expired orders
-					setResumeChecked(true);
-					return;
-				}
+				if (!order?.status) return;
+				if (order.status === OrderStatus.EXPIRED) return;
 
 				setActiveOrderId(order.id);
 				setActiveOrderNumber(order.orderNumber);
@@ -140,7 +135,7 @@ const OrderContainerInner = ({
 		}
 
 		resumeOrder();
-	}, [resumeOrderId, pickupForOrderId, resumeChecked, statusToStep]);
+	}, [resumeOrderId, pickupForOrderId, statusToStep]);
 
 	// Fetch any in-progress orders for authenticated users
 	useEffect(() => {

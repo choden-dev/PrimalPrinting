@@ -47,6 +47,7 @@ interface PickupInstructionProfileData {
 }
 
 interface OrderDetails {
+	id: string;
 	orderNumber: string;
 	status: string;
 	pricing: { subtotal: number; tax: number; total: number };
@@ -383,6 +384,12 @@ const OrderComplete: NextPage<PageProps> = ({ contactInfo }) => {
 								justifyContent="center"
 								flexWrap="wrap"
 							>
+								<Button
+									colorScheme="green"
+									onClick={() => router.push(`/order?pickupFor=${order.id}`)}
+								>
+									Change Pickup
+								</Button>
 								<Button
 									colorScheme="blue"
 									onClick={() => router.push("/my-orders")}

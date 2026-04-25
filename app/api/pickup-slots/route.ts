@@ -12,7 +12,8 @@ import { getPayloadClient } from "../../../lib/payload";
  * slots before selecting one.
  *
  * Query params:
- * - `limit` (number, default 50)
+ * - `limit`  (number, default 50, max 100) — page size
+ * - `offset` (number, default 0) — number of slots to skip
  */
 export async function GET(request: NextRequest) {
 	try {
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
 			100,
 			Math.max(1, Number(searchParams.get("limit")) || 50),
 		);
+		const offset = Math.max(0, Number(searchParams.get("offset")) || 0);
 
 		const payload = await getPayloadClient();
 
@@ -121,12 +123,17 @@ export async function GET(request: NextRequest) {
 			filtered.push(slot);
 		}
 
-		// Apply the requested limit
-		const limited = filtered.slice(0, limit);
+		// Apply offset-based pagination
+		const total = filtered.length;
+		const paginated = filtered.slice(offset, offset + limit);
 
 		return NextResponse.json({
 			success: true,
-			timeslots: limited.map((slot) => {
+			total,
+			limit,
+			offset,
+			hasMore: offset + limit < total,
+			timeslots: paginated.map((slot) => {
 				const maxCap =
 					typeof slot.maxCapacity === "number" ? slot.maxCapacity : null;
 				const booked =

@@ -182,14 +182,16 @@ export default function OrderSteps({
 					if (order.status === OrderStatus.PAID && step === OrderStep.PAYMENT) {
 						onPaymentSuccess();
 					}
-					// If already has a timeslot, jump to complete
+					// If already has a timeslot, jump to complete — but not
+					// when the user is on the PICKUP step to change their timeslot.
 					if (
 						[
 							OrderStatus.AWAITING_PICKUP,
 							OrderStatus.PRINTED,
 							OrderStatus.PICKED_UP,
 						].includes(order.status) &&
-						step !== OrderStep.COMPLETE
+						step !== OrderStep.COMPLETE &&
+						step !== OrderStep.PICKUP
 					) {
 						onPickupConfirmed();
 					}
@@ -593,6 +595,12 @@ export default function OrderSteps({
 				)}
 
 				<Box display="flex" gap={4} justifyContent="center" flexWrap="wrap">
+					<Button
+						colorScheme="green"
+						onClick={() => router.push(`/order?pickupFor=${orderId}`)}
+					>
+						Change Pickup
+					</Button>
 					<Button colorScheme="blue" onClick={() => router.push("/my-orders")}>
 						View My Orders
 					</Button>

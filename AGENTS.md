@@ -68,3 +68,49 @@ After discovering the project's specific touchpoints, use a checklist like this 
 - [ ] No duplicate/alias env vars introduced
 - [ ] Defaults are consistent across all touchpoints
 ```
+
+## Data Fetching with React Query
+
+This project uses **@tanstack/react-query** (v5) for client-side data fetching. The `QueryClientProvider` is set up in `pages/_app.tsx`.
+
+### Guidelines
+
+1. **Use `useQuery` for all GET requests in components.** Do not use raw `useEffect` + `fetch` for data loading. React Query provides caching, deduplication, background refetching, and proper loading/error states out of the box.
+
+2. **Query keys** must be descriptive arrays: `["resource-name", ...params]`. Examples:
+   - `["pickup-slots", page]`
+   - `["order", orderId]`
+   - `["my-orders", { limit }]`
+
+3. **Use `useMutation`** for POST/PUT/DELETE operations that modify server state. Invalidate related queries after mutations succeed:
+   ```ts
+   const queryClient = useQueryClient();
+   const mutation = useMutation({
+     mutationFn: updateOrder,
+     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["orders"] }),
+   });
+   ```
+
+4. **Server-side pagination** — API routes should accept `limit` and `offset` query params and return `{ total, limit, offset, hasMore }` metadata alongside the data array. Use `placeholderData: (prev) => prev` in `useQuery` to keep previous data visible while the next page loads.
+
+5. **Default options** are configured in `_app.tsx`:
+   - `staleTime: 30s` — data is considered fresh for 30 seconds before background refetch
+   - `retry: 1` — one automatic retry on failure
+
+6. **Do not install `react-query`** (v3). The package is `@tanstack/react-query` (v5).
+
+### Refactoring roadmap
+
+The following components still use raw `useEffect` + `fetch` and should be migrated to React Query as they are touched:
+
+- `components/ordercontainer/OrderContainer.tsx` — order resumption & pending orders fetch
+- `components/admin/PendingVerificationView.tsx`
+- `components/admin/OrdersByTimeslotView.tsx`
+- `components/admin/ScheduleCalendarView.tsx`
+- `components/admin/NotifyTimeslotsView.tsx`
+- `components/payment/StripePaymentForm.tsx`
+- `components/payment/BankTransferForm.tsx`
+- `pages/my-orders.tsx`
+- `pages/order_complete.tsx`
+
+When refactoring these components, follow the pattern established in `components/pickup/TimeslotSelector.tsx`.
