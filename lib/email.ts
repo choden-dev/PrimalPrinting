@@ -227,9 +227,7 @@ function formatCents(cents: number | undefined | null): string {
 }
 
 /** Map raw OrderFile[] into template-friendly objects with display labels. */
-function formatFilesForTemplate(
-	files: OrderFile[],
-): Record<string, unknown>[] {
+function formatFilesForTemplate(files: OrderFile[]): Record<string, unknown>[] {
 	return files.map((f) => ({
 		...f,
 		colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
