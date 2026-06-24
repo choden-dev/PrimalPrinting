@@ -22,6 +22,7 @@ interface OrderData {
 	pricing: { total: number };
 	files: {
 		fileName: string;
+		pageCount?: number;
 		copies: number;
 		colorMode?: string;
 		stagingKey?: string;
@@ -536,6 +537,7 @@ export default function OrdersByTimeslotView() {
 											<td style={{ padding: "10px 12px" }}>
 												{order.files?.map((f) => {
 													const hasKey = !!(f.stagingKey || f.permanentKey);
+													const isColor = f.colorMode === "COLOR";
 													return (
 														<div
 															key={`${f.fileName}-${f.copies}-${f.colorMode}`}
@@ -543,13 +545,58 @@ export default function OrdersByTimeslotView() {
 																fontSize: "12px",
 																display: "flex",
 																alignItems: "center",
+																flexWrap: "wrap",
 																gap: "6px",
-																marginBottom: "2px",
+																marginBottom: "6px",
 															}}
 														>
-															<span>
+															<span style={{ wordBreak: "break-word" }}>
 																{f.fileName} ×{f.copies}
 															</span>
+															{typeof f.pageCount === "number" && (
+																<span
+																	title={`${f.pageCount} page${
+																		f.pageCount === 1 ? "" : "s"
+																	} per copy`}
+																	style={{
+																		padding: "1px 7px",
+																		fontSize: "11px",
+																		fontWeight: 600,
+																		background: "#eceff1",
+																		color: "#455a64",
+																		border: "1px solid #cfd8dc",
+																		borderRadius: "10px",
+																		whiteSpace: "nowrap",
+																		flexShrink: 0,
+																	}}
+																>
+																	📄 {f.pageCount}p
+																</span>
+															)}
+															{f.colorMode && (
+																<span
+																	title={
+																		isColor
+																			? "Colour print"
+																			: "Black & white print"
+																	}
+																	style={{
+																		padding: "1px 7px",
+																		fontSize: "11px",
+																		fontWeight: 600,
+																		background: isColor ? "#fff3e0" : "#eeeeee",
+																		color: isColor ? "#e65100" : "#424242",
+																		border: `1px solid ${
+																			isColor ? "#ffcc80" : "#bdbdbd"
+																		}`,
+																		borderRadius: "10px",
+																		whiteSpace: "nowrap",
+																		flexShrink: 0,
+																	}}
+																>
+																	{isColor ? "🎨 Colour" : "⚫ B&W"}
+																</span>
+															)}
 															{hasKey && (
 																<button
 																	type="button"
