@@ -135,6 +135,7 @@ export async function GET(request: NextRequest) {
 			pricing: { total: number };
 			files: {
 				fileName: string;
+				pageCount?: number;
 				copies: number;
 				colorMode?: string;
 				stagingKey?: string;
@@ -154,6 +155,7 @@ export async function GET(request: NextRequest) {
 				pricing: order.pricing as { total: number },
 				files: (order.files || []).map((f: Record<string, unknown>) => ({
 					fileName: f.fileName as string,
+					pageCount: (f.pageCount as number) || undefined,
 					copies: f.copies as number,
 					colorMode: (f.colorMode as string) || undefined,
 					stagingKey: (f.stagingKey as string) || undefined,

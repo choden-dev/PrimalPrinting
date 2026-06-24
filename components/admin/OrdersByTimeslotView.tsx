@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useRef, useState } from "react";
 import type { OrderStatusValue } from "../../types/orderStatus";
 import { OrderStatus, PAID_STATUSES } from "../../types/orderStatus";
 import BackToDashboard from "./BackToDashboard";
@@ -22,6 +23,7 @@ interface OrderData {
 	pricing: { total: number };
 	files: {
 		fileName: string;
+		pageCount?: number;
 		copies: number;
 		colorMode?: string;
 		stagingKey?: string;
@@ -43,6 +45,38 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 	[OrderStatus.PICKED_UP]: { bg: "#f3e5f5", text: "#6a1b9a" },
 };
 
+type TimeslotFilter = "upcoming" | "all";
+
+/** Fetch orders grouped by pickup timeslot from the API. */
+async function fetchOrdersByTimeslot(
+	filter: TimeslotFilter,
+): Promise<TimeslotWithOrders[]> {
+	// Single API call replaces N+2 sequential requests
+	const res = await fetch(`/api/admin/orders-by-timeslot?filter=${filter}`);
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({}));
+		throw new Error(err.error || "Failed to fetch orders by timeslot.");
+	}
+	const json = await res.json();
+	return (json.groups || []) as TimeslotWithOrders[];
+}
+
+/** Update an order's status. Used by the mark-ready/picked-up mutations. */
+async function updateOrderStatus(
+	orderId: string,
+	status: OrderStatusValue,
+): Promise<void> {
+	const res = await fetch(`/api/shop/${orderId}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ status }),
+	});
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({}));
+		throw new Error(err.error || "Failed to update.");
+	}
+}
+
 /**
  * Custom Payload admin view: Orders grouped by pickup timeslot.
  *
@@ -50,78 +84,65 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
  * see which orders are coming for each timeslot and mark them as picked up.
  */
 export default function OrdersByTimeslotView() {
-	const [data, setData] = useState<TimeslotWithOrders[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [filter, setFilter] = useState<"upcoming" | "all">("upcoming");
+	const [filter, setFilter] = useState<TimeslotFilter>("upcoming");
+	const queryClient = useQueryClient();
 
-	const fetchData = useCallback(async () => {
-		setLoading(true);
-		setError(null);
-		try {
-			// Single API call replaces N+2 sequential requests
-			const res = await fetch(`/api/admin/orders-by-timeslot?filter=${filter}`);
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				throw new Error(err.error || "Failed to fetch orders by timeslot.");
-			}
-			const json = await res.json();
-			setData(json.groups || []);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to load data.");
-		} finally {
-			setLoading(false);
-		}
-	}, [filter]);
+	const {
+		data = [],
+		isLoading: loading,
+		error: queryError,
+		refetch,
+	} = useQuery({
+		queryKey: ["orders-by-timeslot", filter],
+		queryFn: () => fetchOrdersByTimeslot(filter),
+		placeholderData: (prev) => prev,
+	});
 
-	useEffect(() => {
-		fetchData();
-	}, [fetchData]);
+	const error =
+		queryError instanceof Error
+			? queryError.message
+			: queryError
+				? "Failed to load data."
+				: null;
+
+	const invalidateOrders = useCallback(
+		() => queryClient.invalidateQueries({ queryKey: ["orders-by-timeslot"] }),
+		[queryClient],
+	);
+
+	const markPickedUpMutation = useMutation({
+		mutationFn: (orderId: string) =>
+			updateOrderStatus(orderId, OrderStatus.PICKED_UP),
+		onSuccess: invalidateOrders,
+		onError: (err) =>
+			window.alert(
+				err instanceof Error ? err.message : "Failed to update order.",
+			),
+	});
+
+	const markReadyMutation = useMutation({
+		mutationFn: (orderId: string) =>
+			updateOrderStatus(orderId, OrderStatus.PRINTED),
+		onSuccess: invalidateOrders,
+		onError: (err) =>
+			window.alert(
+				err instanceof Error ? err.message : "Failed to update order.",
+			),
+	});
 
 	const handleMarkPickedUp = useCallback(
-		async (orderId: string) => {
+		(orderId: string) => {
 			if (!window.confirm("Mark this order as picked up?")) return;
-
-			try {
-				const res = await fetch(`/api/shop/${orderId}`, {
-					method: "PATCH",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ status: OrderStatus.PICKED_UP }),
-				});
-				if (!res.ok) {
-					const err = await res.json();
-					throw new Error(err.error || "Failed to update.");
-				}
-				fetchData(); // Refresh
-			} catch (err) {
-				window.alert(
-					err instanceof Error ? err.message : "Failed to update order.",
-				);
-			}
+			markPickedUpMutation.mutate(orderId);
 		},
-		[fetchData],
+		[markPickedUpMutation],
 	);
 
 	const handleMarkReady = useCallback(
-		async (orderId: string) => {
-			try {
-				const res = await fetch(`/api/shop/${orderId}`, {
-					method: "PATCH",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ status: OrderStatus.PRINTED }),
-				});
-				if (!res.ok) {
-					const err = await res.json();
-					throw new Error(err.error || "Failed to update.");
-				}
-				fetchData();
-			} catch (err) {
-				window.alert(
-					err instanceof Error ? err.message : "Failed to update order.",
-				);
-			}
+		(orderId: string) => {
+			markReadyMutation.mutate(orderId);
 		},
-		[fetchData],
+		[markReadyMutation],
 	);
 
 	const getCustomerDisplay = (
@@ -295,7 +316,7 @@ export default function OrdersByTimeslotView() {
 					</button>
 					<button
 						type="button"
-						onClick={fetchData}
+						onClick={() => refetch()}
 						style={{
 							padding: "8px 16px",
 							borderRadius: "6px",
@@ -536,6 +557,7 @@ export default function OrdersByTimeslotView() {
 											<td style={{ padding: "10px 12px" }}>
 												{order.files?.map((f) => {
 													const hasKey = !!(f.stagingKey || f.permanentKey);
+													const isColor = f.colorMode === "COLOR";
 													return (
 														<div
 															key={`${f.fileName}-${f.copies}-${f.colorMode}`}
@@ -543,13 +565,58 @@ export default function OrdersByTimeslotView() {
 																fontSize: "12px",
 																display: "flex",
 																alignItems: "center",
+																flexWrap: "wrap",
 																gap: "6px",
-																marginBottom: "2px",
+																marginBottom: "6px",
 															}}
 														>
-															<span>
+															<span style={{ wordBreak: "break-word" }}>
 																{f.fileName} ×{f.copies}
 															</span>
+															{typeof f.pageCount === "number" && (
+																<span
+																	title={`${f.pageCount} page${
+																		f.pageCount === 1 ? "" : "s"
+																	} per copy`}
+																	style={{
+																		padding: "1px 7px",
+																		fontSize: "11px",
+																		fontWeight: 600,
+																		background: "#eceff1",
+																		color: "#455a64",
+																		border: "1px solid #cfd8dc",
+																		borderRadius: "10px",
+																		whiteSpace: "nowrap",
+																		flexShrink: 0,
+																	}}
+																>
+																	📄 {f.pageCount}p
+																</span>
+															)}
+															{f.colorMode && (
+																<span
+																	title={
+																		isColor
+																			? "Colour print"
+																			: "Black & white print"
+																	}
+																	style={{
+																		padding: "1px 7px",
+																		fontSize: "11px",
+																		fontWeight: 600,
+																		background: isColor ? "#fff3e0" : "#eeeeee",
+																		color: isColor ? "#e65100" : "#424242",
+																		border: `1px solid ${
+																			isColor ? "#ffcc80" : "#bdbdbd"
+																		}`,
+																		borderRadius: "10px",
+																		whiteSpace: "nowrap",
+																		flexShrink: 0,
+																	}}
+																>
+																	{isColor ? "🎨 Colour" : "⚫ B&W"}
+																</span>
+															)}
 															{hasKey && (
 																<button
 																	type="button"
