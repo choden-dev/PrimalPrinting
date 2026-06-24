@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import type { OrderStatusValue } from "../../types/orderStatus";
 import { OrderStatus, PAID_STATUSES } from "../../types/orderStatus";
+import AdminQueryProvider from "./AdminQueryProvider";
 import BackToDashboard from "./BackToDashboard";
 
 interface TimeslotData {
@@ -83,7 +84,7 @@ async function updateOrderStatus(
  * This is the view the admin uses in-person to manage pickups —
  * see which orders are coming for each timeslot and mark them as picked up.
  */
-export default function OrdersByTimeslotView() {
+function OrdersByTimeslotViewInner() {
 	const [filter, setFilter] = useState<TimeslotFilter>("upcoming");
 	const queryClient = useQueryClient();
 
@@ -747,5 +748,20 @@ export default function OrdersByTimeslotView() {
 				);
 			})}
 		</div>
+	);
+}
+
+/**
+ * Default export wraps the view in its own QueryClientProvider.
+ *
+ * Payload admin custom views render outside the Pages Router tree, so they
+ * don't inherit the QueryClient from `pages/_app.tsx`. Wrapping here makes
+ * the view self-sufficient.
+ */
+export default function OrdersByTimeslotView() {
+	return (
+		<AdminQueryProvider>
+			<OrdersByTimeslotViewInner />
+		</AdminQueryProvider>
 	);
 }

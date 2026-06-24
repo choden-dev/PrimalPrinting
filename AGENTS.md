@@ -71,7 +71,13 @@ After discovering the project's specific touchpoints, use a checklist like this 
 
 ## Data Fetching with React Query
 
-This project uses **@tanstack/react-query** (v5) for client-side data fetching. The `QueryClientProvider` is set up in `pages/_app.tsx`.
+This project uses **@tanstack/react-query** (v5) for client-side data fetching.
+
+> ⚠️ **Two separate provider trees.** This app mixes the **Pages Router** and the **App Router**, and they do **not** share a `QueryClientProvider`:
+> - **Pages Router** (`pages/**`, customer-facing pages): the `QueryClientProvider` is set up in `pages/_app.tsx`. Components rendered here (e.g. `components/pickup/TimeslotSelector.tsx`) get a client automatically.
+> - **App Router** (`app/(payload)/**`, Payload admin custom views): these render **outside** `pages/_app.tsx` and therefore have **no** QueryClient. Using `useQuery`/`useMutation` there without a provider throws `No QueryClient set, use QueryClientProvider to set one` at runtime.
+>
+> The Payload admin `app/(payload)/layout.tsx` is **auto-generated ("DO NOT MODIFY")**, so do not wrap it. Instead, any admin (App Router) component that uses React Query must wrap its own content in **`components/admin/AdminQueryProvider.tsx`**. The standard pattern is to split the view into an inner component (which holds the hooks) and a default export that wraps the inner component in `AdminQueryProvider` — see `components/admin/OrdersByTimeslotView.tsx`. Keep `AdminQueryProvider`'s defaults in sync with the Pages Router provider in `pages/_app.tsx`.
 
 ### Guidelines
 
@@ -99,13 +105,14 @@ This project uses **@tanstack/react-query** (v5) for client-side data fetching. 
 
 6. **Do not install `react-query`** (v3). The package is `@tanstack/react-query` (v5).
 
+7. **Admin (App Router) views** must wrap their content in `components/admin/AdminQueryProvider.tsx` (see the "two separate provider trees" note above). Do not rely on the `pages/_app.tsx` provider for anything under `app/(payload)/**`.
+
 ### Refactoring roadmap
 
 The following components still use raw `useEffect` + `fetch` and should be migrated to React Query as they are touched:
 
 - `components/ordercontainer/OrderContainer.tsx` — order resumption & pending orders fetch
 - `components/admin/PendingVerificationView.tsx`
-- `components/admin/OrdersByTimeslotView.tsx`
 - `components/admin/ScheduleCalendarView.tsx`
 - `components/admin/NotifyTimeslotsView.tsx`
 - `components/payment/StripePaymentForm.tsx`
@@ -113,4 +120,8 @@ The following components still use raw `useEffect` + `fetch` and should be migra
 - `pages/my-orders.tsx`
 - `pages/order_complete.tsx`
 
-When refactoring these components, follow the pattern established in `components/pickup/TimeslotSelector.tsx`.
+Already migrated (use as references):
+
+- ✅ `components/admin/OrdersByTimeslotView.tsx` — admin (App Router) view; wraps its default export in `AdminQueryProvider`.
+
+When refactoring Pages Router components, follow the pattern established in `components/pickup/TimeslotSelector.tsx`. When refactoring **admin (App Router) views** (the remaining `components/admin/*` entries above), additionally wrap the view in `AdminQueryProvider` as shown in `components/admin/OrdersByTimeslotView.tsx`.
