@@ -14,16 +14,20 @@
  * first user. Warming here overlaps that cost with the server's own boot.
  *
  * The warmup is:
- *   - Node.js runtime only (skipped on the Edge runtime, which has no Mongo).
+ *   - Skipped only on the Edge runtime (which has no Mongo); runs on the Node
+ *     server runtime by default even if `NEXT_RUNTIME` is unset.
  *   - Fire-and-forget: it never blocks server startup and swallows errors so a
  *     transient DB hiccup at boot can't crash the process. `getPayloadClient`
  *     caches its promise, so the first real request simply awaits the same
  *     (already in-flight or resolved) connection.
  */
 export async function register(): Promise<void> {
-	// Only warm on the Node.js server runtime — the Edge runtime cannot talk to
-	// MongoDB and has no access to the Payload local API.
-	if (process.env.NEXT_RUNTIME !== "nodejs") {
+	// Skip only on the Edge runtime, which cannot talk to MongoDB and has no
+	// access to the Payload local API. We deliberately check for an explicit
+	// "edge" value rather than requiring `=== "nodejs"`: `NEXT_RUNTIME` may be
+	// unset in some instrumentation-hook environments, and in that case we still
+	// want to warm on the Node server runtime by default rather than skip it.
+	if (process.env.NEXT_RUNTIME === "edge") {
 		return;
 	}
 

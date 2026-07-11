@@ -102,13 +102,22 @@ export default {
 	 *
 	 * Unlike GitHub Actions cron (min ~5min, frequently delayed and needs an
 	 * external URL + shared secret), Worker Cron Triggers fire reliably and can
-	 * reach the container directly through the Durable Object stub — no public
-	 * request, no auth secret required.
+	 * reach the container directly through the Durable Object stub — the ping
+	 * never leaves Cloudflare's network and needs no auth secret (the URL below
+	 * uses the public origin only to satisfy `global_fetch_strictly_public`).
 	 */
 	async scheduled(_event, env, ctx) {
 		const containerInstance = getContainer(env.APP, "singleton");
+		// `containerInstance.fetch()` always routes internally via the Durable
+		// Object stub regardless of the request URL, so the hostname here is only
+		// used to construct a valid Request. Use the site's public origin (not a
+		// made-up hostname like `https://internal/...`): the
+		// `global_fetch_strictly_public` compatibility flag in wrangler.jsonc can
+		// reject non-public hostnames, which would break the keep-warm ping.
+		const baseUrl = env.NEXT_PUBLIC_BASE_URL || "https://primalprinting.co.nz";
+		const healthUrl = new URL("/api/health", baseUrl).toString();
 		const warm = containerInstance
-			.fetch(new Request("https://internal/api/health"))
+			.fetch(new Request(healthUrl))
 			.then(() => undefined)
 			.catch((error) => {
 				console.warn("[keep-warm] health ping failed:", error);

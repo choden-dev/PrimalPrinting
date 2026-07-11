@@ -13,8 +13,8 @@ import { getPayloadClient } from "@/lib/payload";
  *
  * The route touches `getPayloadClient()` (which caches its connection promise)
  * so the ping also keeps the Payload/Mongo layer warm, not just the HTTP
- * server. It then issues ONE deliberately cheap query (a `count` capped at a
- * single document) against MongoDB.
+ * server. It then issues ONE deliberately cheap query (a collection `count`)
+ * against MongoDB.
  *
  * Why run a query at all? Warming `getPayloadClient()` only proves the cached
  * connection *promise* resolved — it does not prove the underlying pooled
@@ -24,8 +24,8 @@ import { getPayloadClient } from "@/lib/payload";
  * into a true readiness probe that reports `db: false` when MongoDB is down
  * instead of a false `db: true` on a stale connection. The `count` bypasses
  * access control (`overrideAccess`) and never fetches document bodies — it
- * only asks MongoDB for a collection count, which is the cheapest possible
- * round-trip that still touches the wire.
+ * only asks MongoDB for a collection count, which is a cheap round-trip that
+ * still touches the wire.
  *
  * Kept public (not matched by middleware.ts, which only guards /api/shop/*).
  */
