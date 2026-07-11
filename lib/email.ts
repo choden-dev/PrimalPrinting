@@ -385,7 +385,7 @@ function formatFilesForTemplate(files: OrderFile[]): Record<string, unknown>[] {
 	return files.map((f) => ({
 		...f,
 		colorLabel: f.colorMode === "COLOR" ? "Colour" : "B&W",
-		sidedLabel: f.doubleSided ? "Double-sided" : "Single-sided",
+		sidedLabel: f.doubleSided === false ? "Single-sided" : "Double-sided",
 	}));
 }
 

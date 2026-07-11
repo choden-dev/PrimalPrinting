@@ -366,7 +366,7 @@ export const Orders: CollectionConfig = {
 				{
 					name: "doubleSided",
 					type: "checkbox",
-					defaultValue: false,
+					defaultValue: true,
 					admin: { description: "Print on both sides of the page." },
 				},
 				{

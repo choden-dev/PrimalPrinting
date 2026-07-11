@@ -140,7 +140,8 @@ function FileRow({ file, isPaid }: { file: OrderFile; isPaid: boolean }) {
 					{file.pageCount} pages · {file.copies}{" "}
 					{file.copies === 1 ? "copy" : "copies"} ·{" "}
 					{file.colorMode === "COLOR" ? "Colour" : "B&W"} · {file.paperSize} ·{" "}
-					{file.doubleSided ? "Double-sided" : "Single-sided"} · {fileSizeMB} MB
+					{file.doubleSided === false ? "Single-sided" : "Double-sided"} ·{" "}
+					{fileSizeMB} MB
 				</div>
 			</div>
 
