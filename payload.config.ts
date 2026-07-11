@@ -38,6 +38,20 @@ export default (async () =>
 				serverSelectionTimeoutMS: 5000,
 				connectTimeoutMS: 5000,
 				socketTimeoutMS: 10000,
+				// Disable Mongoose autoIndex in production. By default the mongodb
+				// adapter connects with `autoIndex: true`, which makes Mongoose
+				// verify/build the indexes for EVERY collection (Users, Customers,
+				// Orders, Timeslots, Schedules, …) against MongoDB right after the
+				// connection opens. On a cold container start that first request
+				// pays the cost of all those index round-trips, producing the very
+				// long / timeout-prone loads reported for the first visitor after
+				// the container scales back up.
+				//
+				// Indexes should instead be created once (via `payload migrate` or
+				// a one-off admin login), not rebuilt on every cold connect. We
+				// keep autoIndex enabled in development so schema/index changes are
+				// picked up automatically while iterating locally.
+				autoIndex: process.env.NODE_ENV !== "production",
 			},
 		}),
 		editor: lexicalEditor(),
