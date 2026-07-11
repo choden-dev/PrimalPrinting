@@ -75,10 +75,17 @@ export class PrimalPrinting extends Container {
 
 export default {
 	async fetch(request, env) {
-		const url = new URL(request.url);
-		const id = url.searchParams.get("id") || "singleton";
-		// Get the container instance for the given session ID
-		const containerInstance = getContainer(env.APP, id);
+		// Always route to the single "singleton" instance. This app runs with
+		// `max_instances: 1`, and the keep-warm cron (see `scheduled` below)
+		// only pings the "singleton" instance. Previously the instance id was
+		// derived from a `?id=` query param, so any request carrying an `id`
+		// would be routed to a DIFFERENT, cold container instance that the
+		// keep-warm ping never touched — that visitor would then pay the full
+		// container boot + Next.js start + Mongo connect/init on their critical
+		// path (the exact long-load / timeout symptom). Pinning every request
+		// to "singleton" guarantees all traffic reuses the one warm process
+		// with its live MongoDB connection pool.
+		const containerInstance = getContainer(env.APP, "singleton");
 		// Pass the request to the container instance on its default port
 		return containerInstance.fetch(request);
 	},
