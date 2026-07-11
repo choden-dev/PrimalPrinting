@@ -86,6 +86,15 @@
 			}
 		]
 	},
+	// Keep-warm Cron Trigger. Fires the Worker's `scheduled` handler (see
+	// container-worker.js), which pings the container's /api/health endpoint so
+	// the singleton instance never idles long enough to scale to zero. Every 5
+	// minutes sits comfortably inside the Container class's `sleepAfter` window,
+	// so a warm process with a live MongoDB pool is always ready — no cold-start
+	// connect/init on the first real visitor's critical path.
+	"triggers": {
+		"crons": ["*/5 * * * *"]
+	},
 	"images": {
 		"binding": "IMAGES"
 	},
