@@ -18,9 +18,7 @@ import {
 // Run on the Node.js runtime — required for Buffer + the S3 client used by
 // downloadFromStaging.
 export const runtime = "nodejs";
-// Allow time for HEAD + page-counting downloads of every file in an order.
-// 25 files × 100MB at typical R2 download speeds (~50MB/s sustained) =
-// ~50s, with parallelism this comfortably fits in 60s.
+// HEAD + page-counting downloads of every file can take a while at max size.
 export const maxDuration = 60;
 
 /**
@@ -47,36 +45,13 @@ function countPdfPages(buffer: Buffer): number {
 }
 
 /**
- * POST /api/shop/orders — Finalise a DRAFT order from previously-uploaded
- * staging files.
+ * POST /api/shop/orders — Finalise a DRAFT order from staging files the
+ * browser already uploaded directly to R2 (see /api/shop/staging-urls).
  *
- * Body (JSON):
- *   {
- *     files: [
- *       {
- *         stagingKey: string,    // returned by /api/shop/staging-urls
- *         fileName:   string,    // original filename for display
- *         copies?:    number,    // default 1
- *         colorMode?: "BW" | "COLOR" // default "BW"
- *       },
- *       ...
- *     ]
- *   }
- *
- * The browser uploads the bytes directly to R2 via presigned PUT URLs first
- * (see /api/shop/staging-urls), then calls this endpoint with just the
- * staging keys. The server:
- *
- *   1. Verifies every staging key belongs to this customer (key prefix).
- *   2. HEADs each object in R2 to confirm the upload actually completed
- *      and that the size is within the per-file limit.
- *   3. Downloads each PDF to count pages authoritatively (never trust
- *      the client).
- *   4. Calculates pricing server-side from the verified page counts.
- *   5. Creates the DRAFT order.
- *
- * If any step fails the staging objects we *did* manage to verify are
- * cleaned up so they don't linger in R2.
+ * Everything is verified server-side: staging keys must belong to the
+ * customer, objects are HEADed and downloaded to count pages, and pricing
+ * is computed from the verified counts. Verified staging objects are cleaned
+ * up on failure so they don't linger in R2.
  */
 export async function POST(request: NextRequest) {
 	const customer = await getAuthenticatedCustomer(request);
@@ -187,8 +162,8 @@ export async function POST(request: NextRequest) {
 	const verifiedKeys: string[] = [];
 
 	try {
-		// Step 1: HEAD every object to confirm the browser-side upload actually
-		// completed, and pull authoritative size + content-type from R2.
+		// Step 1: HEAD every object to confirm the upload completed and read
+		// authoritative size + content-type from R2.
 		const headed = await Promise.all(
 			validated.map(async (v) => {
 				const head = await headStagingObject(v.stagingKey);
@@ -222,8 +197,8 @@ export async function POST(request: NextRequest) {
 			}),
 		);
 
-		// Step 2: Download each PDF and count pages authoritatively. Never
-		// trust client-supplied page counts — pricing depends on this.
+		// Step 2: Download each PDF and count pages server-side — never trust
+		// client-supplied counts, since pricing depends on them.
 		const orderFiles = await Promise.all(
 			headed.map(async (v) => {
 				const buffer = await downloadFromStaging(v.stagingKey);

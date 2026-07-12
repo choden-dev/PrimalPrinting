@@ -56,13 +56,8 @@ interface OrderDetails {
 }
 
 /**
- * Multi-step order flow shown after the user has configured their order
- * and is authenticated.
- *
- * Steps:
- * 1. Payment — choose Stripe or bank transfer
- * 2. Pickup — select a timeslot
- * 3. Complete — confirmation screen
+ * Multi-step order flow (Payment → Pickup → Complete) shown after the user
+ * has configured their order and is authenticated.
  */
 
 // ── Rich text renderer ──────────────────────────────────────────────────

@@ -1,12 +1,8 @@
 import { useEffect } from "react";
 
 /**
- * OAuth callback landing page.
- *
- * After Google OAuth completes, NextAuth redirects here. This page reads the
- * saved return URL from sessionStorage and redirects the user back to where
- * they were before sign-in (e.g. the order page with their uploaded files
- * restored from IndexedDB).
+ * OAuth callback page: after Google/NextAuth sign-in, redirects the user back
+ * to the saved return URL from sessionStorage (defaulting to /order).
  */
 export default function AuthCallback() {
 	useEffect(() => {

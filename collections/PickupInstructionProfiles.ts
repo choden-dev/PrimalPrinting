@@ -1,14 +1,9 @@
 import type { CollectionConfig } from "payload";
 
 /**
- * PickupInstructionProfiles – reusable pickup instruction templates.
- *
- * Each profile represents a pickup method (e.g. "Locker Pickup",
- * "In-Person Pickup") with rich-text instructions that are shown to
- * customers on the order confirmation page and in confirmation emails.
- *
- * Profiles are linked to Schedules so every timeslot generated from a
- * schedule inherits the associated pickup instructions.
+ * PickupInstructionProfiles – reusable pickup-method templates (e.g. "Locker
+ * Pickup") with rich-text instructions shown on the confirmation page and in
+ * emails. Linked to Schedules so generated timeslots inherit the instructions.
  */
 export const PickupInstructionProfiles: CollectionConfig = {
 	slug: "pickup-instruction-profiles",

@@ -1,28 +1,11 @@
 #!/usr/bin/env tsx
 /**
- * Mirror Next.js build artefacts into the R2 "assets" bucket so the standalone
- * server can run truly headless — i.e. it does not have to serve any static
- * files itself. The matching origin is configured on the Next side via
- * `assetPrefix` (NEXT_PUBLIC_ASSET_PREFIX in next.config.ts).
- *
- * What gets uploaded:
- *   - `.next/static/**`   →  `_next/static/**`   (immutable, fingerprinted)
- *   - `public/**`         →  `**`                (root of the bucket)
- *
- * Required env vars (validated below):
- *   - R2_ASSETS_BUCKET
- *   - R2_S3_ENDPOINT
- *   - R2_ACCESS_KEY_ID
- *   - R2_SECRET_ACCESS_KEY
- *
- * Optional:
- *   - ASSETS_CACHE_CONTROL   default: "public, max-age=31536000, immutable"
- *   - ASSETS_PUBLIC_CACHE_CONTROL  default: "public, max-age=3600"
- *   - ASSETS_CONCURRENCY     default: 16
- *   - ASSETS_DRY_RUN         set to "1" to skip the actual PUTs
- *
- * The script writes `.next/asset-upload.manifest.json` so Turbo can cache it
- * as the task's output.
+ * Mirror `.next/static/**` → `_next/static/**` and `public/**` → `**` into the
+ * R2 "assets" bucket so the standalone server runs headless (origin set via
+ * NEXT_PUBLIC_ASSET_PREFIX). Requires R2_ASSETS_BUCKET, R2_S3_ENDPOINT,
+ * R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY; optional ASSETS_CACHE_CONTROL,
+ * ASSETS_PUBLIC_CACHE_CONTROL, ASSETS_CONCURRENCY, ASSETS_DRY_RUN. Writes
+ * `.next/asset-upload.manifest.json` as Turbo's cached output.
  */
 
 import { createReadStream, type Dirent } from "node:fs";
@@ -46,20 +29,14 @@ const NEXT_STATIC_DIR = join(REPO_ROOT, ".next", "static");
 const PUBLIC_DIR = join(REPO_ROOT, "public");
 const MANIFEST_PATH = join(REPO_ROOT, ".next", "asset-upload.manifest.json");
 
-// Where the previous deploy's manifest is stored *inside the bucket*. We use
-// the bucket itself as the source of truth (rather than e.g. an R2 KV
-// namespace) so the upload script is fully self-contained: any runner with
-// R2 credentials can deploy without extra plumbing. The `_meta/` prefix
-// keeps it out of the way of any user-visible asset path.
+// Previous deploy's manifest, stored in-bucket so the script is self-contained
+// (any runner with R2 creds can deploy). `_meta/` keeps it off asset paths.
 const PREVIOUS_MANIFEST_KEY = "_meta/asset-upload.manifest.previous.json";
 
-// Only prune objects under this prefix. We deliberately leave `public/**`
-// (stable filenames like favicon.ico) and the `_meta/` namespace alone.
+// Only prune under this prefix; leave `public/**` and `_meta/` alone.
 const PRUNE_PREFIX = "_next/static/";
 
-// `DeleteObjects` accepts up to 1000 keys per request. We size our batches
-// at 500 to leave headroom for the XML overhead and to keep individual
-// requests fast.
+// DeleteObjects allows 1000 keys/request; 500 leaves headroom for XML overhead.
 const DELETE_BATCH_SIZE = 500;
 
 const IMMUTABLE_CACHE_CONTROL =
@@ -121,14 +98,8 @@ const ACCESS_KEY = requireEnv("R2_ACCESS_KEY_ID");
 const SECRET_KEY = requireEnv("R2_SECRET_ACCESS_KEY");
 
 // ── S3 client (R2 is S3-compatible) ────────────────────────────────────────
-//
-// `requestChecksumCalculation` and `responseChecksumValidation` are pinned
-// to "WHEN_REQUIRED" because Cloudflare R2 does not fully support the
-// `Content-Encoding: aws-chunked` + `x-amz-trailer` flexible-checksum
-// framing that aws-sdk-js v3 enables by default since v3.730. Without this
-// opt-out, every PutObject is rejected (streamed bodies surface as
-// "non-retryable streaming request" + UnknownError; smaller bodies surface
-// as 403 Access Denied), even though the credentials are correct.
+// Checksum opts pinned to "WHEN_REQUIRED": R2 rejects the flexible-checksum
+// framing aws-sdk-js v3 enables by default (>=v3.730), failing every PutObject.
 // See: https://developers.cloudflare.com/r2/examples/aws/aws-sdk-js-v3/
 const s3 = new S3Client({
 	region: "auto",
@@ -291,30 +262,18 @@ async function collectPlan(): Promise<UploadPlanItem[]> {
 }
 
 // ── Pruning ───────────────────────────────────────────────────────────────
-//
-// Strategy: "two-deploy delay" using the manifest from the previous deploy.
-//
-// After a successful upload of build N, we want to delete any object under
-// `_next/static/` that is referenced by neither build N nor build N-1. Doing
-// it this way (rather than an R2 lifecycle rule) is correct regardless of
-// deploy cadence — a server-side age-based rule would either delete assets
-// that are still in production (if the bucket's max age is shorter than the
-// gap between deploys) or be effectively a no-op (if it's longer).
-//
-// In-flight users on build N-1 may still lazy-load chunks for ~minutes after
-// deploy N goes live; keeping N-1's keys gives them comfortably more than
-// enough time to either finish the current navigation or hit a fresh page
-// that pulls the new chunks.
+// "Two-deploy delay": after uploading build N, delete `_next/static/` objects
+// referenced by neither build N nor N-1. Unlike an R2 age-based lifecycle rule,
+// this is correct regardless of deploy cadence and keeps N-1's chunks around
+// for in-flight users still lazy-loading them.
 
 type PreviousManifest = {
 	keys: string[];
 };
 
 /**
- * Fetch the previous deploy's manifest from the bucket. Returns `null` if
- * the object does not exist (first deploy of this feature) or if the body
- * is unreadable / unparseable — both cases degrade gracefully into "no
- * previous manifest known", which makes the prune pass a safe no-op.
+ * Fetch the previous deploy's manifest. Returns `null` when the object is
+ * missing or unparseable, which degrades gracefully into a no-op prune.
  */
 async function loadPreviousManifest(): Promise<PreviousManifest | null> {
 	let body: string;
@@ -322,8 +281,6 @@ async function loadPreviousManifest(): Promise<PreviousManifest | null> {
 		const res = await s3.send(
 			new GetObjectCommand({ Bucket: BUCKET, Key: PREVIOUS_MANIFEST_KEY }),
 		);
-		// `Body` is a Node Readable in node runtimes; transformToString is
-		// the canonical way to drain it across SDK versions.
 		body = (await res.Body?.transformToString()) ?? "";
 	} catch (err) {
 		const e = err as S3ServiceException;
@@ -340,8 +297,7 @@ async function loadPreviousManifest(): Promise<PreviousManifest | null> {
 	try {
 		const parsed = JSON.parse(body) as Partial<PreviousManifest>;
 		if (!Array.isArray(parsed.keys)) return null;
-		// Defensive cast: ensure every entry is a string before we use it as
-		// a Set member that drives DeleteObjects.
+		// Keep only string entries before they drive DeleteObjects.
 		return {
 			keys: parsed.keys.filter((k): k is string => typeof k === "string"),
 		};
@@ -354,10 +310,7 @@ async function loadPreviousManifest(): Promise<PreviousManifest | null> {
 	}
 }
 
-/**
- * List every object under PRUNE_PREFIX. Uses ContinuationToken pagination
- * so it works for buckets containing more than 1000 keys.
- */
+/** List every object under PRUNE_PREFIX, paginating past the 1000-key limit. */
 async function listAllPrunablePrefixKeys(): Promise<string[]> {
 	const keys: string[] = [];
 	let continuationToken: string | undefined;
@@ -377,10 +330,7 @@ async function listAllPrunablePrefixKeys(): Promise<string[]> {
 	return keys;
 }
 
-/**
- * Delete `keys` from the bucket using `DeleteObjects` in batches of
- * DELETE_BATCH_SIZE. Returns counts so the caller can report them.
- */
+/** Delete `keys` in DELETE_BATCH_SIZE batches, returning success/error counts. */
 async function deleteKeys(
 	keys: string[],
 ): Promise<{ deleted: number; errors: number }> {
@@ -393,9 +343,7 @@ async function deleteKeys(
 				Bucket: BUCKET,
 				Delete: {
 					Objects: batch.map((Key) => ({ Key })),
-					// Quiet mode: only failures come back, not every successful key.
-					// Cuts response size for large batches and matches our reporting
-					// (we only want to surface failures individually).
+					// Quiet: return only failures, cutting response size on large batches.
 					Quiet: true,
 				},
 			}),
@@ -411,10 +359,8 @@ async function deleteKeys(
 }
 
 /**
- * Compute the prune set and execute it. `currentKeys` is the set of keys
- * the just-completed deploy uploaded; the bucket's _next/static/ contents
- * minus `currentKeys` minus `previous.keys` is the set of keys that have
- * been stale for at least one full deploy cycle and are safe to remove.
+ * Compute and execute the prune set: bucket `_next/static/` contents minus
+ * `currentKeys` minus the previous deploy's keys are safe to remove.
  */
 async function pruneStaleAssets(currentKeys: Set<string>): Promise<{
 	scanned: number;
@@ -457,11 +403,7 @@ async function pruneStaleAssets(currentKeys: Set<string>): Promise<{
 	return { scanned: bucketKeys.length, deleted, errors, skipped: false };
 }
 
-/**
- * Persist the current build's key set as the "previous manifest" for the
- * next deploy. We write only the key list — no other metadata is needed and
- * a smaller payload makes GetObject cheaper next time.
- */
+/** Persist the current build's key set as the next deploy's "previous manifest". */
 async function writePreviousManifest(currentKeys: Set<string>): Promise<void> {
 	const body = `${JSON.stringify(
 		{ keys: [...currentKeys].sort(), generatedAt: new Date().toISOString() },
@@ -543,17 +485,9 @@ async function main(): Promise<void> {
 	);
 	console.log(`  manifest: ${relative(REPO_ROOT, MANIFEST_PATH)}`);
 
-	// ── Prune stale assets + persist this build's manifest for the next run ─
-	//
-	// Guard rails:
-	//   - Skip on DRY_RUN — we never want to mutate the bucket from a dry run.
-	//   - Skip if any uploads failed — pruning could remove the previous
-	//     build's copy of an asset whose new copy we didn't manage to upload,
-	//     which would 404 in production. Better to leave the bucket fat than
-	//     to break it.
-	//   - The current key set covers ALL keys planned for the prune prefix
-	//     (uploaded + skipped), since "skipped" just means the bytes were
-	//     already in the bucket — it's still very much part of THIS build.
+	// Prune stale assets, then persist this build's manifest. Skipped on DRY_RUN
+	// or any upload failure (pruning could 404 an asset whose new copy didn't
+	// land). currentKeys covers uploaded + skipped, as both belong to this build.
 	if (!DRY_RUN && failed.length === 0) {
 		const currentKeys = new Set<string>();
 		for (const item of plan) {
@@ -568,14 +502,11 @@ async function main(): Promise<void> {
 						`deleted ${prune.deleted}, errors ${prune.errors}`,
 				);
 			}
-			// Always update the previous-manifest pointer on success so the
-			// next deploy has the correct N-1 reference. Done after the prune
-			// so a partial prune still leaves the bucket in a consistent state
-			// from the next deploy's perspective.
+			// Update the previous-manifest pointer after the prune so the next
+			// deploy has a correct N-1 reference even after a partial prune.
 			await writePreviousManifest(currentKeys);
 		} catch (err) {
-			// Pruning is best-effort — we never want a prune failure to fail
-			// the deploy. Surface the error loudly but exit 0.
+			// Pruning is best-effort — never fail the deploy over it.
 			console.error(
 				"⚠ Prune / previous-manifest write failed (deploy will continue):",
 				err,

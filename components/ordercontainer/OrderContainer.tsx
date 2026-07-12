@@ -52,8 +52,7 @@ const OrderContainerInner = ({
 	>([]);
 	const [smallScreen] = useMediaQuery(`(max-width: 1000px)`);
 
-	// Track the current step of the new order flow
-	// UPLOAD → PAYMENT → PICKUP → COMPLETE
+	// Step of the order flow: UPLOAD → PAYMENT → PICKUP → COMPLETE
 	const [orderStep, setOrderStep] = useState<OrderStepValue>(OrderStep.UPLOAD);
 	const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 	const [activeOrderNumber, setActiveOrderNumber] = useState<string | null>(
@@ -93,10 +92,8 @@ const OrderContainerInner = ({
 		}
 	}, []);
 
-	// Resume an existing order or jump to pickup selection.
-	// Resets resumeChecked to false and re-fetches whenever the query
-	// params change (e.g. clicking "Change Pickup" while already on
-	// the /order page).
+	// Resume an existing order or jump to pickup selection, re-fetching
+	// whenever the resume/pickupFor query params change.
 	useEffect(() => {
 		const orderIdToResume = resumeOrderId || pickupForOrderId;
 		if (!orderIdToResume) return;

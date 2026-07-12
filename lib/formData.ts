@@ -1,14 +1,9 @@
 import type { NextRequest } from "next/server";
 
 /**
- * Maximum total request body size we accept for any multipart upload (across
- * all files + form fields combined). Set above the per-file limits so a small
- * batch of max-size files still fits, but well below typical platform/proxy
- * limits so we can reject early with a clear message.
- *
- * /api/shop/orders        — up to 10 PDFs × 20MB = 200MB; reject above 220MB
- * /api/shop/upload-proof  — single image × 10MB                              ;
- * the cap below is the global ceiling for ANY multipart endpoint.
+ * Global ceiling for any multipart upload (all files + fields combined). Sized
+ * above the largest endpoint (10 PDFs × 20MB) but below platform/proxy limits
+ * so we can reject early with a clear message.
  */
 export const MAX_MULTIPART_BODY_SIZE = 220 * 1024 * 1024; // 220MB
 
@@ -22,20 +17,13 @@ export type FormDataParseResult =
 	| { ok: false; error: FormDataParseError };
 
 /**
- * Safely parse a multipart/form-data request body.
+ * Safely parse a multipart/form-data request body, replacing the runtime's
+ * generic "Failed to parse body as FormData" error with a clear message that
+ * covers the common causes (bad Content-Type, oversized body, truncated
+ * stream, malformed payload).
  *
- * Wraps `request.formData()` so the generic, unhelpful
- * "Failed to parse body as FormData" error from the runtime is replaced
- * with a clear, actionable message that distinguishes the common causes:
- *
- * 1. Wrong / missing Content-Type header.
- * 2. Body exceeds our configured size limit.
- * 3. Body was truncated mid-stream (network drop, proxy timeout, client
- *    cancellation) — the multipart boundary never closed.
- * 4. Genuinely malformed multipart payload.
- *
- * @param request          The incoming Next.js request.
- * @param maxBodyBytes     Optional override for the global multipart cap.
+ * @param request      The incoming Next.js request.
+ * @param maxBodyBytes Optional override for the global multipart cap.
  */
 export async function parseMultipartFormData(
 	request: NextRequest,
@@ -52,10 +40,9 @@ export async function parseMultipartFormData(
 		};
 	}
 
-	// Reject oversized bodies up-front using the Content-Length header so we
-	// don't buffer hundreds of megabytes only to fail at the parser layer.
-	// Some proxies omit Content-Length on chunked uploads; in that case we
-	// fall through and rely on the per-file checks downstream.
+	// Reject oversized bodies up-front via Content-Length so we don't buffer
+	// hundreds of megabytes only to fail at the parser. Chunked uploads may omit
+	// the header, in which case downstream per-file checks apply.
 	const contentLengthRaw = request.headers.get("content-length");
 	if (contentLengthRaw) {
 		const contentLength = Number.parseInt(contentLengthRaw, 10);
@@ -79,12 +66,9 @@ export async function parseMultipartFormData(
 		const rawMessage = err instanceof Error ? err.message : String(err);
 		console.error("Failed to parse multipart form data:", rawMessage, err);
 
-		// The most common cause of a runtime "Failed to parse body as FormData"
-		// in production is a body that was truncated mid-stream — usually
-		// because the upload exceeded an upstream proxy/CDN body limit, or the
-		// client connection dropped before the closing multipart boundary was
-		// transmitted. Surface that as the most likely explanation while still
-		// including the underlying message for debugging.
+		// The usual cause is a body truncated mid-stream (proxy/CDN limit or
+		// dropped connection); surface that likely explanation to the user while
+		// the raw message is logged above for debugging.
 		return {
 			ok: false,
 			error: {

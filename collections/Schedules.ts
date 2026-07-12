@@ -2,14 +2,9 @@ import type { CollectionAfterChangeHook, CollectionConfig } from "payload";
 import { generateTimeslotsForSchedule } from "../lib/scheduleGenerator";
 
 /**
- * Schedules collection – Calendly-style recurring pickup schedules.
- *
- * Each schedule defines a weekly pattern of available pickup windows that
- * repeats from startDate to endDate. When a schedule is created or updated,
- * individual Timeslot documents are automatically generated/synced.
- *
- * Schedules are linked to a PickupInstructionProfile so every generated
- * timeslot inherits the associated pickup instructions.
+ * Schedules collection – recurring weekly pickup patterns (startDate→endDate).
+ * On create/update, Timeslot documents are auto-generated/synced, inheriting
+ * the schedule's linked PickupInstructionProfile.
  */
 
 // ── afterChange hook: generate timeslots when schedule changes ───────────

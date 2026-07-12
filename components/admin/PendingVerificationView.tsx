@@ -17,11 +17,8 @@ interface OrderData {
 }
 
 /**
- * Custom Payload admin view: Bank Transfer Verification Queue.
- *
- * Shows all bank transfer orders that have not yet been verified,
- * allowing the admin to view proof images and mark them as verified.
- * Verification is optional — for record keeping only.
+ * Payload admin queue of unverified bank transfer orders, letting the admin
+ * view proof images and mark them verified (optional, record keeping only).
  */
 export default function PendingVerificationView() {
 	const [orders, setOrders] = useState<OrderData[]>([]);

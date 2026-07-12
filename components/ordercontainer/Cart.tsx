@@ -163,16 +163,10 @@ const Cart = ({
 	const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
 	/**
-	 * Upload all PDFs to R2 via presigned PUT URLs (with real per-file
-	 * progress), then call /api/shop/orders to finalise the DRAFT order.
-	 *
-	 * The bytes never traverse our server — the browser PUTs straight to R2.
-	 * This avoids the Cloudflare Worker / Container body-size limits that
-	 * caused the original "Failed to parse body as FormData" failures, and
-	 * lets us show real upload progress via XHR.upload.onprogress.
-	 *
-	 * Client-side validation mirrors the server limits so customers get
-	 * instant, descriptive errors before any bytes leave their machine.
+	 * Upload all PDFs directly to R2 via presigned PUT URLs (with real
+	 * per-file progress), then call /api/shop/orders to finalise the order.
+	 * Uploading straight to R2 keeps bytes off our server, avoiding the
+	 * Worker/Container body-size limits.
 	 */
 	const handleOrderNow = useCallback(async () => {
 		const cartValid =
@@ -244,9 +238,6 @@ const Cart = ({
 			const uploads = await requestPresignedUrls(filesToUpload);
 
 			// Step 2: PUT each file directly to R2 with real progress events.
-			//   - Concurrency 3 keeps the customer's connection responsive
-			//     while still parallelising for speed.
-			//   - 1 automatic retry recovers from transient network blips.
 			const uploaded = await uploadFilesWithProgress({
 				files: filesToUpload,
 				uploads,
@@ -259,8 +250,7 @@ const Cart = ({
 				},
 			});
 
-			// Step 3: Finalise the order with the server. Tiny JSON payload —
-			// no multipart, no body-size concerns.
+			// Step 3: Finalise the order with a small JSON payload.
 			const finaliseBody = {
 				files: uploaded.map((u, i) => ({
 					stagingKey: u.stagingKey,

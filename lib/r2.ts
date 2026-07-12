@@ -57,21 +57,16 @@ export function generateStagingKey(
 }
 
 /**
- * Generate a customer-scoped staging key used for direct browser uploads
- * via presigned PUT URLs.
- *
- * Format: `staging/<customerId>/<uuid>-<sanitisedFilename>`
- *
- * Embedding the `customerId` in the key prefix means we can verify ownership
- * in the order-finalisation step without trusting any client-supplied data:
- * the client can only claim a key whose prefix matches their own session.
+ * Customer-scoped staging key for direct browser uploads via presigned PUT.
+ * Format: `staging/<customerId>/<uuid>-<sanitisedFilename>`.
+ * The customerId prefix lets finalisation verify ownership without trusting
+ * client-supplied data — a client can only claim keys under its own prefix.
  */
 export function generateCustomerStagingKey(
 	customerId: string,
 	originalFileName: string,
 ): string {
-	// Customer ID may include characters that S3 accepts but we'd rather not
-	// see in object keys (slashes, control chars). Sanitise defensively.
+	// Sanitise the customer ID out of caution (slashes, control chars).
 	const safeCustomerId = String(customerId).replace(/[^a-zA-Z0-9._-]/g, "_");
 	const sanitised = originalFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
 	return `staging/${safeCustomerId}/${randomUUID()}-${sanitised}`;
@@ -86,12 +81,8 @@ export function isCustomerStagingKey(key: string, customerId: string): boolean {
 	return key.startsWith(`staging/${safeCustomerId}/`);
 }
 
-/**
- * Generate a permanent key from a staging key.
- * Keeps the same path structure but lives in the permanent bucket.
- */
+/** Permanent key for a staging key — same path structure, different bucket. */
 export function generatePermanentKey(stagingKey: string): string {
-	// Same key structure — different bucket
 	return stagingKey;
 }
 
@@ -125,12 +116,7 @@ export async function uploadToStaging(
 	);
 }
 
-/**
- * Upload a bank transfer proof image to the staging bucket.
- *
- * The image is automatically downsized to a max width of 1200px and
- * converted to WebP at 70% quality to prevent abuse / save storage.
- */
+/** Upload a bank transfer proof image to the staging bucket. */
 export async function uploadBankTransferProof(
 	orderNumber: string,
 	imageBuffer: Buffer | Uint8Array,
@@ -138,8 +124,6 @@ export async function uploadBankTransferProof(
 ): Promise<string> {
 	const key = generateProofKey(orderNumber);
 
-	// Previously used sharp to resize/convert to WebP, but sharp's native
-	// bindings are incompatible with Cloudflare Workers. Upload original instead.
 	await uploadToStaging(key, imageBuffer, contentType);
 	return key;
 }
@@ -244,12 +228,9 @@ export async function getPresignedUrl(
 }
 
 /**
- * Generate a pre-signed URL for uploading (PUT) a file directly from the
- * browser to the staging R2 bucket.
- *
- * The browser must send a matching `Content-Type` header on the PUT request
- * so the signature validates. The URL is short-lived to limit the blast
- * radius if it leaks.
+ * Pre-signed URL for uploading (PUT) a file directly from the browser to the
+ * staging bucket. The PUT must send a matching `Content-Type` header for the
+ * signature to validate. Kept short-lived to limit exposure if it leaks.
  */
 export async function getPresignedUploadUrl(
 	key: string,
@@ -271,11 +252,9 @@ export async function getPresignedUploadUrl(
 // ── Read operations ──────────────────────────────────────────────────────
 
 /**
- * HEAD an object in the staging bucket. Returns the object metadata
- * (size + content-type) or `null` if the object does not exist.
- *
- * Used during order finalisation to verify that a client-supplied staging
- * key actually corresponds to a successfully-uploaded object.
+ * HEAD a staging object, returning its size + content-type, or `null` if it
+ * doesn't exist. Used during finalisation to verify a client-supplied key
+ * corresponds to a successfully-uploaded object.
  */
 export async function headStagingObject(
 	key: string,
@@ -317,9 +296,8 @@ export async function downloadFromStaging(key: string): Promise<Buffer> {
 		throw new Error(`Staging object ${key} has no body.`);
 	}
 
-	// `result.Body` in the AWS SDK v3 is a Readable | ReadableStream | Blob
-	// depending on the runtime. `transformToByteArray` is the cross-runtime
-	// helper exposed by the SDK for collecting the whole body into memory.
+	// SDK v3 body type varies by runtime; transformToByteArray is the
+	// cross-runtime helper for reading the whole body into memory.
 	const bytes = await (
 		result.Body as { transformToByteArray: () => Promise<Uint8Array> }
 	).transformToByteArray();

@@ -18,17 +18,8 @@ let pdfjsPromise: Promise<typeof pdfjsTypes> | null = null;
 function getPdfjs(): Promise<typeof pdfjsTypes> {
 	if (!pdfjsPromise) {
 		pdfjsPromise = import("pdfjs-dist").then((pdfjs) => {
-			// pdfjs-dist v4+ ships its worker as an ES module (.mjs). We bundle
-			// it locally via `new URL(..., import.meta.url)` — webpack/Turbopack
-			// recognise this idiom, copy the worker into the build output, and
-			// hand back a same-origin asset URL.
-			//
-			// Why not the cdnjs.cloudflare.com URL we used before? It coupled
-			// the app to a third-party CDN that had to (a) be online, (b) have
-			// already published the exact pdfjs-dist version we depend on, and
-			// (c) not be blocked by a strict CSP. Any of those failing yields
-			// an opaque "Setting up fake worker failed" error and every PDF
-			// upload breaks. Bundling the worker eliminates all three risks.
+			// Bundle the worker locally (via new URL + import.meta.url) instead
+			// of a third-party CDN, which avoids CDN/version/CSP failures.
 			pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 				"pdfjs-dist/build/pdf.worker.min.mjs",
 				import.meta.url,
@@ -79,11 +70,8 @@ const PdfOrder = () => {
 	const handlePdfUpload = useCallback(
 		(files: File[]) => {
 			const uploaded = [...uploadedPdfs];
-			// `.some()` was used here as a forEach without ever returning
-			// true to short-circuit — switch to the correct iterator so the
-			// linter is happy and intent is clear.
 			files.forEach((file: File) => {
-				//file doesn't exist
+				// Skip files that are already in the cart
 				if (uploaded.findIndex((f) => f.displayName === file.name) === -1) {
 					const src = URL.createObjectURL(file);
 					let pages: number = -1;
@@ -123,10 +111,8 @@ const PdfOrder = () => {
 							);
 						})
 						.catch((err) => {
-							// Surface the underlying pdfjs error so genuine
-							// load/parse failures are debuggable. The previous
-							// blanket "invalid file type" message hid problems
-							// like the worker URL 404'ing on valid PDFs.
+							// Log the underlying pdfjs error so genuine load/parse
+							// failures remain debuggable.
 							console.error("PDF processing failed:", err);
 							const name = err instanceof Error ? err.name : "UnknownError";
 							const isInvalidPdf =

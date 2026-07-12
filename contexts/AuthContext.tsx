@@ -80,16 +80,7 @@ function AuthContextInner({ children }: PropsWithChildren) {
 
 // ── Exported provider & hook ─────────────────────────────────────────────
 
-/**
- * Wrap your app (or the order pages) with this provider to enable
- * customer authentication via Google OAuth.
- *
- * ```tsx
- * <AuthProvider>
- *   <App />
- * </AuthProvider>
- * ```
- */
+/** Enables customer authentication via Google OAuth; wrap the order pages with it. */
 export function AuthProvider({ children }: PropsWithChildren) {
 	return (
 		<SessionProvider>
@@ -98,13 +89,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	);
 }
 
-/**
- * Access the current customer's authentication state.
- *
- * ```tsx
- * const { isAuthenticated, customerId, login, logout } = useAuth();
- * ```
- */
+/** Access the current customer's authentication state. */
 export function useAuth(): CustomerSession {
 	return useContext(AuthContext);
 }

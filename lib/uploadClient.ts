@@ -1,16 +1,8 @@
 /**
  * Browser-side helper for uploading PDFs directly to R2 via presigned PUT
- * URLs, with real progress reporting and bounded concurrency.
- *
- * Flow:
- *   1. Caller asks the server for a batch of presigned upload URLs
- *      (POST /api/shop/staging-urls).
- *   2. For each file, we PUT to R2 with `XMLHttpRequest` so we can hook
- *      `xhr.upload.onprogress` for per-file %.
- *   3. Caller passes the resulting `stagingKey`s to /api/shop/orders.
- *
- * `XMLHttpRequest` is used instead of `fetch()` because `fetch()` doesn't
- * expose upload-progress events in any browser today.
+ * URLs, with real progress reporting and bounded concurrency. Uses
+ * `XMLHttpRequest` rather than `fetch()` because only XHR exposes
+ * upload-progress events (`xhr.upload.onprogress`) for per-file %.
  */
 
 export type FileToUpload = {

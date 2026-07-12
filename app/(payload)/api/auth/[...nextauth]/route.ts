@@ -36,7 +36,6 @@ const authOptions: NextAuthOptions = {
 			try {
 				const payload = await getPayloadClient();
 
-				// Check if customer already exists
 				const existing = await payload.find({
 					collection: "customers",
 					where: { googleId: { equals: account.providerAccountId } },
@@ -44,7 +43,6 @@ const authOptions: NextAuthOptions = {
 				});
 
 				if (existing.docs.length === 0) {
-					// Create new customer record
 					await payload.create({
 						collection: "customers",
 						data: {
@@ -55,7 +53,7 @@ const authOptions: NextAuthOptions = {
 						},
 					});
 				} else {
-					// Update profile info in case it changed
+					// Refresh profile info in case it changed upstream
 					await payload.update({
 						collection: "customers",
 						id: existing.docs[0].id,

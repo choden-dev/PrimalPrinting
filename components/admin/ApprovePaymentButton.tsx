@@ -10,11 +10,8 @@ interface OrderDocumentData {
 }
 
 /**
- * Payload admin custom component: "Verify Payment" button.
- *
- * Shown on the order detail view for bank transfer orders that haven't been verified yet.
- * This is optional — for record keeping only. The order is already PAID.
- * Calls the approve-payment API endpoint and refreshes the page on success.
+ * Payload admin "Verify Payment" button for unverified bank transfer orders.
+ * Verification is optional (record keeping only); the order is already PAID.
  */
 export const ApprovePaymentButton: React.FC = () => {
 	const { id, initialData } = useDocumentInfo();

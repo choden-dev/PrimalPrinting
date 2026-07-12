@@ -26,19 +26,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 /**
- * Bank transfer payment form with proof of payment upload.
- *
- * Shows bank account details, lets the user upload a screenshot
- * of their transfer, and submits it for admin verification.
- *
- * ```tsx
- * <BankTransferForm
- *   orderId={order.id}
- *   orderNumber={order.orderNumber}
- *   totalCents={order.pricing.total}
- *   onSuccess={() => router.push(`/order_complete?orderId=${order.id}`)}
- * />
- * ```
+ * Bank transfer payment form: shows bank account details, lets the user upload
+ * a screenshot of their transfer, and submits it for admin verification.
  */
 export function BankTransferForm({
 	orderId,
@@ -108,10 +97,8 @@ export function BankTransferForm({
 			setError(null);
 
 			try {
-				// ── Defensive client-side validation ────────────────────────
-				// Mirrors the server-side limits in
-				// app/api/shop/upload-proof/route.ts so customers get an
-				// instant, descriptive error before the upload is attempted.
+				// Client-side validation mirroring the server limits in
+				// app/api/shop/upload-proof/route.ts for a faster error.
 				if (!ALLOWED_TYPES.includes(selectedFile.type)) {
 					throw new Error(
 						`Unsupported image type "${selectedFile.type || "unknown"}". Only JPEG, PNG, and WebP images are accepted.`,

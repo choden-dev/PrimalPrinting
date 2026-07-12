@@ -165,11 +165,7 @@ export async function sendBankTransferReceivedEmail(params: {
 	});
 }
 
-/**
- * Send a payment confirmation email after Stripe payment succeeds.
- * Tells the customer to select a pickup timeslot, or to wait for one
- * if none are currently available.
- */
+/** Send a payment confirmation email after Stripe succeeds, prompting timeslot selection (or to wait if none are available). */
 export async function sendPaymentConfirmationEmail(params: {
 	to: string;
 	customerName: string;
@@ -199,11 +195,7 @@ export async function sendPaymentConfirmationEmail(params: {
 	});
 }
 
-/**
- * Send a bulk notification email to customers whose orders are PAID
- * but have no pickup timeslot selected, letting them know that
- * timeslots are now available.
- */
+/** Send a bulk notification to PAID orders without a timeslot that new timeslots are available. */
 export async function sendTimeslotsAvailableEmail(params: {
 	to: string;
 	customerName: string;
@@ -229,11 +221,7 @@ export async function sendTimeslotsAvailableEmail(params: {
 	});
 }
 
-/**
- * Send a notification email when an admin updates a timeslot's date/time.
- * Each affected customer receives one email per order in that timeslot,
- * showing the diff of what changed and their order summary.
- */
+/** Notify affected customers (one email per order) when an admin changes a timeslot's date/time, showing the diff. */
 export async function sendTimeslotChangedEmail(params: {
 	to: string;
 	customerName: string;
@@ -295,10 +283,7 @@ export async function sendTimeslotChangedEmail(params: {
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
-/**
- * Convert Payload rich-text (Lexical/Slate) block content into simple HTML
- * suitable for email templates. Handles the common node types.
- */
+/** Convert Payload rich-text (Lexical/Slate) content into simple email-safe HTML, handling common node types. */
 // biome-ignore lint/suspicious/noExplicitAny: rich text nodes are loosely typed
 export function richTextToHtml(nodes: any[] | null | undefined): string {
 	if (!nodes || nodes.length === 0) return "";
@@ -356,10 +341,7 @@ function escapeHtml(s: string): string {
 		.replace(/"/g, "&quot;");
 }
 
-/**
- * Extract rich text HTML from a pickup instruction profile object.
- * Works with the PickupInstructionProfiles collection's blocks field.
- */
+/** Extract rich-text HTML from a PickupInstructionProfiles blocks field. */
 // biome-ignore lint/suspicious/noExplicitAny: profile shape varies when populated vs ID
 export function pickupProfileToHtml(profile: any): string | null {
 	if (!profile || typeof profile === "string") return null;
