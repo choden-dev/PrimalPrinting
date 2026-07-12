@@ -129,18 +129,9 @@ function PaymentForm({
 // ── Exported component ───────────────────────────────────────────────────
 
 /**
- * In-app Stripe payment form using Stripe Elements.
- *
- * Fetches a PaymentIntent client secret from the API, then renders a
- * card input form inline — no redirect to Stripe Checkout.
- *
- * ```tsx
- * <StripePaymentForm
- *   orderId={order.id}
- *   totalCents={order.pricing.total}
- *   onSuccess={(id) => router.push(`/order_complete?orderId=${order.id}`)}
- * />
- * ```
+ * In-app Stripe payment form using Stripe Elements. Fetches a PaymentIntent
+ * client secret from the API, then renders a card input form inline — no
+ * redirect to Stripe Checkout.
  */
 export function StripePaymentForm({
 	orderId,
