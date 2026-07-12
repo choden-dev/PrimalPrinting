@@ -18,10 +18,19 @@ let cachedPromise: Promise<Payload> | null = null;
  *
  * A timeout wrapper ensures the Worker never hangs indefinitely if the
  * database is unreachable.
+ *
+ * Failure handling: we cache the in-flight promise (so concurrent callers
+ * share one initialisation), but if it REJECTS — e.g. a transient MongoDB
+ * slowdown trips the init timeout, or a momentary network blip during a cold
+ * connect — we clear the cache so the next call retries with a fresh attempt.
+ * Without this, a single slow/failed cold connect would poison `cachedPromise`
+ * permanently: every subsequent request (and the keep-warm ping) would get the
+ * cached rejection instantly and the container could never recover until it was
+ * restarted, turning a momentary blip into a hard outage.
  */
 export const getPayloadClient = async (): Promise<Payload> => {
 	if (!cachedPromise) {
-		cachedPromise = Promise.race([
+		const attempt = Promise.race([
 			getPayload({ config: configPromise }),
 			new Promise<never>((_, reject) =>
 				setTimeout(
@@ -30,6 +39,15 @@ export const getPayloadClient = async (): Promise<Payload> => {
 				),
 			),
 		]);
+		// Only keep the cache if initialisation succeeds. On failure, drop it
+		// so a later request/ping can retry instead of being served a
+		// permanently-cached rejection.
+		attempt.catch(() => {
+			if (cachedPromise === attempt) {
+				cachedPromise = null;
+			}
+		});
+		cachedPromise = attempt;
 	}
 	return cachedPromise;
 };
