@@ -86,18 +86,58 @@ for entry in $REPLACEMENTS; do
 done
 
 if [ "$#" -gt 0 ]; then
-  # Single tree walk, single sed invocation per file (batched via `+`), all
-  # substitutions applied at once. This runs on EVERY container boot before
-  # `node server.js`, so keeping it to one pass minimises cold-start latency
-  # — the faster placeholders are swapped, the sooner the server binds port
-  # 3000 and the less likely Cloudflare's proxy is to time out with
-  # "Container is taking too long to accept the connection".
+  # Only rewrite files that ACTUALLY contain a placeholder, instead of
+  # `sed -i`-ing every *.js in the tree. This runs on EVERY container boot
+  # before `node server.js`, so it sits directly on the cold-start critical
+  # path — the faster it finishes, the sooner the server binds port 3000 and
+  # the less likely Cloudflare's proxy is to time out with "Container is
+  # taking too long to accept the connection".
   #
-  # Best-effort: the trailing `|| ...` swallows any non-zero exit from the
-  # walk/sed so a transient FS hiccup can never abort the boot before the
-  # server starts. The server reads NEXT_PUBLIC_* from its own env regardless;
-  # this swap only patches the client bundles the standalone server serves.
-  if find "$SEARCH_DIR" -type f -name '*.js' -exec sed -i "$@" {} +; then
+  # Why the grep prefilter matters: `sed -i` rewrites (fsyncs a brand new
+  # inode for) EVERY file it's handed, even ones with no match. A Next.js
+  # standalone `.next` tree holds thousands of chunk *.js files, the vast
+  # majority of which contain no `__NEXT_PUBLIC_*__` placeholder at all, so
+  # the old unconditional walk paid a full read+rewrite of the entire tree on
+  # every boot. Testing each file with `grep -qE` first narrows sed to just
+  # the handful of files that contain a placeholder, turning O(all-files) disk
+  # writes into O(matching-files) — a meaningful cold-start I/O saving.
+  #
+  # The alternation regex is built once from the placeholder tokens so a
+  # single `grep -qE` test matches ANY of them. We use `find`'s own
+  # predicate chaining rather than a `grep -lZ | xargs sed` pipe on purpose:
+  #   * It's fully portable (BSD + GNU) — no reliance on `grep -Z` / `xargs -0`
+  #     NUL handling, which differs between BSD and GNU (BSD `grep -Z` appends
+  #     newlines instead of NUL-separating, silently breaking `xargs -0`).
+  #   * There's no fragile multi-stage pipe whose exit status is the LAST
+  #     command's, so a no-match `grep` can't masquerade as a pipeline failure.
+  placeholder_re=""
+  for entry in $REPLACEMENTS; do
+    [ -z "$entry" ] && continue
+    ph=$(echo "$entry" | cut -d'|' -f1)
+    if [ -z "$placeholder_re" ]; then
+      placeholder_re="$ph"
+    else
+      placeholder_re="$placeholder_re|$ph"
+    fi
+  done
+
+  # `find` runs the second `-exec` (the actual sed rewrite, batched via `+`)
+  # ONLY on files where the first `-exec grep -qE ... {} \;` test succeeds —
+  # i.e. files that actually contain a placeholder. Files with no placeholder
+  # (the overwhelming majority of the .next tree) are never handed to sed and
+  # so are never rewritten, saving the read+rewrite I/O on the cold-start
+  # critical path.
+  #
+  # Best-effort: the trailing `|| swap_status=$?` swallows any non-zero exit so
+  # a transient FS/sed hiccup can never abort the boot before the server
+  # starts. The server reads NEXT_PUBLIC_* from its own env regardless; this
+  # swap only patches the client bundles the standalone server serves.
+  swap_status=0
+  find "$SEARCH_DIR" -type f -name '*.js' \
+    -exec grep -qE "$placeholder_re" {} \; \
+    -exec sed -i "$@" {} + \
+    || swap_status=$?
+  if [ "$swap_status" -eq 0 ]; then
     echo "✅ NEXT_PUBLIC_* placeholders replaced with runtime values"
   else
     echo "⚠️  NEXT_PUBLIC_* placeholder swap failed — starting server anyway" >&2
