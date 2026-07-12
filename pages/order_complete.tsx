@@ -156,12 +156,8 @@ function renderNodes(nodes: unknown[]): React.ReactNode[] {
 }
 
 /**
- * Order completion page.
- *
- * Displayed after a successful payment (Stripe redirect callback) or
- * when a user navigates here with an orderId query parameter.
- *
- * Fetches the order from the API and shows a confirmation summary.
+ * Order completion page shown after a successful payment (Stripe redirect) or
+ * via an orderId query param; fetches the order and shows a confirmation summary.
  */
 const OrderComplete: NextPage<PageProps> = ({ contactInfo }) => {
 	const router = useRouter();

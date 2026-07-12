@@ -23,12 +23,8 @@ interface OrderDocumentData {
 }
 
 /**
- * Payload admin custom component: Order Files Viewer.
- *
- * Replaces the raw R2 key strings with a friendly file list that includes:
- * - File name, size, page count, print settings
- * - "View / Download" button that generates a presigned R2 URL
- * - Visual indicator of whether the file is in staging or permanent storage
+ * Payload admin component that renders order files as a friendly list with
+ * metadata, a presigned "View / Download" link, and a staging/permanent badge.
  */
 export const OrderFilesViewer: React.FC = () => {
 	const { initialData } = useDocumentInfo();
