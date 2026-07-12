@@ -13,6 +13,49 @@ import { Container, getContainer } from "@cloudflare/containers";
 export class PrimalPrinting extends Container {
 	defaultPort = 3000;
 
+	// Readiness probe endpoint used by the @cloudflare/containers base class to
+	// decide when a (re)started instance is "ready" to receive proxied traffic.
+	//
+	// WHY OVERRIDE THE DEFAULT: the library's port-readiness check does a bare
+	// `tcpPort.fetch("http://<pingEndpoint>")` and treats ANY completed fetch
+	// (no thrown error) as ready. With the default `pingEndpoint = "ping"` that
+	// is effectively a pure TCP-accept probe against the bare host — it resolves
+	// the instant `node server.js` binds port 3000, which Next.js standalone
+	// does BEFORE the app is actually routable (the instrumentation `register()`
+	// hook + Payload/Mongo warm run around/after `listen`). That leaves a window
+	// where the port TCP-accepts but the server isn't serving yet; the base
+	// class considers the container healthy and proxies the visitor's request
+	// into that gap, where it can be refused/dropped and surface as the exact
+	// reported error: "Error proxying request to container: Container is taking
+	// too long to accept the connection; the application could be overwhelmed
+	// with load".
+	//
+	// Pointing the probe at a real app route (one that runs through the full
+	// Next.js router and only responds once the app is actually serving)
+	// upgrades readiness from "TCP accepts" to "HTTP request completes
+	// end-to-end". The base class then only marks the container healthy — and
+	// only starts proxying real traffic — once the app can genuinely serve a
+	// request, closing that gap at the source. This is the proactive complement
+	// to the reactive `#fetchWithProxyRetry` below (which retries the 500 if a
+	// blip still slips through). Host must be explicit (`localhost:3000`) so the
+	// probe hits the app port rather than the bare `ping` host.
+	//
+	// CRITICAL — why `/api/ready` and NOT `/api/health`: the library's
+	// readiness check treats ANY completed fetch (no thrown error) as ready; it
+	// does NOT inspect the HTTP status. So the probe target only needs to prove
+	// the Next.js router can complete a request — it must NOT do heavy work.
+	// `/api/health` calls `getPayloadClient()` + a MongoDB `count()`; on a cold
+	// boot Mongo may not be connected yet, so that route can block up to the
+	// driver's serverSelectionTimeout, which can EXCEED the library's per-probe
+	// `PING_TIMEOUT_MS` (5s). Each probe would then time out and be retried,
+	// DELAYING the ready signal and eating the port-ready budget — actively
+	// causing the "taking too long to accept the connection" error it was meant
+	// to prevent. `/api/ready` touches nothing external (no DB, no Payload), so
+	// it returns the instant the router is up. Mongo/Payload warming stays
+	// decoupled and is handled by instrumentation.ts (boot) + the keep-warm
+	// cron hitting /api/health.
+	pingEndpoint = "localhost:3000/api/ready";
+
 	// Keep a warmed instance alive well past the default idle timeout so the
 	// container does NOT scale to zero during normal gaps in traffic. Every
 	// scale-to-zero forces the next visitor to pay the full container boot +
@@ -71,7 +114,341 @@ export class PrimalPrinting extends Container {
 		// serve any static files. Empty string falls back to same-origin.
 		NEXT_PUBLIC_ASSET_PREFIX: env.NEXT_PUBLIC_ASSET_PREFIX ?? "",
 	};
+
+	/**
+	 * Override the base `containerFetch` purely to widen the port-ready
+	 * timeout on a genuine cold start.
+	 *
+	 * The @cloudflare/containers base class, when the container isn't already
+	 * running/healthy, calls `startAndWaitForPorts(port, { abort: request.signal })`
+	 * with NO `portReadyTimeoutMS`, so it falls back to the library default of
+	 * 20s (`TIMEOUT_TO_GET_PORTS_MS`). A cold boot here has to: pull/boot the
+	 * container, run the docker entrypoint's NEXT_PUBLIC_* placeholder swap,
+	 * start the Next.js standalone server, and only THEN bind port 3000. On a
+	 * cold instance that whole chain can exceed 20s, at which point Cloudflare's
+	 * proxy gives up with:
+	 *   "Error proxying request to container: Container is taking too long to
+	 *    accept the connection; the application could be overwhelmed with load"
+	 *
+	 * Waiting longer for the port to come up (instead of failing at 20s) lets
+	 * the first visitor after a cold start actually reach the server. The
+	 * keep-warm cron + `sleepAfter` still make cold starts rare; this just stops
+	 * the rare cold start from erroring out. We keep passing the incoming
+	 * request's abort signal so a client that goes away still cancels the wait.
+	 */
+	async containerFetch(requestOrUrl, portOrInit, portParam) {
+		const state = await this.state.getState();
+		const needsColdStart =
+			!this.container.running || state.status !== "healthy";
+		if (needsColdStart) {
+			// Proactively start the container and wait for the port with a
+			// generous timeout BEFORE delegating to the base implementation
+			// (whose internal wait uses the short 20s default). Once the port
+			// is ready, the base `containerFetch` sees a healthy container and
+			// skips its own wait entirely.
+			const port = this.defaultPort ?? PrimalPrinting.COLD_START_PORT;
+			try {
+				await this.startAndWaitForPorts({
+					ports: port,
+					cancellationOptions: {
+						// 3× the library default — enough headroom for a cold
+						// boot + entrypoint swap + Next.js start on a fresh
+						// instance without waiting so long that a truly stuck
+						// container hangs the request indefinitely.
+						portReadyTimeoutMS: PrimalPrinting.COLD_START_PORT_TIMEOUT_MS,
+						// Widen the *provisioning* timeout too. The library has
+						// TWO separate cold-start timeouts and the port-ready one
+						// above is only the second half:
+						//   1. instanceGetTimeoutMS — time allowed to GET/provision
+						//      a fresh container instance (pull image + schedule).
+						//      Library default = TIMEOUT_TO_GET_CONTAINER_MS = 8s.
+						//   2. portReadyTimeoutMS — time allowed AFTER provisioning
+						//      for the port to bind. Library default = 20s.
+						// On a genuine cold start (image pull + schedule on a fresh
+						// instance) provisioning alone can exceed 8s, so the request
+						// fails with "Container is taking too long to accept the
+						// connection" BEFORE the port-ready wait is even reached —
+						// and, because startAndWaitForPorts subtracts the tries
+						// already spent provisioning from the port-ready budget, a
+						// slow provision also eats into the 60s port window. Widening
+						// this closes that gap. We keep it well below the port-ready
+						// timeout so a container that genuinely can't be provisioned
+						// still fails reasonably fast rather than hanging.
+						instanceGetTimeoutMS:
+							PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS,
+					},
+				});
+			} catch (error) {
+				console.warn(
+					"[cold-start] startAndWaitForPorts failed, falling back to base fetch:",
+					error,
+				);
+			}
+		}
+		// Proxy the request to the container, retrying ONLY the specific
+		// transient "proxy" failure that produces the reported error.
+		//
+		// KEY INSIGHT: the exact user-facing message
+		//   "Error proxying request to container: ... taking too long to accept
+		//    the connection; the application could be overwhelmed with load"
+		// is NOT emitted while waiting for the port to bind. In
+		// @cloudflare/containers' base `containerFetch`, that string comes from
+		// the FINAL catch block wrapping `tcpPort.fetch(containerUrl, request)`
+		// (container.js) — i.e. AFTER the port is already considered ready. It
+		// fires when the actual HTTP proxy connection to the container is
+		// refused/dropped in the brief window where the port TCP-accepts but the
+		// Next.js server (single ~1/2 vCPU process) hasn't finished becoming
+		// ready, or when its event loop is momentarily blocked ("overwhelmed
+		// with load"). The base class does NOT retry this — one transient blip
+		// surfaces immediately as an HTTP 500 to the visitor.
+		//
+		// Since the port is confirmed ready above, a short bounded retry with a
+		// small backoff lets that sub-second readiness gap pass instead of
+		// erroring out. We only retry idempotent-safe cases: the response is a
+		// 500 whose body matches the transient proxy error, and the client
+		// hasn't aborted. Non-500s and other 500s pass straight through.
+		return this.#fetchWithProxyRetry(requestOrUrl, portOrInit, portParam);
+	}
+
+	/**
+	 * Delegate to the base `containerFetch`, retrying only the transient
+	 * "Error proxying request to container … taking too long to accept the
+	 * connection" 500 a small, bounded number of times with backoff.
+	 */
+	async #fetchWithProxyRetry(requestOrUrl, portOrInit, portParam) {
+		const maxAttempts = PrimalPrinting.PROXY_RETRY_MAX_ATTEMPTS;
+
+		// CRITICAL — only idempotent requests may be auto-retried.
+		//
+		// Two independent hazards make blindly retrying a mutating request
+		// unsafe here:
+		//
+		//   1. Body reuse. The base `containerFetch` proxies by handing the
+		//      SAME `Request` to `tcpPort.fetch(containerUrl, request)`. A
+		//      `Request` body is a single-use `ReadableStream`; once the first
+		//      attempt reads it the stream is consumed, so a second attempt
+		//      would forward an EMPTY body (or throw "body already used").
+		//   2. Duplicate side effects. The transient proxy 500 usually means
+		//      the TCP connection was refused/dropped BEFORE the app handled
+		//      the request — but not always. If the drop happened AFTER the
+		//      Next.js handler already processed a POST (e.g. created an order
+		//      or a Stripe payment intent), retrying would double-submit.
+		//
+		// Rather than gamble on cloning bodies and hoping the mutation didn't
+		// land, we scope the retry to requests that are inherently safe to
+		// repeat: idempotent methods (GET/HEAD/OPTIONS) with no body. Those are
+		// exactly the page loads / navigations that dominate traffic right
+		// after a cold start — precisely where the "taking too long to accept
+		// the connection" gap surfaces — so the retry still covers the reported
+		// symptom. Non-idempotent requests (the storefront's order/payment/
+		// upload POSTs) are passed through once and their 500, if any, is
+		// surfaced to the caller instead of risking a duplicate mutation.
+		const isRequest = requestOrUrl instanceof Request;
+		const method = isRequest ? requestOrUrl.method.toUpperCase() : "GET";
+		const isIdempotent =
+			method === "GET" || method === "HEAD" || method === "OPTIONS";
+
+		let lastResponse;
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Clone per attempt so the (empty, for idempotent methods) body
+			// stream is never reused across retries; non-Request callers pass
+			// through unchanged.
+			const attemptTarget = isRequest ? requestOrUrl.clone() : requestOrUrl;
+			lastResponse = await super.containerFetch(
+				attemptTarget,
+				portOrInit,
+				portParam,
+			);
+			// Only the transient proxy 500 on an idempotent request is
+			// retryable. Anything else (success, redirects, 4xx, a different
+			// 500, or ANY non-idempotent request) is returned as-is.
+			if (
+				lastResponse.status !== 500 ||
+				!isIdempotent ||
+				attempt === maxAttempts ||
+				(isRequest && requestOrUrl.signal?.aborted)
+			) {
+				return lastResponse;
+			}
+			// Peek at the body WITHOUT consuming the response we might return:
+			// clone first so a non-matching body can still be handed back intact.
+			let bodyText = "";
+			try {
+				bodyText = await lastResponse.clone().text();
+			} catch {
+				// If the body can't be read, treat it as non-retryable.
+				return lastResponse;
+			}
+			if (!PrimalPrinting.TRANSIENT_PROXY_ERROR_RE.test(bodyText)) {
+				return lastResponse;
+			}
+			console.warn(
+				`[proxy-retry] transient container proxy error (attempt ${attempt}/${maxAttempts}), retrying:`,
+				bodyText.slice(0, 200),
+			);
+			await scheduler.wait(PrimalPrinting.PROXY_RETRY_BACKOFF_MS * attempt);
+		}
+		return lastResponse;
+	}
+
+	/**
+	 * Keep-warm entrypoint invoked by the Worker's `scheduled` (cron) handler
+	 * via the Durable Object stub.
+	 *
+	 * IMPORTANT: this exists because the previous keep-warm implementation
+	 * simply did `containerInstance.fetch("/api/health")`. That routes through
+	 * the base `containerFetch`, whose internal wake-up wait uses the SHORT
+	 * library defaults (8s provisioning + 20s port-ready). If the singleton had
+	 * actually scaled to zero, the cron's own ping could exceed those defaults
+	 * and fail — and because the failure was swallowed by the caller's
+	 * `.catch`, the container was left ASLEEP. The keep-warm cron therefore did
+	 * not reliably keep anything warm after a genuine scale-to-zero, so the
+	 * next real visitor still paid the full cold start and hit
+	 *   "Container is taking too long to accept the connection".
+	 *
+	 * By waking the container here with the SAME widened cold-start budget used
+	 * on the request path (`startAndWaitForPorts` with the COLD_START_*
+	 * timeouts), the cron reliably revives a slept instance well before the
+	 * next visitor arrives — moving the (rare) cold start off the visitor's
+	 * critical path and onto the background cron instead.
+	 *
+	 * Returns void; callers should treat any thrown error as a non-fatal
+	 * "couldn't warm this cycle, will retry next cron tick".
+	 */
+	async keepWarm() {
+		const state = await this.state.getState();
+		const alreadyWarm = this.container.running && state.status === "healthy";
+		if (!alreadyWarm) {
+			const port = this.defaultPort ?? PrimalPrinting.COLD_START_PORT;
+			await this.startAndWaitForPorts({
+				ports: port,
+				cancellationOptions: {
+					portReadyTimeoutMS: PrimalPrinting.COLD_START_PORT_TIMEOUT_MS,
+					instanceGetTimeoutMS:
+						PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS,
+				},
+			});
+		}
+		// Touch the health endpoint so the Payload/Mongo connection pool is
+		// exercised (a real wire round-trip), not just the HTTP server. This
+		// keeps the DB layer hot end-to-end so the first visitor after an idle
+		// gap doesn't pay a fresh Mongo connect/init either.
+		const baseUrl =
+			PrimalPrinting.KEEP_WARM_BASE_URL || "https://primalprinting.co.nz";
+		const healthUrl = new URL("/api/health", baseUrl).toString();
+		await this.containerFetch(new Request(healthUrl));
+	}
+
+	/**
+	 * Diagnostic lifecycle hooks.
+	 *
+	 * The base @cloudflare/containers class fires these on the container's
+	 * start / stop / error transitions but its defaults are silent (onStart /
+	 * onStop are no-ops, onError rethrows). Without overriding them, the ONLY
+	 * signal we get when a cold start misbehaves is Cloudflare's opaque proxy
+	 * error — "Container is taking too long to accept the connection" — with no
+	 * indication of WHY: did the Node process crash on boot (nonzero exitCode),
+	 * get OOM-killed (runtime_signal), or simply go idle and sleep normally?
+	 *
+	 * After many iterations of blind timeout/instance-size tuning, the missing
+	 * piece is observability. These hooks emit structured, greppable logs to
+	 * the Worker's tail so the next occurrence of the proxy error can be
+	 * correlated with the container's actual lifecycle:
+	 *   - onStart  → confirms the instance booted & bound its port at all.
+	 *   - onStop   → distinguishes a clean idle sleep (exitCode 0) from a
+	 *                crash / OOM (nonzero exitCode or runtime_signal), which
+	 *                would explain a container that never accepts connections.
+	 *   - onError  → surfaces boot/runtime errors that the base class would
+	 *                otherwise swallow into the generic proxy 500.
+	 *
+	 * These are purely observational: onStart/onStop keep the base no-op
+	 * behaviour and onError rethrows to preserve the library's error contract.
+	 */
+	onStart() {
+		console.log("[container] onStart — instance started and port bound");
+	}
+
+	onStop({ exitCode, reason }) {
+		// A clean idle sleep exits 0 via SIGTERM; anything else is suspicious
+		// (a crash-loop or OOM here is a prime suspect for the recurring
+		// "Container is taking too long to accept the connection" proxy error).
+		const unexpected = exitCode !== 0 || reason === "runtime_signal";
+		const log = unexpected ? console.warn : console.log;
+		log(
+			`[container] onStop — exitCode=${exitCode} reason=${reason}` +
+				(unexpected
+					? " (UNEXPECTED — possible crash/OOM; next cold start may fail to accept connections)"
+					: " (clean shutdown/idle sleep)"),
+		);
+	}
+
+	onError(error) {
+		console.error("[container] onError — container reported an error:", error);
+		// Preserve the base class's contract of surfacing the error.
+		throw error;
+	}
 }
+
+// Default port the container listens on (mirrors `defaultPort = 3000`), used
+// only as a fallback when resolving the port to wait on during cold start.
+PrimalPrinting.COLD_START_PORT = 3000;
+// How long to wait for the container port to come up on a cold start before
+// giving up. 60s = 3× the @cloudflare/containers default of 20s.
+PrimalPrinting.COLD_START_PORT_TIMEOUT_MS = 60_000;
+// How long to wait to GET/provision a fresh container instance on a cold start
+// before giving up. 30s ≈ 3.75× the @cloudflare/containers default of 8s
+// (TIMEOUT_TO_GET_CONTAINER_MS) — enough headroom for image pull + scheduling
+// on a genuinely cold instance, while staying below the port-ready timeout so a
+// container that truly can't be provisioned still fails reasonably fast.
+PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS = 30_000;
+// Transient-proxy-error retry tuning. These govern `#fetchWithProxyRetry`,
+// which retries ONLY the base class's post-port-ready proxy 500 (see the big
+// comment in `containerFetch`). The port is already confirmed ready by then,
+// so this covers the sub-second gap between "port TCP-accepts" and "Next.js is
+// actually serving" (or a momentary event-loop block on the single low-vCPU
+// process) instead of surfacing that blip to the visitor as a 500.
+//   - MAX_ATTEMPTS = 3  → the initial try + 2 retries.
+//   - BACKOFF_MS   = 250 → linear backoff (250ms, then 500ms), so the total
+//     added latency in the worst retried case stays well under 1s.
+PrimalPrinting.PROXY_RETRY_MAX_ATTEMPTS = 3;
+PrimalPrinting.PROXY_RETRY_BACKOFF_MS = 250;
+// Matches the base @cloudflare/containers TRANSIENT proxy-stage 500 bodies.
+//
+// The base `containerFetch` catch block (container.js) can return THREE
+// distinct transient 500s, all of which represent a container that is
+// (re)starting or momentarily not accepting the proxied connection — i.e.
+// exactly the cold-start / scale-to-zero-revival window this class is trying
+// to smooth over:
+//
+//   1. "Error proxying request to container: ... is taking too long to accept
+//      the connection; the application could be overwhelmed with load"
+//      — the generic proxy failure (port TCP-accepts but Next.js isn't serving
+//      yet, or the single low-vCPU event loop is momentarily blocked).
+//   2. "Error proxying request to container: ..." (any other tcpPort.fetch
+//      throw, e.g. a connection refused/reset during the readiness gap).
+//   3. "Container suddenly disconnected, try again" — returned specifically
+//      when the underlying error message includes "Network connection lost.",
+//      which the library itself comments means "the container might've just
+//      restarted". This is the CLASSIC symptom right after a cold boot /
+//      scale-to-zero revival, and the library even tells the caller to "try
+//      again" — yet the base class does NOT retry it. Without matching this,
+//      the very first request after a container restart still surfaces a 500
+//      to the visitor.
+//
+// We match on the stable "proxying request to container" prefix OR the
+// "taking too long to accept the connection" phrase OR the
+// "suddenly disconnected" / "Network connection lost" restart phrases, so
+// wording drift on any of them still matches while staying specific enough not
+// to retry unrelated 500s. Combined with the idempotent-only guard in
+// `#fetchWithProxyRetry`, retrying the restart case is safe (GET/HEAD/OPTIONS
+// only) and directly covers the post-cold-start visitor experience.
+PrimalPrinting.TRANSIENT_PROXY_ERROR_RE =
+	/proxying request to container|taking too long to accept the connection|suddenly disconnected|network connection lost/i;
+// Public origin used to build the /api/health Request inside `keepWarm`. The
+// container routes internally via the DO stub regardless of hostname, but the
+// `global_fetch_strictly_public` compatibility flag rejects non-public
+// hostnames, so use the real site origin. Overridable for tests.
+PrimalPrinting.KEEP_WARM_BASE_URL = "https://primalprinting.co.nz";
 
 export default {
 	async fetch(request, env) {
@@ -108,19 +485,27 @@ export default {
 	 */
 	async scheduled(_event, env, ctx) {
 		const containerInstance = getContainer(env.APP, "singleton");
-		// `containerInstance.fetch()` always routes internally via the Durable
-		// Object stub regardless of the request URL, so the hostname here is only
-		// used to construct a valid Request. Use the site's public origin (not a
-		// made-up hostname like `https://internal/...`): the
-		// `global_fetch_strictly_public` compatibility flag in wrangler.jsonc can
-		// reject non-public hostnames, which would break the keep-warm ping.
-		const baseUrl = env.NEXT_PUBLIC_BASE_URL || "https://primalprinting.co.nz";
-		const healthUrl = new URL("/api/health", baseUrl).toString();
-		const warm = containerInstance
-			.fetch(new Request(healthUrl))
+		// Call the container's `keepWarm()` RPC method (see the PrimalPrinting
+		// class) rather than a plain `fetch("/api/health")`.
+		//
+		// Why not just `fetch`? A plain fetch routes through the base
+		// `containerFetch`, whose wake-up wait uses the SHORT library defaults
+		// (8s provisioning + 20s port-ready). If the singleton had genuinely
+		// scaled to zero, that wake-up could exceed those defaults and fail —
+		// and the `.catch` below would swallow it, leaving the container ASLEEP.
+		// The keep-warm cron would then not actually keep anything warm after a
+		// scale-to-zero, and the next real visitor would still pay the full cold
+		// start and hit "Container is taking too long to accept the connection".
+		//
+		// `keepWarm()` instead wakes the container with the SAME widened
+		// cold-start budget used on the request path, so the (rare) cold start
+		// happens here on the background cron rather than on a visitor's
+		// critical path. It also touches /api/health internally to keep the
+		// Payload/Mongo pool hot end-to-end.
+		const warm = Promise.resolve(containerInstance.keepWarm())
 			.then(() => undefined)
 			.catch((error) => {
-				console.warn("[keep-warm] health ping failed:", error);
+				console.warn("[keep-warm] warm-up failed:", error);
 			});
 		ctx.waitUntil(warm);
 	},

@@ -35,6 +35,23 @@
 			"class_name": "PrimalPrinting",
 			"image": "./Dockerfile",
 			"max_instances": 1,
+			// Container instance size. Omitting this defaults to the smallest
+			// "dev" instance (256 MiB RAM, 1/16 vCPU), on which a Next.js +
+			// Payload CMS standalone server boots slowly and can even OOM on a
+			// cold start — the Node process is too CPU/RAM-starved to finish
+			// starting and bind port 3000 before Cloudflare's proxy gives up
+			// with "Error proxying request to container: Container is taking too
+			// long to accept the connection; the application could be
+			// overwhelmed with load". "standard-1" (4 GiB RAM, 1/2 vCPU) gives
+			// the cold boot enough headroom to start Next.js + open the MongoDB
+			// pool and bind the port well within the port-ready window. With
+			// max_instances: 1 (a single low-traffic storefront) the cost delta
+			// of a larger-but-rarely-cold instance is negligible, and the
+			// keep-warm cron means it's almost always already running anyway.
+			//
+			// NOTE: use "standard-1" (not the legacy "standard" alias, which
+			// wrangler now warns is deprecated and slated for removal).
+			"instance_type": "standard-1",
 			// Non-secret build-time values — passed through to the docker
 			// build as --build-args. Stored here (not in the dashboard) so
 			// they're version-controlled and reviewable.
