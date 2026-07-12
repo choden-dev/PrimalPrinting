@@ -91,12 +91,11 @@ function getDatesForDay(start: Date, end: Date, dayOfWeek: number): Date[] {
 	const dates: Date[] = [];
 	const current = new Date(start);
 
-	// Advance to the first occurrence of dayOfWeek (using UTC to avoid TZ issues)
+	// Advance to the first occurrence of dayOfWeek (UTC avoids TZ issues)
 	while (current.getUTCDay() !== dayOfWeek && current <= end) {
 		current.setUTCDate(current.getUTCDate() + 1);
 	}
 
-	// Collect every 7 days
 	while (current <= end) {
 		dates.push(new Date(current));
 		current.setUTCDate(current.getUTCDate() + 7);
@@ -216,7 +215,6 @@ export async function generateTimeslotsForSchedule(
 		const dayNum = DAY_MAP[ws.dayOfWeek];
 		if (dayNum === undefined) continue;
 
-		// Expand the weekly slot into individual sub-slots
 		const subSlots = expandWeeklySlot(ws);
 
 		const dates = getDatesForDay(start, end, dayNum);
