@@ -1,29 +1,10 @@
 #!/usr/bin/env tsx
-// scripts/cloudflare-build.mts
-//
-// Cloudflare Workers Builds entrypoint. Renders wrangler.jsonc with
-// `${VAR}` placeholders inside `containers[].image_vars` substituted from
-// the build env (the Cloudflare dashboard's "Build configuration →
-// Variables and Secrets"), writes the result to wrangler.deploy.jsonc,
-// and runs `wrangler deploy --config wrangler.deploy.jsonc`.
-//
-// Why this is needed: wrangler's `image_vars` field passes string values
-// *literally* to `docker build --build-arg` — there is no `${VAR}`
-// substitution against the build env — and Cloudflare doesn't auto-forward
-// dashboard env vars into the docker build either. So we substitute first,
-// then hand the rendered config to wrangler.
-//
-// Required env vars (set as Secrets in the Cloudflare dashboard's "Build
-// configuration → Variables and Secrets"):
-//   - R2_S3_ENDPOINT
-//   - R2_ACCESS_KEY_ID
-//   - R2_SECRET_ACCESS_KEY
-// Optional:
-//   - TURBO_TOKEN  (Turborepo Remote Cache; build still works without it)
-//
-// This script is the canonical deploy entrypoint — `pnpm run deploy`
-// invokes it via tsx. Set the Cloudflare dashboard's Build command to
-// `pnpm run deploy` so the substitution always runs.
+// Cloudflare Workers Builds deploy entrypoint (`pnpm run deploy`). Substitutes
+// `${VAR}` placeholders in wrangler.jsonc's `containers[].image_vars` from the
+// build env into wrangler.deploy.jsonc, then runs `wrangler deploy`. Needed
+// because wrangler passes `image_vars` literally to `docker build --build-arg`
+// with no env substitution, and Cloudflare doesn't forward dashboard env vars
+// into the docker build.
 
 import { spawn } from "node:child_process";
 import { chmodSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -96,11 +77,9 @@ function stripJsoncComments(src: string): string {
 	return out.replace(/,(\s*[}\]])/g, "$1");
 }
 
-// Replace `${VAR}` references in `image_vars` values with `process.env.VAR`.
-// Logs each substitution (without the value) so the build log is debuggable.
-// Falls back to an empty string when the env var is unset, mirroring the
-// previous envsubst behaviour and letting the Dockerfile's defensive
-// placeholder-stripping pass through cleanly.
+// Replace `${VAR}` references in `image_vars` with `process.env.VAR`, logging
+// each substitution (without the value). Unset vars fall back to an empty
+// string so the Dockerfile's placeholder-stripping passes through cleanly.
 function substituteImageVars(config: WranglerConfig): WranglerConfig {
 	const containers = config.containers ?? [];
 	for (const container of containers) {
