@@ -108,10 +108,8 @@ export function BankTransferForm({
 			setError(null);
 
 			try {
-				// ── Defensive client-side validation ────────────────────────
-				// Mirrors the server-side limits in
-				// app/api/shop/upload-proof/route.ts so customers get an
-				// instant, descriptive error before the upload is attempted.
+				// Client-side validation mirroring the server limits in
+				// app/api/shop/upload-proof/route.ts for a faster error.
 				if (!ALLOWED_TYPES.includes(selectedFile.type)) {
 					throw new Error(
 						`Unsupported image type "${selectedFile.type || "unknown"}". Only JPEG, PNG, and WebP images are accepted.`,
