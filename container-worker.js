@@ -412,14 +412,38 @@ PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS = 30_000;
 //     added latency in the worst retried case stays well under 1s.
 PrimalPrinting.PROXY_RETRY_MAX_ATTEMPTS = 3;
 PrimalPrinting.PROXY_RETRY_BACKOFF_MS = 250;
-// Matches the base @cloudflare/containers proxy-stage 500 body, e.g.
-// "Error proxying request to container: ... is taking too long to accept the
-// connection; the application could be overwhelmed with load". We match on the
-// stable "proxying request to container" prefix OR the "taking too long to
-// accept the connection" phrase so wording drift on either side still matches,
-// while still being specific enough not to retry unrelated 500s.
+// Matches the base @cloudflare/containers TRANSIENT proxy-stage 500 bodies.
+//
+// The base `containerFetch` catch block (container.js) can return THREE
+// distinct transient 500s, all of which represent a container that is
+// (re)starting or momentarily not accepting the proxied connection — i.e.
+// exactly the cold-start / scale-to-zero-revival window this class is trying
+// to smooth over:
+//
+//   1. "Error proxying request to container: ... is taking too long to accept
+//      the connection; the application could be overwhelmed with load"
+//      — the generic proxy failure (port TCP-accepts but Next.js isn't serving
+//      yet, or the single low-vCPU event loop is momentarily blocked).
+//   2. "Error proxying request to container: ..." (any other tcpPort.fetch
+//      throw, e.g. a connection refused/reset during the readiness gap).
+//   3. "Container suddenly disconnected, try again" — returned specifically
+//      when the underlying error message includes "Network connection lost.",
+//      which the library itself comments means "the container might've just
+//      restarted". This is the CLASSIC symptom right after a cold boot /
+//      scale-to-zero revival, and the library even tells the caller to "try
+//      again" — yet the base class does NOT retry it. Without matching this,
+//      the very first request after a container restart still surfaces a 500
+//      to the visitor.
+//
+// We match on the stable "proxying request to container" prefix OR the
+// "taking too long to accept the connection" phrase OR the
+// "suddenly disconnected" / "Network connection lost" restart phrases, so
+// wording drift on any of them still matches while staying specific enough not
+// to retry unrelated 500s. Combined with the idempotent-only guard in
+// `#fetchWithProxyRetry`, retrying the restart case is safe (GET/HEAD/OPTIONS
+// only) and directly covers the post-cold-start visitor experience.
 PrimalPrinting.TRANSIENT_PROXY_ERROR_RE =
-	/proxying request to container|taking too long to accept the connection/i;
+	/proxying request to container|taking too long to accept the connection|suddenly disconnected|network connection lost/i;
 // Public origin used to build the /api/health Request inside `keepWarm`. The
 // container routes internally via the DO stub regardless of hostname, but the
 // `global_fetch_strictly_public` compatibility flag rejects non-public
