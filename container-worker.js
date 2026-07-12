@@ -13,6 +13,34 @@ import { Container, getContainer } from "@cloudflare/containers";
 export class PrimalPrinting extends Container {
 	defaultPort = 3000;
 
+	// Readiness probe endpoint used by the @cloudflare/containers base class to
+	// decide when a (re)started instance is "ready" to receive proxied traffic.
+	//
+	// WHY OVERRIDE THE DEFAULT: the library's port-readiness check does a bare
+	// `tcpPort.fetch("http://<pingEndpoint>")` and treats ANY completed fetch
+	// (no thrown error) as ready. With the default `pingEndpoint = "ping"` that
+	// is effectively a pure TCP-accept probe against the bare host — it resolves
+	// the instant `node server.js` binds port 3000, which Next.js standalone
+	// does BEFORE the app is actually routable (the instrumentation `register()`
+	// hook + Payload/Mongo warm run around/after `listen`). That leaves a window
+	// where the port TCP-accepts but the server isn't serving yet; the base
+	// class considers the container healthy and proxies the visitor's request
+	// into that gap, where it can be refused/dropped and surface as the exact
+	// reported error: "Error proxying request to container: Container is taking
+	// too long to accept the connection; the application could be overwhelmed
+	// with load".
+	//
+	// Pointing the probe at the real readiness route (`/api/health`, which runs
+	// through the full Next.js router and only responds once the app is actually
+	// serving) upgrades readiness from "TCP accepts" to "HTTP request completes
+	// end-to-end". The base class then only marks the container healthy — and
+	// only starts proxying real traffic — once the app can genuinely serve a
+	// request, closing that gap at the source. This is the proactive complement
+	// to the reactive `#fetchWithProxyRetry` below (which retries the 500 if a
+	// blip still slips through). Host must be explicit (`localhost:3000`) so the
+	// probe hits the app port rather than the bare `ping` host.
+	pingEndpoint = "localhost:3000/api/health";
+
 	// Keep a warmed instance alive well past the default idle timeout so the
 	// container does NOT scale to zero during normal gaps in traffic. Every
 	// scale-to-zero forces the next visitor to pay the full container boot +
