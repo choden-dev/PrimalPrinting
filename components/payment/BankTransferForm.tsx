@@ -26,19 +26,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 /**
- * Bank transfer payment form with proof of payment upload.
- *
- * Shows bank account details, lets the user upload a screenshot
- * of their transfer, and submits it for admin verification.
- *
- * ```tsx
- * <BankTransferForm
- *   orderId={order.id}
- *   orderNumber={order.orderNumber}
- *   totalCents={order.pricing.total}
- *   onSuccess={() => router.push(`/order_complete?orderId=${order.id}`)}
- * />
- * ```
+ * Bank transfer payment form: shows bank account details, lets the user upload
+ * a screenshot of their transfer, and submits it for admin verification.
  */
 export function BankTransferForm({
 	orderId,
