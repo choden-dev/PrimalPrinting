@@ -192,6 +192,55 @@ export class PrimalPrinting extends Container {
 		const healthUrl = new URL("/api/health", baseUrl).toString();
 		await this.containerFetch(new Request(healthUrl));
 	}
+
+	/**
+	 * Diagnostic lifecycle hooks.
+	 *
+	 * The base @cloudflare/containers class fires these on the container's
+	 * start / stop / error transitions but its defaults are silent (onStart /
+	 * onStop are no-ops, onError rethrows). Without overriding them, the ONLY
+	 * signal we get when a cold start misbehaves is Cloudflare's opaque proxy
+	 * error — "Container is taking too long to accept the connection" — with no
+	 * indication of WHY: did the Node process crash on boot (nonzero exitCode),
+	 * get OOM-killed (runtime_signal), or simply go idle and sleep normally?
+	 *
+	 * After many iterations of blind timeout/instance-size tuning, the missing
+	 * piece is observability. These hooks emit structured, greppable logs to
+	 * the Worker's tail so the next occurrence of the proxy error can be
+	 * correlated with the container's actual lifecycle:
+	 *   - onStart  → confirms the instance booted & bound its port at all.
+	 *   - onStop   → distinguishes a clean idle sleep (exitCode 0) from a
+	 *                crash / OOM (nonzero exitCode or runtime_signal), which
+	 *                would explain a container that never accepts connections.
+	 *   - onError  → surfaces boot/runtime errors that the base class would
+	 *                otherwise swallow into the generic proxy 500.
+	 *
+	 * These are purely observational: onStart/onStop keep the base no-op
+	 * behaviour and onError rethrows to preserve the library's error contract.
+	 */
+	onStart() {
+		console.log("[container] onStart — instance started and port bound");
+	}
+
+	onStop({ exitCode, reason }) {
+		// A clean idle sleep exits 0 via SIGTERM; anything else is suspicious
+		// (a crash-loop or OOM here is a prime suspect for the recurring
+		// "Container is taking too long to accept the connection" proxy error).
+		const unexpected = exitCode !== 0 || reason === "runtime_signal";
+		const log = unexpected ? console.warn : console.log;
+		log(
+			`[container] onStop — exitCode=${exitCode} reason=${reason}` +
+				(unexpected
+					? " (UNEXPECTED — possible crash/OOM; next cold start may fail to accept connections)"
+					: " (clean shutdown/idle sleep)"),
+		);
+	}
+
+	onError(error) {
+		console.error("[container] onError — container reported an error:", error);
+		// Preserve the base class's contract of surfacing the error.
+		throw error;
+	}
 }
 
 // Default port the container listens on (mirrors `defaultPort = 3000`), used
