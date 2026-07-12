@@ -4,18 +4,14 @@ import { getPayloadClient } from "../../../../lib/payload";
 /**
  * GET /api/admin/orders-by-timeslot
  *
- * Admin-only endpoint that returns timeslots with their orders pre-grouped,
- * replacing the N+1 query pattern where the client fetched each timeslot's
- * orders individually.
+ * Admin-only endpoint returning timeslots with their orders pre-grouped.
  *
  * Query params:
  * - `filter` ("upcoming" | "all", default "upcoming") — "upcoming" returns
  *   timeslots with dates from today through the next 7 days.
  *
- * Returns:
- * - `groups[]` — timeslots with their orders already attached
- * - Each group has `timeslot` and `orders[]`
- * - A synthetic "unassigned" group is prepended for PAID orders without a slot
+ * Returns `groups[]`, each with a `timeslot` and its `orders[]`. A synthetic
+ * "unassigned" group is prepended for PAID orders without a slot.
  */
 export async function GET(request: NextRequest) {
 	try {
@@ -34,9 +30,8 @@ export async function GET(request: NextRequest) {
 		const filter = searchParams.get("filter") === "all" ? "all" : "upcoming";
 
 		// ── 1. Fetch all active timeslots, filter by date in JS ──────────
-		// The date field is stored as a plain text "YYYY-MM-DD" string.
-		// We fetch all active timeslots and filter in JS to handle any
-		// date strings that might contain a "T" suffix consistently.
+		// The date is a plain "YYYY-MM-DD" string, so we filter in JS to
+		// handle any "T" suffix consistently.
 		const allTimeslotResult = await payload.find({
 			collection: "timeslots",
 			where: { isActive: { equals: true } },
