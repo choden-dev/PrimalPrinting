@@ -71,7 +71,67 @@ export class PrimalPrinting extends Container {
 		// serve any static files. Empty string falls back to same-origin.
 		NEXT_PUBLIC_ASSET_PREFIX: env.NEXT_PUBLIC_ASSET_PREFIX ?? "",
 	};
+
+	/**
+	 * Override the base `containerFetch` purely to widen the port-ready
+	 * timeout on a genuine cold start.
+	 *
+	 * The @cloudflare/containers base class, when the container isn't already
+	 * running/healthy, calls `startAndWaitForPorts(port, { abort: request.signal })`
+	 * with NO `portReadyTimeoutMS`, so it falls back to the library default of
+	 * 20s (`TIMEOUT_TO_GET_PORTS_MS`). A cold boot here has to: pull/boot the
+	 * container, run the docker entrypoint's NEXT_PUBLIC_* placeholder swap,
+	 * start the Next.js standalone server, and only THEN bind port 3000. On a
+	 * cold instance that whole chain can exceed 20s, at which point Cloudflare's
+	 * proxy gives up with:
+	 *   "Error proxying request to container: Container is taking too long to
+	 *    accept the connection; the application could be overwhelmed with load"
+	 *
+	 * Waiting longer for the port to come up (instead of failing at 20s) lets
+	 * the first visitor after a cold start actually reach the server. The
+	 * keep-warm cron + `sleepAfter` still make cold starts rare; this just stops
+	 * the rare cold start from erroring out. We keep passing the incoming
+	 * request's abort signal so a client that goes away still cancels the wait.
+	 */
+	async containerFetch(requestOrUrl, portOrInit, portParam) {
+		const state = await this.state.getState();
+		const needsColdStart =
+			!this.container.running || state.status !== "healthy";
+		if (needsColdStart) {
+			// Proactively start the container and wait for the port with a
+			// generous timeout BEFORE delegating to the base implementation
+			// (whose internal wait uses the short 20s default). Once the port
+			// is ready, the base `containerFetch` sees a healthy container and
+			// skips its own wait entirely.
+			const port = this.defaultPort ?? PrimalPrinting.COLD_START_PORT;
+			try {
+				await this.startAndWaitForPorts({
+					ports: port,
+					cancellationOptions: {
+						// 3× the library default — enough headroom for a cold
+						// boot + entrypoint swap + Next.js start on a fresh
+						// instance without waiting so long that a truly stuck
+						// container hangs the request indefinitely.
+						portReadyTimeoutMS: PrimalPrinting.COLD_START_PORT_TIMEOUT_MS,
+					},
+				});
+			} catch (error) {
+				console.warn(
+					"[cold-start] startAndWaitForPorts failed, falling back to base fetch:",
+					error,
+				);
+			}
+		}
+		return super.containerFetch(requestOrUrl, portOrInit, portParam);
+	}
 }
+
+// Default port the container listens on (mirrors `defaultPort = 3000`), used
+// only as a fallback when resolving the port to wait on during cold start.
+PrimalPrinting.COLD_START_PORT = 3000;
+// How long to wait for the container port to come up on a cold start before
+// giving up. 60s = 3× the @cloudflare/containers default of 20s.
+PrimalPrinting.COLD_START_PORT_TIMEOUT_MS = 60_000;
 
 export default {
 	async fetch(request, env) {

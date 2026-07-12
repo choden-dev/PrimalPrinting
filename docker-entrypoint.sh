@@ -24,6 +24,16 @@ __NEXT_PUBLIC_BASE_URL__|NEXT_PUBLIC_BASE_URL|
 __NEXT_PUBLIC_ASSET_PREFIX__|NEXT_PUBLIC_ASSET_PREFIX|
 "
 
+# Build a single combined `sed` expression so we walk the .next tree only
+# once (instead of once per placeholder). This runs on EVERY container boot
+# before `node server.js`, so it sits directly on the cold-start critical
+# path — the faster it finishes, the sooner the server binds port 3000 and
+# the less likely Cloudflare's proxy is to time out with "Container is taking
+# too long to accept the connection".
+# Accumulate every placeholder→value pair into ONE combined `sed` script so
+# we walk the .next tree a single time and rewrite each file at most once —
+# instead of the previous one-full-tree-walk-and-rewrite *per placeholder*.
+set --
 for entry in $REPLACEMENTS; do
   [ -z "$entry" ] && continue
 
@@ -34,10 +44,20 @@ for entry in $REPLACEMENTS; do
   # Use the env var value if set, otherwise fall back to the default
   eval "real_val=\${$var_name:-$default_val}"
 
-  # Replace in all JS files under .next
-  find "$SEARCH_DIR" -type f -name '*.js' -exec \
-    sed -i "s|${placeholder}|${real_val}|g" {} +
+  # Collect as separate `-e <script>` positional args so values containing
+  # spaces or shell metacharacters are passed to sed safely (no word-split).
+  set -- "$@" -e "s|${placeholder}|${real_val}|g"
 done
+
+if [ "$#" -gt 0 ]; then
+  # Single tree walk, single sed invocation per file (batched via `+`), all
+  # substitutions applied at once. This runs on EVERY container boot before
+  # `node server.js`, so keeping it to one pass minimises cold-start latency
+  # — the faster placeholders are swapped, the sooner the server binds port
+  # 3000 and the less likely Cloudflare's proxy is to time out with
+  # "Container is taking too long to accept the connection".
+  find "$SEARCH_DIR" -type f -name '*.js' -exec sed -i "$@" {} +
+fi
 
 echo "✅ NEXT_PUBLIC_* placeholders replaced with runtime values"
 
