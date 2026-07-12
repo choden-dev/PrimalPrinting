@@ -1,45 +1,26 @@
 /**
- * Next.js instrumentation hook.
+ * Next.js instrumentation hook. `register()` runs once at server boot, before
+ * any request. We warm the Payload/MongoDB connection here so the first visitor
+ * after a cold container start (Cloudflare Containers scale to zero) doesn't pay
+ * the connect + model-registration cost inline with their request.
  *
- * `register()` is invoked exactly once when the server process boots — before
- * any request is handled. We use it to eagerly warm the Payload CMS / MongoDB
- * connection so the FIRST visitor after a cold container start doesn't pay the
- * full connect + Mongoose model-registration cost inline with their request.
- *
- * Background: this app runs as a standalone Next.js server inside a Cloudflare
- * Container that can scale to zero. When it spins back up, the very first
- * request would otherwise trigger `getPayloadClient()` for the first time,
- * incurring the MongoDB handshake and Payload initialisation on the critical
- * path — the source of the very long / timeout-prone loads reported for that
- * first user. Warming here overlaps that cost with the server's own boot.
- *
- * The warmup is:
- *   - Skipped only on the Edge runtime (which has no Mongo); runs on the Node
- *     server runtime by default even if `NEXT_RUNTIME` is unset.
- *   - Fire-and-forget: it never blocks server startup and swallows errors so a
- *     transient DB hiccup at boot can't crash the process. `getPayloadClient`
- *     caches its promise, so the first real request simply awaits the same
- *     (already in-flight or resolved) connection.
+ * Fire-and-forget: never blocks boot and swallows errors; `getPayloadClient`
+ * caches its promise so the first real request awaits the same connection.
  */
 export async function register(): Promise<void> {
-	// Skip only on the Edge runtime, which cannot talk to MongoDB and has no
-	// access to the Payload local API. We deliberately check for an explicit
-	// "edge" value rather than requiring `=== "nodejs"`: `NEXT_RUNTIME` may be
-	// unset in some instrumentation-hook environments, and in that case we still
-	// want to warm on the Node server runtime by default rather than skip it.
+	// Skip on the Edge runtime (no Mongo). Check for an explicit "edge" value
+	// rather than `=== "nodejs"` so an unset NEXT_RUNTIME still warms by default.
 	if (process.env.NEXT_RUNTIME === "edge") {
 		return;
 	}
 
-	// Skip if there is no database configured (e.g. build/CI environments) to
-	// avoid a pointless 5s serverSelectionTimeout at boot.
+	// Skip without a DB (e.g. build/CI) to avoid a pointless serverSelectionTimeout.
 	if (!process.env.DATABASE_URI) {
 		return;
 	}
 
 	try {
 		const { getPayloadClient } = await import("./lib/payload");
-		// Fire-and-forget: kick off initialisation but don't block boot on it.
 		void getPayloadClient().catch((error) => {
 			console.warn("[instrumentation] Payload warmup failed:", error);
 		});

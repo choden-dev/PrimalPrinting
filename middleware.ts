@@ -3,29 +3,15 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 /**
- * Middleware to protect order-related API routes that require authentication.
- *
- * Public routes (no auth required):
- * - GET  /api/pickup-slots           – list available pickup slots
- * - /api/auth/*                      – NextAuth routes
- * - /api/webhooks/*                  – Stripe webhooks
- * - /api/cron/*                      – Cron jobs (protected by CRON_SECRET instead)
- * - /admin/*                         – Payload admin (has its own auth)
- * - All non-API routes               – public pages
- *
- * Protected routes (require NextAuth session):
- * - POST/PATCH /api/shop/orders      – create / finalise orders
- * - POST       /api/shop/staging-urls – issue presigned upload URLs
- * - POST       /api/shop/upload-proof – upload bank transfer proof
- * - GET        /api/shop/my-orders   – user's order history
- * - *          /api/shop/:id/*       – payment, timeslot selection, etc.
+ * Middleware to protect order-related API routes that require a NextAuth
+ * session. The matcher below only runs this on `/api/shop/*`; each protected
+ * pattern is documented inline. Other routes (auth, webhooks, cron, admin,
+ * pages) are public here and rely on their own auth.
  */
 
-// Routes that require authentication. Each handler performs its own
-// `getAuthenticatedCustomer` check too — this middleware is defence in depth.
-//
-// NOTE: `/api/shop/bank-details` is intentionally PUBLIC and must not be
-// covered by any pattern below.
+// Routes that require authentication. Each handler also runs its own
+// `getAuthenticatedCustomer` check — this middleware is defence in depth.
+// NOTE: `/api/shop/bank-details` is intentionally PUBLIC (not matched below).
 const PROTECTED_PATTERNS = [
 	/^\/api\/shop\/orders$/, // POST/PATCH create/finalise orders
 	/^\/api\/shop\/staging-urls$/, // POST issue presigned upload URLs
