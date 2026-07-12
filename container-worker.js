@@ -30,16 +30,31 @@ export class PrimalPrinting extends Container {
 	// too long to accept the connection; the application could be overwhelmed
 	// with load".
 	//
-	// Pointing the probe at the real readiness route (`/api/health`, which runs
-	// through the full Next.js router and only responds once the app is actually
-	// serving) upgrades readiness from "TCP accepts" to "HTTP request completes
+	// Pointing the probe at a real app route (one that runs through the full
+	// Next.js router and only responds once the app is actually serving)
+	// upgrades readiness from "TCP accepts" to "HTTP request completes
 	// end-to-end". The base class then only marks the container healthy — and
 	// only starts proxying real traffic — once the app can genuinely serve a
 	// request, closing that gap at the source. This is the proactive complement
 	// to the reactive `#fetchWithProxyRetry` below (which retries the 500 if a
 	// blip still slips through). Host must be explicit (`localhost:3000`) so the
 	// probe hits the app port rather than the bare `ping` host.
-	pingEndpoint = "localhost:3000/api/health";
+	//
+	// CRITICAL — why `/api/ready` and NOT `/api/health`: the library's
+	// readiness check treats ANY completed fetch (no thrown error) as ready; it
+	// does NOT inspect the HTTP status. So the probe target only needs to prove
+	// the Next.js router can complete a request — it must NOT do heavy work.
+	// `/api/health` calls `getPayloadClient()` + a MongoDB `count()`; on a cold
+	// boot Mongo may not be connected yet, so that route can block up to the
+	// driver's serverSelectionTimeout, which can EXCEED the library's per-probe
+	// `PING_TIMEOUT_MS` (5s). Each probe would then time out and be retried,
+	// DELAYING the ready signal and eating the port-ready budget — actively
+	// causing the "taking too long to accept the connection" error it was meant
+	// to prevent. `/api/ready` touches nothing external (no DB, no Payload), so
+	// it returns the instant the router is up. Mongo/Payload warming stays
+	// decoupled and is handled by instrumentation.ts (boot) + the keep-warm
+	// cron hitting /api/health.
+	pingEndpoint = "localhost:3000/api/ready";
 
 	// Keep a warmed instance alive well past the default idle timeout so the
 	// container does NOT scale to zero during normal gaps in traffic. Every
