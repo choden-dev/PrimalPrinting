@@ -14,12 +14,10 @@ type RouteContext = { params: Promise<{ orderId: string }> };
  * Submits proof of bank transfer payment. Transitions the order from
  * DRAFT/AWAITING_PAYMENT → PAID directly (no verification gate).
  *
- * Files are transferred from staging to permanent storage.
- * Admin can optionally verify the payment later for record keeping.
+ * Files are transferred from staging to permanent storage; admin can
+ * optionally verify the payment later for record keeping.
  *
- * Body: `{ "proofKey": "proofs/ORD-20260415-A3F8/uuid.webp" }`
- *
- * The `proofKey` should come from the `/api/shop/upload-proof` endpoint.
+ * Body: `{ proofKey }` — the key returned by `/api/shop/upload-proof`.
  */
 export async function POST(request: NextRequest, context: RouteContext) {
 	const { orderId } = await context.params;
