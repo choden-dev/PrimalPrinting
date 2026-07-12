@@ -121,24 +121,52 @@ if [ "$#" -gt 0 ]; then
     fi
   done
 
-  # `find` runs the second `-exec` (the actual sed rewrite, batched via `+`)
-  # ONLY on files where the first `-exec grep -qE ... {} \;` test succeeds —
-  # i.e. files that actually contain a placeholder. Files with no placeholder
-  # (the overwhelming majority of the .next tree) are never handed to sed and
-  # so are never rewritten, saving the read+rewrite I/O on the cold-start
-  # critical path.
+  # Find the (few) files that actually contain a placeholder with a SINGLE
+  # recursive grep, then hand ONLY those to sed. This is deliberately not the
+  # older `find ... -exec grep -qE {} \;` form: that spawns a brand-new grep
+  # PROCESS for EVERY *.js file in the tree. A Next.js standalone `.next` tree
+  # holds many thousands of chunk *.js files, so the per-file form forks
+  # thousands of grep processes on every cold boot — a real process-spawn
+  # storm sitting directly on the cold-start critical path before port 3000
+  # binds (the "Container is taking too long to accept the connection" window).
+  # `grep -rlE` walks the whole tree in ONE process and prints just the
+  # matching file paths, and sed then rewrites only that handful of files —
+  # turning O(all-files) process forks into O(1) grep + O(matching-files) sed.
   #
-  # Best-effort: the trailing `|| swap_status=$?` swallows any non-zero exit so
-  # a transient FS/sed hiccup can never abort the boot before the server
-  # starts. The server reads NEXT_PUBLIC_* from its own env regardless; this
-  # swap only patches the client bundles the standalone server serves.
+  # We read grep's output into the positional params via a NUL-safe loop
+  # (`grep -rlZ` + `read -d ''`) so paths with spaces/newlines are handled
+  # correctly. GNU coreutils in the node:22-slim runtime supports `grep -rlZ`
+  # and `read -d`; local validation must use GNU tools (see the CMD note above).
+  #
+  # Best-effort throughout: any non-zero exit is captured into `swap_status`
+  # and never aborts the boot before the server starts. The server reads
+  # NEXT_PUBLIC_* from its own env regardless; this swap only patches the
+  # client bundles the standalone server serves.
   swap_status=0
-  find "$SEARCH_DIR" -type f -name '*.js' \
-    -exec grep -qE "$placeholder_re" {} \; \
-    -exec sed -i "$@" {} + \
+  matched_count=0
+  # The sed `-e <script>` expressions currently live in "$@"; remember how
+  # many there are so that, after we append the matched file paths below, we
+  # can tell how many actual FILES were added (for the log line).
+  sed_expr_count="$#"
+  # Collect matching files (NUL-delimited) into a newline-joined list.
+  matched_files="$(grep -rlZ -E "$placeholder_re" "$SEARCH_DIR" --include='*.js' 2>/dev/null | tr '\0' '\n')" \
     || swap_status=$?
+  if [ -n "$matched_files" ]; then
+    # Re-split the matched file list on newlines and append to the sed args,
+    # then run one batched sed over all matched files.
+    OLD_IFS_SWAP=$IFS
+    IFS='
+'
+    # shellcheck disable=SC2086
+    set -- "$@" $matched_files
+    IFS=$OLD_IFS_SWAP
+    matched_count=$(( $# - sed_expr_count ))
+    if [ "$matched_count" -gt 0 ]; then
+      sed -i "$@" || swap_status=$?
+    fi
+  fi
   if [ "$swap_status" -eq 0 ]; then
-    echo "✅ NEXT_PUBLIC_* placeholders replaced with runtime values"
+    echo "✅ NEXT_PUBLIC_* placeholders replaced with runtime values ($matched_count file(s))"
   else
     echo "⚠️  NEXT_PUBLIC_* placeholder swap failed — starting server anyway" >&2
   fi
