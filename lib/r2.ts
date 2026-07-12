@@ -138,8 +138,6 @@ export async function uploadBankTransferProof(
 ): Promise<string> {
 	const key = generateProofKey(orderNumber);
 
-	// Previously used sharp to resize/convert to WebP, but sharp's native
-	// bindings are incompatible with Cloudflare Workers. Upload original instead.
 	await uploadToStaging(key, imageBuffer, contentType);
 	return key;
 }
