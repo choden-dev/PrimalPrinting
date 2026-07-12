@@ -125,12 +125,7 @@ export async function uploadToStaging(
 	);
 }
 
-/**
- * Upload a bank transfer proof image to the staging bucket.
- *
- * The image is automatically downsized to a max width of 1200px and
- * converted to WebP at 70% quality to prevent abuse / save storage.
- */
+/** Upload a bank transfer proof image to the staging bucket. */
 export async function uploadBankTransferProof(
 	orderNumber: string,
 	imageBuffer: Buffer | Uint8Array,
