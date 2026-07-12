@@ -142,7 +142,73 @@ export class PrimalPrinting extends Container {
 				);
 			}
 		}
-		return super.containerFetch(requestOrUrl, portOrInit, portParam);
+		// Proxy the request to the container, retrying ONLY the specific
+		// transient "proxy" failure that produces the reported error.
+		//
+		// KEY INSIGHT: the exact user-facing message
+		//   "Error proxying request to container: ... taking too long to accept
+		//    the connection; the application could be overwhelmed with load"
+		// is NOT emitted while waiting for the port to bind. In
+		// @cloudflare/containers' base `containerFetch`, that string comes from
+		// the FINAL catch block wrapping `tcpPort.fetch(containerUrl, request)`
+		// (container.js) — i.e. AFTER the port is already considered ready. It
+		// fires when the actual HTTP proxy connection to the container is
+		// refused/dropped in the brief window where the port TCP-accepts but the
+		// Next.js server (single ~1/2 vCPU process) hasn't finished becoming
+		// ready, or when its event loop is momentarily blocked ("overwhelmed
+		// with load"). The base class does NOT retry this — one transient blip
+		// surfaces immediately as an HTTP 500 to the visitor.
+		//
+		// Since the port is confirmed ready above, a short bounded retry with a
+		// small backoff lets that sub-second readiness gap pass instead of
+		// erroring out. We only retry idempotent-safe cases: the response is a
+		// 500 whose body matches the transient proxy error, and the client
+		// hasn't aborted. Non-500s and other 500s pass straight through.
+		return this.#fetchWithProxyRetry(requestOrUrl, portOrInit, portParam);
+	}
+
+	/**
+	 * Delegate to the base `containerFetch`, retrying only the transient
+	 * "Error proxying request to container … taking too long to accept the
+	 * connection" 500 a small, bounded number of times with backoff.
+	 */
+	async #fetchWithProxyRetry(requestOrUrl, portOrInit, portParam) {
+		const maxAttempts = PrimalPrinting.PROXY_RETRY_MAX_ATTEMPTS;
+		let lastResponse;
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			lastResponse = await super.containerFetch(
+				requestOrUrl,
+				portOrInit,
+				portParam,
+			);
+			// Only the transient proxy 500 is retryable. Anything else
+			// (success, redirects, 4xx, or a different 500) is returned as-is.
+			if (
+				lastResponse.status !== 500 ||
+				attempt === maxAttempts ||
+				(requestOrUrl instanceof Request && requestOrUrl.signal?.aborted)
+			) {
+				return lastResponse;
+			}
+			// Peek at the body WITHOUT consuming the response we might return:
+			// clone first so a non-matching body can still be handed back intact.
+			let bodyText = "";
+			try {
+				bodyText = await lastResponse.clone().text();
+			} catch {
+				// If the body can't be read, treat it as non-retryable.
+				return lastResponse;
+			}
+			if (!PrimalPrinting.TRANSIENT_PROXY_ERROR_RE.test(bodyText)) {
+				return lastResponse;
+			}
+			console.warn(
+				`[proxy-retry] transient container proxy error (attempt ${attempt}/${maxAttempts}), retrying:`,
+				bodyText.slice(0, 200),
+			);
+			await scheduler.wait(PrimalPrinting.PROXY_RETRY_BACKOFF_MS * attempt);
+		}
+		return lastResponse;
 	}
 
 	/**
@@ -255,6 +321,25 @@ PrimalPrinting.COLD_START_PORT_TIMEOUT_MS = 60_000;
 // on a genuinely cold instance, while staying below the port-ready timeout so a
 // container that truly can't be provisioned still fails reasonably fast.
 PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS = 30_000;
+// Transient-proxy-error retry tuning. These govern `#fetchWithProxyRetry`,
+// which retries ONLY the base class's post-port-ready proxy 500 (see the big
+// comment in `containerFetch`). The port is already confirmed ready by then,
+// so this covers the sub-second gap between "port TCP-accepts" and "Next.js is
+// actually serving" (or a momentary event-loop block on the single low-vCPU
+// process) instead of surfacing that blip to the visitor as a 500.
+//   - MAX_ATTEMPTS = 3  → the initial try + 2 retries.
+//   - BACKOFF_MS   = 250 → linear backoff (250ms, then 500ms), so the total
+//     added latency in the worst retried case stays well under 1s.
+PrimalPrinting.PROXY_RETRY_MAX_ATTEMPTS = 3;
+PrimalPrinting.PROXY_RETRY_BACKOFF_MS = 250;
+// Matches the base @cloudflare/containers proxy-stage 500 body, e.g.
+// "Error proxying request to container: ... is taking too long to accept the
+// connection; the application could be overwhelmed with load". We match on the
+// stable "proxying request to container" prefix OR the "taking too long to
+// accept the connection" phrase so wording drift on either side still matches,
+// while still being specific enough not to retry unrelated 500s.
+PrimalPrinting.TRANSIENT_PROXY_ERROR_RE =
+	/proxying request to container|taking too long to accept the connection/i;
 // Public origin used to build the /api/health Request inside `keepWarm`. The
 // container routes internally via the DO stub regardless of hostname, but the
 // `global_fetch_strictly_public` compatibility flag rejects non-public
