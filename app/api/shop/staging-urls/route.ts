@@ -14,26 +14,10 @@ import {
 
 /**
  * POST /api/shop/staging-urls — Issue presigned PUT URLs so the browser can
- * upload PDFs directly to the R2 staging bucket.
- *
- * Request body (JSON):
- *   {
- *     files: [{ name: string, size: number, type: string }, ...]
- *   }
- *
- * Response (JSON):
- *   {
- *     uploads: [{ stagingKey: string, uploadUrl: string, contentType: string }, ...]
- *   }
- *
- * Each `uploadUrl` is signed for a short window (5 minutes) and only valid
- * for a PUT with a `Content-Type` header that exactly matches `contentType`.
- *
- * The order of `uploads` matches the order of the request `files`.
- *
- * The bytes never traverse our server / Cloudflare Worker — the browser PUTs
- * straight to R2. The server later verifies via HEAD that the upload
- * actually completed before pricing the order.
+ * upload PDFs directly to the R2 staging bucket (bytes never traverse our
+ * server/Worker). Each URL is short-lived and only valid for a PUT whose
+ * Content-Type matches the returned `contentType`; `uploads` preserves request
+ * order. The server later verifies completion via HEAD before pricing.
  */
 
 export const runtime = "nodejs";
