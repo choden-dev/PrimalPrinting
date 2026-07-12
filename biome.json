@@ -43,7 +43,8 @@
 			"!**/build",
 			"!**/coverage",
 			"!**/terraform/.terraform",
-			"!**/pnpm-lock.yaml"
+			"!**/pnpm-lock.yaml",
+			"!**/.gnhf"
 		],
 		"ignoreUnknown": true
 	}
