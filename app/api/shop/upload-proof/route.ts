@@ -41,10 +41,8 @@ export async function POST(request: NextRequest) {
 		);
 	}
 
-	// Parse the multipart body via the shared safe helper so customers see a
-	// clear, actionable error instead of the runtime's bare
-	// "Failed to parse body as FormData" when the upload is too large or
-	// gets truncated mid-stream.
+	// Shared safe helper surfaces a clear error instead of the runtime's bare
+	// "Failed to parse body as FormData" on oversized/truncated uploads.
 	const parseResult = await parseMultipartFormData(
 		request,
 		MAX_PROOF_BODY_SIZE,
