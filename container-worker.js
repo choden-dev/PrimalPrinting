@@ -144,6 +144,54 @@ export class PrimalPrinting extends Container {
 		}
 		return super.containerFetch(requestOrUrl, portOrInit, portParam);
 	}
+
+	/**
+	 * Keep-warm entrypoint invoked by the Worker's `scheduled` (cron) handler
+	 * via the Durable Object stub.
+	 *
+	 * IMPORTANT: this exists because the previous keep-warm implementation
+	 * simply did `containerInstance.fetch("/api/health")`. That routes through
+	 * the base `containerFetch`, whose internal wake-up wait uses the SHORT
+	 * library defaults (8s provisioning + 20s port-ready). If the singleton had
+	 * actually scaled to zero, the cron's own ping could exceed those defaults
+	 * and fail — and because the failure was swallowed by the caller's
+	 * `.catch`, the container was left ASLEEP. The keep-warm cron therefore did
+	 * not reliably keep anything warm after a genuine scale-to-zero, so the
+	 * next real visitor still paid the full cold start and hit
+	 *   "Container is taking too long to accept the connection".
+	 *
+	 * By waking the container here with the SAME widened cold-start budget used
+	 * on the request path (`startAndWaitForPorts` with the COLD_START_*
+	 * timeouts), the cron reliably revives a slept instance well before the
+	 * next visitor arrives — moving the (rare) cold start off the visitor's
+	 * critical path and onto the background cron instead.
+	 *
+	 * Returns void; callers should treat any thrown error as a non-fatal
+	 * "couldn't warm this cycle, will retry next cron tick".
+	 */
+	async keepWarm() {
+		const state = await this.state.getState();
+		const alreadyWarm = this.container.running && state.status === "healthy";
+		if (!alreadyWarm) {
+			const port = this.defaultPort ?? PrimalPrinting.COLD_START_PORT;
+			await this.startAndWaitForPorts({
+				ports: port,
+				cancellationOptions: {
+					portReadyTimeoutMS: PrimalPrinting.COLD_START_PORT_TIMEOUT_MS,
+					instanceGetTimeoutMS:
+						PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS,
+				},
+			});
+		}
+		// Touch the health endpoint so the Payload/Mongo connection pool is
+		// exercised (a real wire round-trip), not just the HTTP server. This
+		// keeps the DB layer hot end-to-end so the first visitor after an idle
+		// gap doesn't pay a fresh Mongo connect/init either.
+		const baseUrl =
+			PrimalPrinting.KEEP_WARM_BASE_URL || "https://primalprinting.co.nz";
+		const healthUrl = new URL("/api/health", baseUrl).toString();
+		await this.containerFetch(new Request(healthUrl));
+	}
 }
 
 // Default port the container listens on (mirrors `defaultPort = 3000`), used
@@ -158,6 +206,11 @@ PrimalPrinting.COLD_START_PORT_TIMEOUT_MS = 60_000;
 // on a genuinely cold instance, while staying below the port-ready timeout so a
 // container that truly can't be provisioned still fails reasonably fast.
 PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS = 30_000;
+// Public origin used to build the /api/health Request inside `keepWarm`. The
+// container routes internally via the DO stub regardless of hostname, but the
+// `global_fetch_strictly_public` compatibility flag rejects non-public
+// hostnames, so use the real site origin. Overridable for tests.
+PrimalPrinting.KEEP_WARM_BASE_URL = "https://primalprinting.co.nz";
 
 export default {
 	async fetch(request, env) {
@@ -194,19 +247,27 @@ export default {
 	 */
 	async scheduled(_event, env, ctx) {
 		const containerInstance = getContainer(env.APP, "singleton");
-		// `containerInstance.fetch()` always routes internally via the Durable
-		// Object stub regardless of the request URL, so the hostname here is only
-		// used to construct a valid Request. Use the site's public origin (not a
-		// made-up hostname like `https://internal/...`): the
-		// `global_fetch_strictly_public` compatibility flag in wrangler.jsonc can
-		// reject non-public hostnames, which would break the keep-warm ping.
-		const baseUrl = env.NEXT_PUBLIC_BASE_URL || "https://primalprinting.co.nz";
-		const healthUrl = new URL("/api/health", baseUrl).toString();
-		const warm = containerInstance
-			.fetch(new Request(healthUrl))
+		// Call the container's `keepWarm()` RPC method (see the PrimalPrinting
+		// class) rather than a plain `fetch("/api/health")`.
+		//
+		// Why not just `fetch`? A plain fetch routes through the base
+		// `containerFetch`, whose wake-up wait uses the SHORT library defaults
+		// (8s provisioning + 20s port-ready). If the singleton had genuinely
+		// scaled to zero, that wake-up could exceed those defaults and fail —
+		// and the `.catch` below would swallow it, leaving the container ASLEEP.
+		// The keep-warm cron would then not actually keep anything warm after a
+		// scale-to-zero, and the next real visitor would still pay the full cold
+		// start and hit "Container is taking too long to accept the connection".
+		//
+		// `keepWarm()` instead wakes the container with the SAME widened
+		// cold-start budget used on the request path, so the (rare) cold start
+		// happens here on the background cron rather than on a visitor's
+		// critical path. It also touches /api/health internally to keep the
+		// Payload/Mongo pool hot end-to-end.
+		const warm = Promise.resolve(containerInstance.keepWarm())
 			.then(() => undefined)
 			.catch((error) => {
-				console.warn("[keep-warm] health ping failed:", error);
+				console.warn("[keep-warm] warm-up failed:", error);
 			});
 		ctx.waitUntil(warm);
 	},
