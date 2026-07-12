@@ -113,6 +113,26 @@ export class PrimalPrinting extends Container {
 						// instance without waiting so long that a truly stuck
 						// container hangs the request indefinitely.
 						portReadyTimeoutMS: PrimalPrinting.COLD_START_PORT_TIMEOUT_MS,
+						// Widen the *provisioning* timeout too. The library has
+						// TWO separate cold-start timeouts and the port-ready one
+						// above is only the second half:
+						//   1. instanceGetTimeoutMS — time allowed to GET/provision
+						//      a fresh container instance (pull image + schedule).
+						//      Library default = TIMEOUT_TO_GET_CONTAINER_MS = 8s.
+						//   2. portReadyTimeoutMS — time allowed AFTER provisioning
+						//      for the port to bind. Library default = 20s.
+						// On a genuine cold start (image pull + schedule on a fresh
+						// instance) provisioning alone can exceed 8s, so the request
+						// fails with "Container is taking too long to accept the
+						// connection" BEFORE the port-ready wait is even reached —
+						// and, because startAndWaitForPorts subtracts the tries
+						// already spent provisioning from the port-ready budget, a
+						// slow provision also eats into the 60s port window. Widening
+						// this closes that gap. We keep it well below the port-ready
+						// timeout so a container that genuinely can't be provisioned
+						// still fails reasonably fast rather than hanging.
+						instanceGetTimeoutMS:
+							PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS,
 					},
 				});
 			} catch (error) {
@@ -132,6 +152,12 @@ PrimalPrinting.COLD_START_PORT = 3000;
 // How long to wait for the container port to come up on a cold start before
 // giving up. 60s = 3× the @cloudflare/containers default of 20s.
 PrimalPrinting.COLD_START_PORT_TIMEOUT_MS = 60_000;
+// How long to wait to GET/provision a fresh container instance on a cold start
+// before giving up. 30s ≈ 3.75× the @cloudflare/containers default of 8s
+// (TIMEOUT_TO_GET_CONTAINER_MS) — enough headroom for image pull + scheduling
+// on a genuinely cold instance, while staying below the port-ready timeout so a
+// container that truly can't be provisioned still fails reasonably fast.
+PrimalPrinting.COLD_START_INSTANCE_GET_TIMEOUT_MS = 30_000;
 
 export default {
 	async fetch(request, env) {
