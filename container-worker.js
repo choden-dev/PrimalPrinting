@@ -217,19 +217,56 @@ export class PrimalPrinting extends Container {
 	 */
 	async #fetchWithProxyRetry(requestOrUrl, portOrInit, portParam) {
 		const maxAttempts = PrimalPrinting.PROXY_RETRY_MAX_ATTEMPTS;
+
+		// CRITICAL — only idempotent requests may be auto-retried.
+		//
+		// Two independent hazards make blindly retrying a mutating request
+		// unsafe here:
+		//
+		//   1. Body reuse. The base `containerFetch` proxies by handing the
+		//      SAME `Request` to `tcpPort.fetch(containerUrl, request)`. A
+		//      `Request` body is a single-use `ReadableStream`; once the first
+		//      attempt reads it the stream is consumed, so a second attempt
+		//      would forward an EMPTY body (or throw "body already used").
+		//   2. Duplicate side effects. The transient proxy 500 usually means
+		//      the TCP connection was refused/dropped BEFORE the app handled
+		//      the request — but not always. If the drop happened AFTER the
+		//      Next.js handler already processed a POST (e.g. created an order
+		//      or a Stripe payment intent), retrying would double-submit.
+		//
+		// Rather than gamble on cloning bodies and hoping the mutation didn't
+		// land, we scope the retry to requests that are inherently safe to
+		// repeat: idempotent methods (GET/HEAD/OPTIONS) with no body. Those are
+		// exactly the page loads / navigations that dominate traffic right
+		// after a cold start — precisely where the "taking too long to accept
+		// the connection" gap surfaces — so the retry still covers the reported
+		// symptom. Non-idempotent requests (the storefront's order/payment/
+		// upload POSTs) are passed through once and their 500, if any, is
+		// surfaced to the caller instead of risking a duplicate mutation.
+		const isRequest = requestOrUrl instanceof Request;
+		const method = isRequest ? requestOrUrl.method.toUpperCase() : "GET";
+		const isIdempotent =
+			method === "GET" || method === "HEAD" || method === "OPTIONS";
+
 		let lastResponse;
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Clone per attempt so the (empty, for idempotent methods) body
+			// stream is never reused across retries; non-Request callers pass
+			// through unchanged.
+			const attemptTarget = isRequest ? requestOrUrl.clone() : requestOrUrl;
 			lastResponse = await super.containerFetch(
-				requestOrUrl,
+				attemptTarget,
 				portOrInit,
 				portParam,
 			);
-			// Only the transient proxy 500 is retryable. Anything else
-			// (success, redirects, 4xx, or a different 500) is returned as-is.
+			// Only the transient proxy 500 on an idempotent request is
+			// retryable. Anything else (success, redirects, 4xx, a different
+			// 500, or ANY non-idempotent request) is returned as-is.
 			if (
 				lastResponse.status !== 500 ||
+				!isIdempotent ||
 				attempt === maxAttempts ||
-				(requestOrUrl instanceof Request && requestOrUrl.signal?.aborted)
+				(isRequest && requestOrUrl.signal?.aborted)
 			) {
 				return lastResponse;
 			}
