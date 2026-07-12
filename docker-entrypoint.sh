@@ -1,5 +1,16 @@
 #!/bin/sh
-set -e
+# NOTE: intentionally NOT using `set -e` here.
+#
+# This script sits directly on the container cold-start critical path: it runs
+# on EVERY boot before `node server.js` binds port 3000, and Cloudflare's proxy
+# will report "Container is taking too long to accept the connection" if the
+# port never comes up. The NEXT_PUBLIC_* placeholder swap below is a best-effort
+# convenience (it only matters for bundles the standalone server serves itself);
+# a failure in it must NEVER prevent the Next.js server from starting. With
+# `set -e` a single non-zero exit from `find`/`sed` (e.g. a transient FS error)
+# would abort the whole script, the port would never bind, and the request would
+# fail with that exact proxy timeout. So we run the swap defensively and always
+# fall through to `exec "$@"`.
 
 # ── Replace NEXT_PUBLIC_* placeholders with real env var values ────────────
 #
@@ -23,6 +34,31 @@ REPLACEMENTS="
 __NEXT_PUBLIC_BASE_URL__|NEXT_PUBLIC_BASE_URL|
 __NEXT_PUBLIC_ASSET_PREFIX__|NEXT_PUBLIC_ASSET_PREFIX|
 "
+
+# CRITICAL: preserve the original command (the Docker CMD, e.g.
+# `node server.js`) BEFORE we build the sed argument list.
+#
+# We build the combined `sed -e ... -e ...` argument list in the shell's
+# positional parameters (`$@`) because that's the only array POSIX sh gives
+# us. But `$@` currently holds the command we must eventually `exec` to start
+# the server. If we clobber `$@` with sed args and then `exec "$@"`, we would
+# exec the leftover `-e "s|...|...|g"` strings INSTEAD of `node server.js`:
+# the server would never start, port 3000 would never bind, and Cloudflare's
+# proxy would fail every request with "Container is taking too long to accept
+# the connection". So we stash the original args in a delimited string first,
+# then rebuild them for the final `exec` after the swap is done.
+#
+# CMD args are joined on a newline (\n) — safe because none of this image's
+# CMD tokens (`node`, `server.js`) contain a newline.
+CMD_ARGS=""
+for arg in "$@"; do
+  if [ -z "$CMD_ARGS" ]; then
+    CMD_ARGS="$arg"
+  else
+    CMD_ARGS="$CMD_ARGS
+$arg"
+  fi
+done
 
 # Build a single combined `sed` expression so we walk the .next tree only
 # once (instead of once per placeholder). This runs on EVERY container boot
@@ -56,10 +92,37 @@ if [ "$#" -gt 0 ]; then
   # — the faster placeholders are swapped, the sooner the server binds port
   # 3000 and the less likely Cloudflare's proxy is to time out with
   # "Container is taking too long to accept the connection".
-  find "$SEARCH_DIR" -type f -name '*.js' -exec sed -i "$@" {} +
+  #
+  # Best-effort: the trailing `|| ...` swallows any non-zero exit from the
+  # walk/sed so a transient FS hiccup can never abort the boot before the
+  # server starts. The server reads NEXT_PUBLIC_* from its own env regardless;
+  # this swap only patches the client bundles the standalone server serves.
+  if find "$SEARCH_DIR" -type f -name '*.js' -exec sed -i "$@" {} +; then
+    echo "✅ NEXT_PUBLIC_* placeholders replaced with runtime values"
+  else
+    echo "⚠️  NEXT_PUBLIC_* placeholder swap failed — starting server anyway" >&2
+  fi
+else
+  echo "ℹ️  No NEXT_PUBLIC_* placeholders configured — skipping swap"
 fi
 
-echo "✅ NEXT_PUBLIC_* placeholders replaced with runtime values"
+# Restore the original command (the Docker CMD, e.g. `node server.js`) that we
+# stashed in CMD_ARGS before `$@` was repurposed for the sed args, then hand
+# off to it. We re-split CMD_ARGS on newlines using a temporarily-narrowed IFS
+# so each CMD token becomes its own positional parameter again.
+OLD_IFS=$IFS
+IFS='
+'
+# Intentionally unquoted so IFS word-splitting rebuilds the positional params.
+# shellcheck disable=SC2086
+set -- $CMD_ARGS
+IFS=$OLD_IFS
 
-# Hand off to the original command (node server.js)
+# Hand off to the original command (node server.js). If for some reason no CMD
+# was provided, fall back to booting the Next.js standalone server directly so
+# the port always binds.
+if [ "$#" -eq 0 ]; then
+  echo "⚠️  No CMD provided — defaulting to 'node server.js'" >&2
+  set -- node server.js
+fi
 exec "$@"
