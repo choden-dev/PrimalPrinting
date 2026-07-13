@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
 			error instanceof Error ? error.message : "Failed to create order.";
 		const isUserError =
 			error instanceof Error &&
-			/please|must|exceeds|unsupported|empty|not received|valid PDF/i.test(
+			/please|must|exceeds|unsupported|empty|not received|valid PDF|no print product is configured|no default price configured|stripe catalogue/i.test(
 				error.message,
 			);
 		return NextResponse.json(

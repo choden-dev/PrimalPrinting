@@ -47,17 +47,37 @@ const PdfOrder = () => {
 		);
 		const temp = [...uploadedPdfs];
 		const toChange = temp[idx];
-		console.log(option);
-		fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`).then(
-			(res) =>
+		// Guard against the item no longer being in the cart: temp[-1] is
+		// undefined and would crash with "cannot read properties of undefined"
+		// on the toChange.getPages()/property access below.
+		if (idx === -1 || !toChange) {
+			return;
+		}
+		fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`)
+			.then((res) =>
 				res.json().then((data) => {
 					console.log(data);
+					if (!data.success || data.priceId == null || data.price == null) {
+						window.alert(
+							"We couldn't work out a price for this file right now. Please try again, or contact us if the problem persists.",
+						);
+						return;
+					}
 					toChange.isColor = option;
 					toChange.priceId = data.priceId;
 					toChange.setUnitPrice(data.price / 100);
 					updateUploadedPdf(toChange);
 				}),
-		);
+			)
+			.catch((err) => {
+				// A rejected request or a non-JSON error response must not leave
+				// the item in an inconsistent state or surface as an unhandled
+				// rejection — surface a clear message instead.
+				console.error("Failed to reprice file on colour change:", err);
+				window.alert(
+					"We couldn't work out a price for this file right now. Please try again, or contact us if the problem persists.",
+				);
+			});
 	};
 	const _handleDragOver = useCallback(
 		(e: { preventDefault: () => void; stopPropagation: () => void }) => {
@@ -79,10 +99,24 @@ const PdfOrder = () => {
 						.then((pdfjs) => pdfjs.getDocument(src).promise)
 						.then((doc) => {
 							pages = doc.numPages;
-							fetch(
+							// Return the fetch promise so a rejected request or a
+							// non-JSON error response propagates to the outer
+							// .catch() below instead of becoming an unhandled
+							// rejection during the initial upload.
+							return fetch(
 								`/api/shop?pages=${pages}&isColor=${DEFAULT_IS_COLOR}`,
 							).then((res) =>
 								res.json().then((data) => {
+									if (
+										!data.success ||
+										data.price == null ||
+										data.priceId == null
+									) {
+										window.alert(
+											"We couldn't work out a price for this file right now. Please try again, or contact us if the problem persists.",
+										);
+										return;
+									}
 									if (Number.isNaN(data.price)) {
 										window.alert(
 											"Pdf is over 400 pages, please email us the pdf and we can arrange something.",

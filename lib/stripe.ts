@@ -14,7 +14,23 @@ const makeStripeConnection = async () => {
 
 export const findPrice = async (priceId: string) => {
 	const stripe: Stripe = await makeStripeConnection();
-	const price = await stripe.prices.retrieve(priceId);
+	let price: Stripe.Price | Stripe.DeletedPrice;
+	try {
+		price = await stripe.prices.retrieve(priceId);
+	} catch (_error) {
+		// A product may reference a price that has since been deleted/archived
+		// or is otherwise unretrievable. Surface this as a descriptive
+		// catalogue error rather than an opaque Stripe 500 so the caller can
+		// classify it as a user-actionable configuration problem.
+		throw new Error(
+			`Price "${priceId}" could not be retrieved from the Stripe catalogue.`,
+		);
+	}
+	if (price.deleted) {
+		throw new Error(
+			`Price "${priceId}" has been deleted in the Stripe catalogue.`,
+		);
+	}
 	return price.unit_amount;
 };
 
@@ -25,6 +41,11 @@ export const findPrice = async (priceId: string) => {
  *   - type: "Colour" or "B/W"
  */
 export const getPriceForPages = async (pages: number, isColor: boolean) => {
+	if (!Number.isFinite(pages) || pages < 1) {
+		throw new Error(
+			`Page count must be a positive number; received "${pages}". The uploaded file may be empty or could not be read.`,
+		);
+	}
 	const stripe: Stripe = await makeStripeConnection();
 	const pageRange = { maxPages: -1, minPages: -1 };
 	const updatePageRange = (minPages: number, maxPages: number): void => {
@@ -56,9 +77,29 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	const products = await stripe.products.search({
 		query: `metadata["maxPages"]:'${pageRange.maxPages}' AND metadata["minPages"]:'${pageRange.minPages}' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
 	});
-	const priceId = products.data[0].default_price?.toString();
-	const price = await findPrice(priceId || "");
-	const productId = products.data[0].id;
+	const product = products?.data?.[0];
+	if (!product) {
+		throw new Error(
+			`No print product is configured for ${pages} page(s) (${
+				pageRange.minPages
+			}-${pageRange.maxPages}, ${
+				isColor ? "Colour" : "B/W"
+			}) in the Stripe catalogue.`,
+		);
+	}
+	const priceId = product.default_price?.toString();
+	if (!priceId) {
+		throw new Error(
+			`Print product "${product.id}" has no default price configured in the Stripe catalogue.`,
+		);
+	}
+	const price = await findPrice(priceId);
+	if (price == null) {
+		throw new Error(
+			`Print product "${product.id}" price "${priceId}" has no unit amount configured in the Stripe catalogue.`,
+		);
+	}
+	const productId = product.id;
 	return {
 		price: price,
 		priceId: priceId,
