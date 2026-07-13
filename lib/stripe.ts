@@ -14,7 +14,23 @@ const makeStripeConnection = async () => {
 
 export const findPrice = async (priceId: string) => {
 	const stripe: Stripe = await makeStripeConnection();
-	const price = await stripe.prices.retrieve(priceId);
+	let price: Stripe.Price | Stripe.DeletedPrice;
+	try {
+		price = await stripe.prices.retrieve(priceId);
+	} catch (_error) {
+		// A product may reference a price that has since been deleted/archived
+		// or is otherwise unretrievable. Surface this as a descriptive
+		// catalogue error rather than an opaque Stripe 500 so the caller can
+		// classify it as a user-actionable configuration problem.
+		throw new Error(
+			`Price "${priceId}" could not be retrieved from the Stripe catalogue.`,
+		);
+	}
+	if (price.deleted) {
+		throw new Error(
+			`Price "${priceId}" has been deleted in the Stripe catalogue.`,
+		);
+	}
 	return price.unit_amount;
 };
 
