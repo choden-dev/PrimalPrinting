@@ -73,6 +73,11 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 		);
 	}
 	const price = await findPrice(priceId);
+	if (price == null) {
+		throw new Error(
+			`Print product "${product.id}" price "${priceId}" has no unit amount configured in the Stripe catalogue.`,
+		);
+	}
 	const productId = product.id;
 	return {
 		price: price,
