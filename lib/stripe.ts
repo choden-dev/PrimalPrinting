@@ -61,7 +61,7 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	const products = await stripe.products.search({
 		query: `metadata["maxPages"]:'${pageRange.maxPages}' AND metadata["minPages"]:'${pageRange.minPages}' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
 	});
-	const product = products.data[0];
+	const product = products?.data?.[0];
 	if (!product) {
 		throw new Error(
 			`No print product is configured for ${pages} page(s) (${
