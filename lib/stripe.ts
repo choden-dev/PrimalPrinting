@@ -25,6 +25,11 @@ export const findPrice = async (priceId: string) => {
  *   - type: "Colour" or "B/W"
  */
 export const getPriceForPages = async (pages: number, isColor: boolean) => {
+	if (!Number.isFinite(pages) || pages < 1) {
+		throw new Error(
+			`Page count must be a positive number; received "${pages}". The uploaded file may be empty or could not be read.`,
+		);
+	}
 	const stripe: Stripe = await makeStripeConnection();
 	const pageRange = { maxPages: -1, minPages: -1 };
 	const updatePageRange = (minPages: number, maxPages: number): void => {
