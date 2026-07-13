@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	type FileToUpload,
 	type PresignedUpload,
@@ -78,6 +78,48 @@ function CreateOrderViewInner() {
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [createdOrder, setCreatedOrder] = useState<CreatedOrder | null>(null);
 	const [copied, setCopied] = useState(false);
+	const [preselectError, setPreselectError] = useState<string | null>(null);
+
+	// Deep-link support: when the admin arrives with ?customerId=<id> (e.g. from
+	// a "Create order" link on a customer's admin record), fetch that customer
+	// and pre-select them so the admin can jump straight to adding files.
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const customerId = new URLSearchParams(window.location.search)
+			.get("customerId")
+			?.trim();
+		if (!customerId) return;
+
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await fetch(
+					`/api/admin/customers?id=${encodeURIComponent(customerId)}`,
+				);
+				if (!res.ok) {
+					const data = (await res.json().catch(() => ({}))) as {
+						error?: string;
+					};
+					throw new Error(
+						data.error || `Could not load customer (HTTP ${res.status}).`,
+					);
+				}
+				const data = (await res.json()) as { customers?: Customer[] };
+				const customer = data.customers?.[0];
+				if (!cancelled && customer) setSelectedCustomer(customer);
+			} catch (err) {
+				if (!cancelled) {
+					setPreselectError(
+						err instanceof Error ? err.message : "Could not load customer.",
+					);
+				}
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
 	const handleSearch = useCallback(async () => {
 		setSearching(true);
@@ -267,6 +309,11 @@ function CreateOrderViewInner() {
 			{/* ---- Step 1: Customer ---- */}
 			<section style={{ marginTop: "1.5rem" }}>
 				<h2 style={{ fontSize: "1.1rem" }}>1. Select customer</h2>
+				{preselectError && (
+					<p style={{ color: "var(--theme-error-500, #c00)" }}>
+						{preselectError} Search for the customer below instead.
+					</p>
+				)}
 				{selectedCustomer ? (
 					<div
 						style={{
