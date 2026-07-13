@@ -56,9 +56,24 @@ export const getPriceForPages = async (pages: number, isColor: boolean) => {
 	const products = await stripe.products.search({
 		query: `metadata["maxPages"]:'${pageRange.maxPages}' AND metadata["minPages"]:'${pageRange.minPages}' AND metadata["type"]:${isColor ? "'Colour'" : "'B/W'"}`,
 	});
-	const priceId = products.data[0].default_price?.toString();
-	const price = await findPrice(priceId || "");
-	const productId = products.data[0].id;
+	const product = products.data[0];
+	if (!product) {
+		throw new Error(
+			`No print product is configured for ${pages} page(s) (${
+				pageRange.minPages
+			}-${pageRange.maxPages}, ${
+				isColor ? "Colour" : "B/W"
+			}) in the Stripe catalogue.`,
+		);
+	}
+	const priceId = product.default_price?.toString();
+	if (!priceId) {
+		throw new Error(
+			`Print product "${product.id}" has no default price configured in the Stripe catalogue.`,
+		);
+	}
+	const price = await findPrice(priceId);
+	const productId = product.id;
 	return {
 		price: price,
 		priceId: priceId,
