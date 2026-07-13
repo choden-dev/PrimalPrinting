@@ -94,7 +94,11 @@ const PdfOrder = () => {
 						.then((pdfjs) => pdfjs.getDocument(src).promise)
 						.then((doc) => {
 							pages = doc.numPages;
-							fetch(
+							// Return the fetch promise so a rejected request or a
+							// non-JSON error response propagates to the outer
+							// .catch() below instead of becoming an unhandled
+							// rejection during the initial upload.
+							return fetch(
 								`/api/shop?pages=${pages}&isColor=${DEFAULT_IS_COLOR}`,
 							).then((res) =>
 								res.json().then((data) => {
