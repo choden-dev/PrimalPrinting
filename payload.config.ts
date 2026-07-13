@@ -100,6 +100,13 @@ export default (async () =>
 			},
 			components: {
 				views: {
+					createOrder: {
+						Component: "@/components/admin/CreateOrderView",
+						path: "/create-order",
+						meta: {
+							title: "Create Order for Customer",
+						},
+					},
 					ordersByTimeslot: {
 						Component: "@/components/admin/OrdersByTimeslotView",
 						path: "/orders-by-timeslot",

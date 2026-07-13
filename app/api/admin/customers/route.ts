@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import type { Where } from "payload";
 import { isPayloadAdmin } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const payload = await getPayloadClient();
 
-		const where = search
+		const where: Where = search
 			? {
 					or: [{ email: { contains: search } }, { name: { contains: search } }],
 				}
