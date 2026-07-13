@@ -52,6 +52,12 @@ const PdfOrder = () => {
 			(res) =>
 				res.json().then((data) => {
 					console.log(data);
+					if (!data.success || data.priceId == null || data.price == null) {
+						window.alert(
+							"We couldn't work out a price for this file right now. Please try again, or contact us if the problem persists.",
+						);
+						return;
+					}
 					toChange.isColor = option;
 					toChange.priceId = data.priceId;
 					toChange.setUnitPrice(data.price / 100);
@@ -83,6 +89,16 @@ const PdfOrder = () => {
 								`/api/shop?pages=${pages}&isColor=${DEFAULT_IS_COLOR}`,
 							).then((res) =>
 								res.json().then((data) => {
+									if (
+										!data.success ||
+										data.price == null ||
+										data.priceId == null
+									) {
+										window.alert(
+											"We couldn't work out a price for this file right now. Please try again, or contact us if the problem persists.",
+										);
+										return;
+									}
 									if (Number.isNaN(data.price)) {
 										window.alert(
 											"Pdf is over 400 pages, please email us the pdf and we can arrange something.",
