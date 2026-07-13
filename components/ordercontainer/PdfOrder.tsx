@@ -48,8 +48,8 @@ const PdfOrder = () => {
 		const temp = [...uploadedPdfs];
 		const toChange = temp[idx];
 		console.log(option);
-		fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`).then(
-			(res) =>
+		fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`)
+			.then((res) =>
 				res.json().then((data) => {
 					console.log(data);
 					if (!data.success || data.priceId == null || data.price == null) {
@@ -63,7 +63,16 @@ const PdfOrder = () => {
 					toChange.setUnitPrice(data.price / 100);
 					updateUploadedPdf(toChange);
 				}),
-		);
+			)
+			.catch((err) => {
+				// A rejected request or a non-JSON error response must not leave
+				// the item in an inconsistent state or surface as an unhandled
+				// rejection — surface a clear message instead.
+				console.error("Failed to reprice file on colour change:", err);
+				window.alert(
+					"We couldn't work out a price for this file right now. Please try again, or contact us if the problem persists.",
+				);
+			});
 	};
 	const _handleDragOver = useCallback(
 		(e: { preventDefault: () => void; stopPropagation: () => void }) => {
