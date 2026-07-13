@@ -29,6 +29,14 @@ export default function AdminNavLinks() {
 	return (
 		<>
 			<Link
+				href="/admin/create-order"
+				style={linkStyle}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				➕ Create Order
+			</Link>
+			<Link
 				href="/admin/verify-payments"
 				style={linkStyle}
 				onMouseEnter={handleMouseEnter}

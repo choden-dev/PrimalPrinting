@@ -16,6 +16,13 @@ export const Customers: CollectionConfig = {
 		defaultColumns: ["email", "name", "createdAt"],
 		description:
 			"Customer accounts created via Google OAuth sign-in. Managed by NextAuth – do not create manually.",
+		components: {
+			edit: {
+				beforeDocumentControls: [
+					"@/components/admin/CreateOrderForCustomerButton",
+				],
+			},
+		},
 	},
 	access: {
 		// Only admins can read/update/delete via the Payload admin panel.
