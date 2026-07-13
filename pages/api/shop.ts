@@ -46,8 +46,18 @@ export default async function handler(
 				success: false,
 			});
 		}
-		return res.status(500).json({
-			message: error instanceof Error ? error.message : "Unknown error",
+		// Catalogue/pricing misconfiguration errors thrown by getPriceForPages
+		// (no matching product, no default price, no unit amount, invalid page
+		// count) are user-actionable — surface them as 400 with the descriptive
+		// message rather than an opaque 500, matching the App Router order route.
+		const message = error instanceof Error ? error.message : "Unknown error";
+		const isUserError =
+			error instanceof Error &&
+			/please|must|exceeds|unsupported|empty|not received|valid PDF|no print product is configured|no default price configured|stripe catalogue/i.test(
+				error.message,
+			);
+		return res.status(isUserError ? 400 : 500).json({
+			message,
 			success: false,
 		});
 	}
