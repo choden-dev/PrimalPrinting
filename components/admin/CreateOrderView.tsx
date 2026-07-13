@@ -77,6 +77,7 @@ function CreateOrderViewInner() {
 	const [progressLabel, setProgressLabel] = useState<string | null>(null);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [createdOrder, setCreatedOrder] = useState<CreatedOrder | null>(null);
+	const [copied, setCopied] = useState(false);
 
 	const handleSearch = useCallback(async () => {
 		setSearching(true);
@@ -229,7 +230,30 @@ function CreateOrderViewInner() {
 	const resetForNewOrder = useCallback(() => {
 		setCreatedOrder(null);
 		setSubmitError(null);
+		setCopied(false);
 	}, []);
+
+	// Customer-facing link that resumes the order straight into the payment
+	// step (see statusToStep in OrderContainer: DRAFT → PAYMENT). The admin can
+	// copy this and send it to the customer so they land directly on payment.
+	const resumeUrl = useMemo(() => {
+		if (!createdOrder) return "";
+		const origin = typeof window !== "undefined" ? window.location.origin : "";
+		return `${origin}/order?resume=${createdOrder.id}`;
+	}, [createdOrder]);
+
+	const handleCopyResumeUrl = useCallback(async () => {
+		if (!resumeUrl) return;
+		try {
+			await navigator.clipboard.writeText(resumeUrl);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// Clipboard API can fail (e.g. insecure context) — leave the link
+			// visible so the admin can select and copy it manually.
+			setCopied(false);
+		}
+	}, [resumeUrl]);
 
 	return (
 		<div style={{ padding: "2rem", maxWidth: 860, margin: "0 auto" }}>
@@ -471,6 +495,45 @@ function CreateOrderViewInner() {
 						Total:{" "}
 						<strong>{formatCurrency(createdOrder.pricing?.total)}</strong>
 					</p>
+					<div style={{ margin: "0.75rem 0" }}>
+						<label
+							htmlFor="resume-link"
+							style={{
+								display: "block",
+								fontWeight: 600,
+								marginBottom: "0.25rem",
+							}}
+						>
+							Send this link to the customer to pay:
+						</label>
+						<div style={{ display: "flex", gap: "0.5rem" }}>
+							<input
+								id="resume-link"
+								type="text"
+								readOnly
+								value={resumeUrl}
+								onFocus={(e) => e.target.select()}
+								style={{
+									flex: 1,
+									padding: "0.5rem",
+									fontFamily: "monospace",
+								}}
+							/>
+							<button type="button" onClick={handleCopyResumeUrl}>
+								{copied ? "Copied!" : "Copy link"}
+							</button>
+						</div>
+						<p
+							style={{
+								margin: "0.25rem 0 0",
+								color: "var(--theme-elevation-600)",
+								fontSize: "0.85rem",
+							}}
+						>
+							Opens the order directly on the payment step (customer must sign
+							in). It's also available under “My Orders”.
+						</p>
+					</div>
 					<button type="button" onClick={resetForNewOrder}>
 						Create another order
 					</button>
