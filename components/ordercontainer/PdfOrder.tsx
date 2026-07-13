@@ -47,7 +47,12 @@ const PdfOrder = () => {
 		);
 		const temp = [...uploadedPdfs];
 		const toChange = temp[idx];
-		console.log(option);
+		// Guard against the item no longer being in the cart: temp[-1] is
+		// undefined and would crash with "cannot read properties of undefined"
+		// on the toChange.getPages()/property access below.
+		if (idx === -1 || !toChange) {
+			return;
+		}
 		fetch(`/api/shop?pages=${toChange.getPages()}&isColor=${option}`)
 			.then((res) =>
 				res.json().then((data) => {
