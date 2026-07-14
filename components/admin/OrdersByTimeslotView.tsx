@@ -195,9 +195,15 @@ function OrdersByTimeslotViewInner() {
 		[getFileKey],
 	);
 
-	/** Download all files for all orders in a timeslot group sequentially */
+	/**
+	 * Open every downloadable file across the given orders in new tabs.
+	 *
+	 * Shared by the per-timeslot "Download All Files" button and the per-order
+	 * download button, so both behave identically (parallel presign, sequential
+	 * open with a small delay to dodge popup blockers).
+	 */
 	const downloadingRef = useRef(false);
-	const handleDownloadAllFiles = useCallback(
+	const downloadFilesForOrders = useCallback(
 		async (orders: OrderData[]) => {
 			if (downloadingRef.current) return;
 			downloadingRef.current = true;
@@ -263,6 +269,18 @@ function OrdersByTimeslotViewInner() {
 			}
 		},
 		[getFileKey],
+	);
+
+	/** Download all files across every order in a timeslot group. */
+	const handleDownloadAllFiles = useCallback(
+		(orders: OrderData[]) => downloadFilesForOrders(orders),
+		[downloadFilesForOrders],
+	);
+
+	/** Download all files for a single order. */
+	const handleDownloadOrderFiles = useCallback(
+		(order: OrderData) => downloadFilesForOrders([order]),
+		[downloadFilesForOrders],
 	);
 
 	return (
@@ -457,6 +475,23 @@ function OrdersByTimeslotViewInner() {
 								>
 									⬇ Download All Files
 								</button>
+								<a
+									href={`/admin/collections/timeslots/${timeslot.id}`}
+									title="Open this timeslot to edit or delete it"
+									style={{
+										padding: "3px 10px",
+										fontSize: "12px",
+										fontWeight: 600,
+										background: "rgba(255,255,255,0.15)",
+										color: "#fff",
+										border: "1px solid rgba(255,255,255,0.3)",
+										borderRadius: "4px",
+										cursor: "pointer",
+										textDecoration: "none",
+									}}
+								>
+									⚙ Manage Timeslot
+								</a>
 							</div>
 						</div>
 
@@ -691,6 +726,28 @@ function OrdersByTimeslotViewInner() {
 												)}
 											</td>
 											<td style={{ padding: "10px 12px", textAlign: "right" }}>
+												{order.files?.some(
+													(f) => f.stagingKey || f.permanentKey,
+												) && (
+													<button
+														type="button"
+														onClick={() => handleDownloadOrderFiles(order)}
+														title="Download all files for this order"
+														style={{
+															padding: "4px 12px",
+															background: "#00695c",
+															color: "#fff",
+															border: "none",
+															borderRadius: "4px",
+															fontSize: "12px",
+															fontWeight: 600,
+															cursor: "pointer",
+															marginRight: "4px",
+														}}
+													>
+														⬇ Download All
+													</button>
+												)}
 												{order.status === OrderStatus.AWAITING_PICKUP && (
 													<button
 														type="button"
