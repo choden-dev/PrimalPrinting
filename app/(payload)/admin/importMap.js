@@ -33,6 +33,7 @@ import { default as default_createorderview01234567890abcdef } from '@/component
 import { default as default_ae6d727f69bea18ad23ef405314d6459 } from '@/components/admin/PendingVerificationView'
 import { default as default_357e94cb16882b41b62ce8427705d759 } from '@/components/admin/NotifyTimeslotsView'
 import { default as default_f0bf1af8c7fcbee7729125193a4368fe } from '@/components/admin/ScheduleCalendarView'
+import { default as default_deletetimeslotbtn0123456789abcdef } from '@/components/admin/DeleteTimeslotButton'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -72,5 +73,6 @@ export const importMap = {
   "@/components/admin/PendingVerificationView#default": default_ae6d727f69bea18ad23ef405314d6459,
   "@/components/admin/NotifyTimeslotsView#default": default_357e94cb16882b41b62ce8427705d759,
   "@/components/admin/ScheduleCalendarView#default": default_f0bf1af8c7fcbee7729125193a4368fe,
+  "@/components/admin/DeleteTimeslotButton#default": default_deletetimeslotbtn0123456789abcdef,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

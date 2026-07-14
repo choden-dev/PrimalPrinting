@@ -19,6 +19,14 @@ html
 
         p Your order itself is safe and has not been affected. All you need to do is choose a new pickup time.
 
+        if customMessage
+          .section
+            .info-box
+              h3 A note from us
+              each line in customMessage.split("\n")
+                if line.trim()
+                  p= line
+
         .section
           .action-box
             h3 Select a New Pickup Slot
