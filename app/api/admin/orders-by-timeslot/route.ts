@@ -61,6 +61,28 @@ export async function GET(request: NextRequest) {
 			});
 		}
 
+		// Sort chronologically by date, then start/end time. The Payload query
+		// only sorts by date, so slots on the same day would otherwise appear in
+		// an arbitrary order. `date` is "YYYY-MM-DD" and the times are zero-padded
+		// "HH:MM", so lexicographic comparison is chronological.
+		const normaliseDate = (value: unknown): string =>
+			typeof value === "string"
+				? value.includes("T")
+					? value.split("T")[0]
+					: value
+				: "";
+		timeslots = [...timeslots].sort((a, b) => {
+			const dateCmp = normaliseDate(a.date).localeCompare(
+				normaliseDate(b.date),
+			);
+			if (dateCmp !== 0) return dateCmp;
+			const startCmp = String(a.startTime ?? "").localeCompare(
+				String(b.startTime ?? ""),
+			);
+			if (startCmp !== 0) return startCmp;
+			return String(a.endTime ?? "").localeCompare(String(b.endTime ?? ""));
+		});
+
 		const timeslotIds = timeslots.map((t) => String(t.id));
 
 		// ── 2. Fetch orders in two parallel queries ──────────────────────
