@@ -291,8 +291,11 @@ export async function sendTimeslotDeletedEmail(params: {
 	orderNumber: string;
 	files: OrderFile[];
 	pricing: PricingInfo | undefined;
+	/** Optional personalised note from the admin, shown as "A note from us". */
+	customMessage?: string;
 }): Promise<void> {
-	const { to, customerName, orderNumber, files, pricing } = params;
+	const { to, customerName, orderNumber, files, pricing, customMessage } =
+		params;
 
 	const common = await buildCommonLocals(customerName);
 
@@ -301,6 +304,7 @@ export async function sendTimeslotDeletedEmail(params: {
 		orderNumber,
 		files: formatFilesForTemplate(files),
 		...formatPricingForTemplate(pricing),
+		customMessage: customMessage?.trim() || null,
 	});
 
 	await getTransporter().sendMail({
