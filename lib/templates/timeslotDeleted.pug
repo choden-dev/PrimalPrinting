@@ -1,0 +1,37 @@
+include _mixins
+
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    include _styles
+  body
+    .container
+      .header
+        h1 Pickup Timeslot No Longer Available
+        p Order ##{orderNumber}
+
+      .content
+        p Hi #{customerName},
+
+        p We are sorry, but the pickup timeslot you selected for your order is no longer available and has been removed. We apologise for the inconvenience this may cause.
+
+        p Your order itself is safe and has not been affected. All you need to do is choose a new pickup time.
+
+        .section
+          .action-box
+            h3 Select a New Pickup Slot
+            p Please head to your orders page to choose a new time to collect your prints.
+            p
+              a.btn(href=ordersUrl) Select a New Pickup Slot
+
+        +fileList(files)
+
+        +pricingTable(subtotal, tax, total)
+
+        p If you have any questions or need help choosing a new time, please contact us:
+        +contactAndFooter(contactEmail, contactPhone)
+
+      .footer
+        p Primal Printing. Thank you for your order and for your patience.

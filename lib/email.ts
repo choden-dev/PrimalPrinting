@@ -281,6 +281,36 @@ export async function sendTimeslotChangedEmail(params: {
 	});
 }
 
+/**
+ * Notify affected customers (one email per order) when an admin deletes a
+ * timeslot. Apologises and asks the customer to select a new pickup slot.
+ */
+export async function sendTimeslotDeletedEmail(params: {
+	to: string;
+	customerName: string;
+	orderNumber: string;
+	files: OrderFile[];
+	pricing: PricingInfo | undefined;
+}): Promise<void> {
+	const { to, customerName, orderNumber, files, pricing } = params;
+
+	const common = await buildCommonLocals(customerName);
+
+	const html = renderTemplate("timeslotDeleted", {
+		...common,
+		orderNumber,
+		files: formatFilesForTemplate(files),
+		...formatPricingForTemplate(pricing),
+	});
+
+	await getTransporter().sendMail({
+		from: fromAddress(),
+		to,
+		subject: `Action Needed: Select a New Pickup Time — ${orderNumber}`,
+		html,
+	});
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 /** Convert Payload rich-text (Lexical/Slate) content into simple email-safe HTML, handling common node types. */

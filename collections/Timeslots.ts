@@ -1,5 +1,12 @@
-import type { CollectionAfterChangeHook, CollectionConfig } from "payload";
-import { sendTimeslotChangedEmail } from "../lib/email";
+import type {
+	CollectionAfterChangeHook,
+	CollectionAfterDeleteHook,
+	CollectionConfig,
+} from "payload";
+import {
+	sendTimeslotChangedEmail,
+	sendTimeslotDeletedEmail,
+} from "../lib/email";
 import { getPayloadClient } from "../lib/payload";
 
 /**
@@ -97,6 +104,81 @@ const notifyOnTimeslotChange: CollectionAfterChangeHook = async ({
 	return doc;
 };
 
+// ── afterDelete hook: notify customers when a booked timeslot is deleted ──
+const notifyOnTimeslotDelete: CollectionAfterDeleteHook = async ({
+	id,
+	req,
+}) => {
+	// Fire-and-forget so the admin UI isn't blocked
+	void (async () => {
+		try {
+			const payload = req.payload ?? (await getPayloadClient());
+
+			// Find all orders that still reference the deleted timeslot
+			const { docs: orders } = await payload.find({
+				collection: "orders",
+				where: { pickupTimeslot: { equals: id } },
+				depth: 1, // populate the customer relationship
+				limit: 0, // no limit — fetch all
+			});
+
+			if (orders.length === 0) return;
+
+			// Clear the dangling timeslot reference and email each customer
+			await Promise.allSettled(
+				orders.map(async (order) => {
+					// Remove the reference so the customer can re-select a slot
+					try {
+						await payload.update({
+							collection: "orders",
+							id: order.id,
+							data: { pickupTimeslot: null },
+						});
+					} catch (error) {
+						console.error(
+							`[Timeslots] Failed to clear pickupTimeslot on order ${order.orderNumber}:`,
+							error,
+						);
+					}
+
+					const customer = order.customer as {
+						email?: string;
+						name?: string;
+					} | null;
+
+					if (!customer?.email) return;
+
+					await sendTimeslotDeletedEmail({
+						to: customer.email,
+						customerName: customer.name || "Customer",
+						orderNumber: order.orderNumber,
+						files: (order.files || []) as {
+							fileName: string;
+							pageCount: number;
+							copies: number;
+							colorMode: string;
+							paperSize: string;
+							doubleSided: boolean;
+						}[],
+						pricing: order.pricing as
+							| { subtotal: number; tax: number; total: number }
+							| undefined,
+					});
+				}),
+			);
+
+			console.log(
+				`[Timeslots] Notified ${orders.length} order(s) about deleted timeslot ${id}`,
+			);
+		} catch (error) {
+			console.error(
+				`[Timeslots] Failed to send timeslot-deleted emails for ${id}:`,
+				error,
+			);
+		}
+	})();
+};
+
 export const Timeslots: CollectionConfig = {
 	slug: "timeslots",
 	admin: {
@@ -123,6 +205,7 @@ export const Timeslots: CollectionConfig = {
 	},
 	hooks: {
 		afterChange: [notifyOnTimeslotChange],
+		afterDelete: [notifyOnTimeslotDelete],
 	},
 	fields: [
 		{
