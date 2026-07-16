@@ -18,7 +18,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Biome
+      - name: Setup Biome (attempt 1)
+        id: setup_biome
+        continue-on-error: true
+        uses: biomejs/setup-biome@v2
+        with:
+          version: 2.4.12
+      - name: Setup Biome (retry on transient failure)
+        if: steps.setup_biome.outcome == 'failure'
         uses: biomejs/setup-biome@v2
         with:
           version: 2.4.12
