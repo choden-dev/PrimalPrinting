@@ -12,6 +12,8 @@ type RouteContext = { params: Promise<{ orderId: string }> };
  * Customer selects (or changes) a pickup timeslot.
  * - PAID → AWAITING_PICKUP (first selection)
  * - AWAITING_PICKUP → AWAITING_PICKUP (re-selection / change)
+ * - PRINTED → PRINTED (change after the order has been printed; status is
+ *   preserved so the admin still sees it as printed)
  *
  * Enforces capacity limits and includes pickup instructions in the response.
  * Triggers order confirmation email with pickup details and instructions.
@@ -57,10 +59,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			return NextResponse.json({ error: "Order not found." }, { status: 404 });
 		}
 
-		if (order.status !== "PAID" && order.status !== "AWAITING_PICKUP") {
+		if (
+			order.status !== "PAID" &&
+			order.status !== "AWAITING_PICKUP" &&
+			order.status !== "PRINTED"
+		) {
 			return NextResponse.json(
 				{
-					error: `Cannot select timeslot for order in ${order.status} status. Order must be PAID or AWAITING_PICKUP.`,
+					error: `Cannot select timeslot for order in ${order.status} status. Order must be PAID, AWAITING_PICKUP, or PRINTED.`,
 				},
 				{ status: 400 },
 			);
@@ -93,7 +99,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		const isChangingTimeslot = order.status === "AWAITING_PICKUP";
+		// An order is "changing" its timeslot (rather than selecting for the
+		// first time) whenever it already has one — i.e. any status past PAID.
+		const isChangingTimeslot =
+			order.status === "AWAITING_PICKUP" || order.status === "PRINTED";
 		const previousTimeslotId = isChangingTimeslot
 			? typeof order.pickupTimeslot === "object" && order.pickupTimeslot
 				? (order.pickupTimeslot as { id: string }).id
