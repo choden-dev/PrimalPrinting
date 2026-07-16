@@ -75,7 +75,7 @@
 		"wrangler": "^4.83.0"
 	},
 	"engines": {
-		"node": ">=20",
+		"node": ">=24",
 		"pnpm": "^10.0.0"
 	},
 	"//cloudflare-workarounds": "jose is an explicit dep because payload uses it for JWT but pnpm doesn't hoist it. canvas is overridden with a local stub because pdfjs-dist optionally requires it (native addon) which breaks the build. See shims/canvas/index.js for details.",

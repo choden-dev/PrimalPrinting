@@ -7,7 +7,7 @@
 # which is NOT the case for Cloudflare Workers Builds. Turbo's remote
 # cache, by contrast, IS preserved, so we get a true "skip pnpm install
 # when the lockfile hasn't changed" path on every deploy.
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -140,7 +140,7 @@ ENV TURBO_TOKEN="" \
 
 
 # ── Stage 3: Production runner ───────────────────────────────────────────
-FROM node:22-slim AS runner
+FROM node:24-slim AS runner
 
 WORKDIR /app
 

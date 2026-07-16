@@ -135,7 +135,7 @@ if [ "$#" -gt 0 ]; then
   #
   # We read grep's output into the positional params via a NUL-safe loop
   # (`grep -rlZ` + `read -d ''`) so paths with spaces/newlines are handled
-  # correctly. GNU coreutils in the node:22-slim runtime supports `grep -rlZ`
+  # correctly. GNU coreutils in the node:24-slim runtime supports `grep -rlZ`
   # and `read -d`; local validation must use GNU tools (see the CMD note above).
   #
   # Best-effort throughout: any non-zero exit is captured into `swap_status`

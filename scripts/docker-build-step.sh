@@ -18,7 +18,7 @@
 #      falling back to a plain `next build`.
 #
 # Kept as a standalone POSIX shell script (sh, not bash) so it runs cleanly
-# inside node:22-slim without requiring extra packages.
+# inside node:24-slim without requiring extra packages.
 
 set -eu
 
