@@ -114,11 +114,15 @@ const OrderContainerInner = ({
 				setActiveOrderId(order.id);
 				setActiveOrderNumber(order.orderNumber);
 
-				// If pickupFor query param, force pickup step (if order is PAID or AWAITING_PICKUP)
+				// If pickupFor query param, force pickup step so the customer can
+				// (re)select their timeslot. PRINTED orders are still allowed to
+				// change their slot (see select-timeslot route), so include it here
+				// too — otherwise statusToStep would send them to COMPLETE.
 				if (
 					pickupForOrderId &&
 					(order.status === OrderStatus.PAID ||
-						order.status === OrderStatus.AWAITING_PICKUP)
+						order.status === OrderStatus.AWAITING_PICKUP ||
+						order.status === OrderStatus.PRINTED)
 				) {
 					setOrderStep(OrderStep.PICKUP);
 				} else {
