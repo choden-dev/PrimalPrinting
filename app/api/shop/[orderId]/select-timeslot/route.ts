@@ -3,6 +3,7 @@ import { pickupProfileToHtml, sendOrderConfirmationEmail } from "@/lib/email";
 import { getAuthenticatedCustomer } from "../../../../../lib/auth";
 import { notifyPickupSlotSelected } from "../../../../../lib/discord";
 import { getPayloadClient } from "../../../../../lib/payload";
+import { slotInstant } from "../../../../../lib/scheduleGenerator";
 
 type RouteContext = { params: Promise<{ orderId: string }> };
 
@@ -95,6 +96,62 @@ export async function POST(request: NextRequest, context: RouteContext) {
 		if (maxCap !== null && currentBooked >= maxCap) {
 			return NextResponse.json(
 				{ error: "This timeslot is fully booked. Please choose another." },
+				{ status: 409 },
+			);
+		}
+
+		// ── Minimum notice period check ──────────────────────────────
+		// Mirror the filtering done in GET /api/pickup-slots so a customer can't
+		// book a slot inside the notice window by POSTing a timeslotId directly
+		// (or from a stale list). Resolve notice hours: schedule override →
+		// global default → 24h fallback. Times are interpreted in the shop's
+		// timezone via slotInstant so the comparison is timezone-safe.
+		let noticeHours = 24;
+		try {
+			const settings = await payload.findGlobal({ slug: "schedule-settings" });
+			if (
+				settings?.defaultMinimumNoticeHours != null &&
+				typeof settings.defaultMinimumNoticeHours === "number"
+			) {
+				noticeHours = settings.defaultMinimumNoticeHours;
+			}
+		} catch {
+			// Use default
+		}
+
+		const scheduleId =
+			typeof timeslot.schedule === "object" && timeslot.schedule
+				? (timeslot.schedule as { id: string }).id
+				: typeof timeslot.schedule === "string"
+					? timeslot.schedule
+					: null;
+		if (scheduleId) {
+			try {
+				const schedule = await payload.findByID({
+					collection: "schedules",
+					id: scheduleId,
+				});
+				if (
+					schedule?.minimumNoticeHours != null &&
+					typeof schedule.minimumNoticeHours === "number"
+				) {
+					noticeHours = schedule.minimumNoticeHours;
+				}
+			} catch {
+				// Use resolved default
+			}
+		}
+
+		const slotDateStr =
+			typeof timeslot.date === "string" ? timeslot.date.split("T")[0] : "";
+		const slotStart = slotInstant(slotDateStr, timeslot.startTime || "00:00");
+		const cutoff = new Date(Date.now() + noticeHours * 60 * 60 * 1000);
+		if (slotStart <= cutoff) {
+			return NextResponse.json(
+				{
+					error:
+						"This timeslot is too soon to book. Please choose a later slot.",
+				},
 				{ status: 409 },
 			);
 		}

@@ -109,6 +109,82 @@ function slotKey(date: string, startTime: string, endTime: string): string {
 	return `${date}|${startTime}|${endTime}`;
 }
 
+/**
+ * IANA timezone the shop operates in. Timeslot `date` (YYYY-MM-DD) and
+ * `startTime`/`endTime` (HH:MM) are stored as bare wall-clock strings with no
+ * timezone, so they must be interpreted in the shop's local timezone to be
+ * turned into real instants. Defaults to Pacific/Auckland — keep this in sync
+ * with the SHOP_TIMEZONE default in container-worker.js and .env.local.
+ */
+export const SHOP_TIMEZONE = process.env.SHOP_TIMEZONE || "Pacific/Auckland";
+
+/**
+ * Compute the UTC offset (in minutes) of a given IANA timezone at a specific
+ * instant, e.g. +780 for Pacific/Auckland during NZDT. Positive means the zone
+ * is ahead of UTC. Uses Intl so DST is handled automatically for the date.
+ */
+function tzOffsetMinutes(instant: Date, timeZone: string): number {
+	// Format the instant as wall-clock parts in the target timezone, then read
+	// those parts back as if they were UTC. The difference between that pseudo-UTC
+	// value and the real instant is the zone's offset at that moment.
+	const dtf = new Intl.DateTimeFormat("en-US", {
+		timeZone,
+		hour12: false,
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	});
+	const parts = dtf.formatToParts(instant);
+	const map: Record<string, number> = {};
+	for (const p of parts) {
+		if (p.type !== "literal") map[p.type] = Number(p.value);
+	}
+	// Intl may emit hour "24" at midnight — normalise to 0.
+	const hour = map.hour === 24 ? 0 : map.hour;
+	const asUTC = Date.UTC(
+		map.year,
+		map.month - 1,
+		map.day,
+		hour,
+		map.minute,
+		map.second,
+	);
+	return (asUTC - instant.getTime()) / 60000;
+}
+
+/**
+ * Convert a timeslot's wall-clock `date` (YYYY-MM-DD) and `time` (HH:MM),
+ * interpreted in `timeZone`, into the correct absolute Date (instant).
+ *
+ * This is timezone-safe: the same slot resolves to the same instant regardless
+ * of the server's own timezone, so notice-period math is correct in production
+ * (where the server typically runs in UTC) as well as locally. DST transitions
+ * are handled by resolving the offset for that specific wall-clock moment.
+ */
+export function slotInstant(
+	date: string,
+	time: string,
+	timeZone: string = SHOP_TIMEZONE,
+): Date {
+	const dateStr = date.includes("T") ? date.split("T")[0] : date;
+	const [year, month, day] = dateStr.split("-").map(Number);
+	const [hour, minute] = (time || "00:00").split(":").map(Number);
+
+	// First guess: treat the wall-clock time as if it were UTC.
+	const utcGuess = Date.UTC(year, month - 1, day, hour, minute, 0);
+	// The offset near that instant tells us how far to shift to get the real
+	// instant. We resolve the offset twice to correctly handle the rare case
+	// where the guess lands on the far side of a DST boundary.
+	const offset1 = tzOffsetMinutes(new Date(utcGuess), timeZone);
+	const candidate = utcGuess - offset1 * 60000;
+	const offset2 = tzOffsetMinutes(new Date(candidate), timeZone);
+	const finalMs = offset2 === offset1 ? candidate : utcGuess - offset2 * 60000;
+	return new Date(finalMs);
+}
+
 /** Parse "HH:MM" into total minutes since midnight. */
 function parseTime(t: string): number {
 	const [h, m] = t.split(":").map(Number);

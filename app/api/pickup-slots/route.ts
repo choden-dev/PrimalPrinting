@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayloadClient } from "../../../lib/payload";
+import { SHOP_TIMEZONE, slotInstant } from "../../../lib/scheduleGenerator";
 
 /**
  * GET /api/pickup-slots — List available pickup timeslots.
@@ -27,7 +28,15 @@ export async function GET(request: NextRequest) {
 		const payload = await getPayloadClient();
 
 		const now = new Date();
-		const todayStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
+		// "Today" must be computed in the SHOP's timezone, not the server's
+		// (production runs in UTC). Using the server's local date here could
+		// drop or include a day's slots incorrectly around midnight.
+		const todayStr = new Intl.DateTimeFormat("en-CA", {
+			timeZone: SHOP_TIMEZONE,
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		}).format(now); // en-CA yields YYYY-MM-DD
 
 		// Fetch all active future timeslots (we filter capacity + notice in JS
 		// because MongoDB can't easily express "maxCapacity is null OR
@@ -108,12 +117,14 @@ export async function GET(request: NextRequest) {
 				}
 			}
 
-			// Compute the slot's start datetime
+			// Compute the slot's real start instant. The slot's date + startTime
+			// are stored as bare wall-clock strings (no timezone), so we resolve
+			// them against the shop's timezone. Without this, `new Date("...T09:00")`
+			// would be parsed in the SERVER's timezone (UTC in production), shifting
+			// the comparison by the shop's UTC offset and breaking the notice period.
 			const slotDateStr =
 				typeof slot.date === "string" ? slot.date.split("T")[0] : "";
-			const slotStart = new Date(
-				`${slotDateStr}T${slot.startTime || "00:00"}:00`,
-			);
+			const slotStart = slotInstant(slotDateStr, slot.startTime || "00:00");
 			const cutoff = new Date(now.getTime() + noticeHours * 60 * 60 * 1000);
 
 			if (slotStart <= cutoff) {
