@@ -170,7 +170,10 @@ const MyOrders: NextPage<PageProps> = ({ contactInfo }) => {
 				</Button>
 			);
 		}
-		if (order.status === OrderStatus.AWAITING_PICKUP) {
+		if (
+			order.status === OrderStatus.AWAITING_PICKUP ||
+			order.status === OrderStatus.PRINTED
+		) {
 			return (
 				<Button
 					size="sm"
