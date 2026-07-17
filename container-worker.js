@@ -64,6 +64,10 @@ export class PrimalPrinting extends Container {
 		DISCORD_WEBHOOK_URL: env.DISCORD_WEBHOOK_URL ?? "",
 		// Cron
 		CRON_SECRET: env.CRON_SECRET ?? "",
+		// Shop timezone — used to interpret timeslot date/time strings when
+		// enforcing the minimum notice period. Keep the default in sync with
+		// the code fallback in lib/scheduleGenerator.ts and .env.local.
+		SHOP_TIMEZONE: env.SHOP_TIMEZONE ?? "Pacific/Auckland",
 		// Public env vars (baked into client bundle at build time, but
 		// still useful for server-side code that reads them)
 		NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT:

@@ -51,6 +51,14 @@ declare namespace NodeJS {
 		/** Discord webhook URL for admin notifications (bank transfers, pickup slots). */
 		DISCORD_WEBHOOK_URL?: string;
 
+		/**
+		 * IANA timezone the shop operates in (e.g. "Pacific/Auckland"). Used to
+		 * interpret timeslot date + startTime strings as real instants when
+		 * enforcing the minimum notice period, so the calculation is correct
+		 * regardless of the server's own timezone. Defaults to "Pacific/Auckland".
+		 */
+		SHOP_TIMEZONE?: string;
+
 		// ── Public / client-side config ──────────────────────────────────
 		/** Minimum items to trigger a discount. Defaults to "2" in code. */
 		NEXT_PUBLIC_MINIMUM_ITEMS_FOR_DISCOUNT?: string;
