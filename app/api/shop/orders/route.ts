@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedCustomer } from "../../../../lib/auth";
 import { getPayloadClient } from "../../../../lib/payload";
+import { countPdfPages } from "../../../../lib/pdf";
 import {
 	cleanupStagingFiles,
 	downloadFromStaging,
@@ -20,29 +21,6 @@ import {
 export const runtime = "nodejs";
 // HEAD + page-counting downloads of every file can take a while at max size.
 export const maxDuration = 60;
-
-/**
- * Count PDF pages by scanning for /Type /Page markers in the raw buffer.
- * Lightweight — no external dependencies, no Object.defineProperty issues.
- */
-function countPdfPages(buffer: Buffer): number {
-	const text = buffer.toString("latin1");
-	let count = 0;
-	let pos = 0;
-
-	while (true) {
-		const idx = text.indexOf("/Type", pos);
-		if (idx === -1) break;
-
-		const after = text.substring(idx + 5, idx + 30).trimStart();
-		if (after.startsWith("/Page") && !after.startsWith("/Pages")) {
-			count++;
-		}
-		pos = idx + 5;
-	}
-
-	return Math.max(count, 0);
-}
 
 /**
  * POST /api/shop/orders — Finalise a DRAFT order from staging files the
@@ -202,7 +180,7 @@ export async function POST(request: NextRequest) {
 		const orderFiles = await Promise.all(
 			headed.map(async (v) => {
 				const buffer = await downloadFromStaging(v.stagingKey);
-				const pageCount = countPdfPages(buffer);
+				const pageCount = await countPdfPages(buffer);
 				if (pageCount < 1) {
 					throw new Error(
 						`"${v.fileName}": Unable to read PDF. Please ensure it's a valid PDF file.`,
