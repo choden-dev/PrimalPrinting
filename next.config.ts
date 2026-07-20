@@ -21,6 +21,17 @@ const nextConfig: NextConfig = {
 		ignoreBuildErrors: false,
 	},
 	serverExternalPackages: ["jose", "pdfjs-dist"],
+	// pdfjs-dist is loaded server-side (lib/pdf.ts) via a dynamic import of its
+	// *legacy* build to count PDF pages. Next.js's standalone output-file
+	// tracing does not reliably follow that dynamic subpath import, so the
+	// legacy build can be missing from the deployed container — at runtime the
+	// import then fails and every upload is wrongly reported as an invalid PDF.
+	// Explicitly include the legacy build (and the shared package internals it
+	// pulls in) so it is always copied into the standalone bundle.
+	outputFileTracingIncludes: {
+		"/api/shop/orders": ["./node_modules/pdfjs-dist/legacy/**"],
+		"/api/admin/orders": ["./node_modules/pdfjs-dist/legacy/**"],
+	},
 	// Inline assetPrefix so the value is baked into the client bundle. The
 	// docker-entrypoint.sh placeholder swap also rewrites this at container
 	// startup, so the same image can be redeployed against different CDNs.

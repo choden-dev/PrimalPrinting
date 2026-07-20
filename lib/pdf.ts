@@ -15,21 +15,47 @@
 
 import type * as pdfjsTypes from "pdfjs-dist";
 
+/**
+ * Raised when the pdfjs parser itself cannot be loaded/initialised — as opposed
+ * to the input simply being an invalid PDF. Callers can treat this as a server
+ * error (retryable) rather than telling the user their file is broken.
+ */
+export class PdfParserUnavailableError extends Error {
+	constructor(cause: unknown) {
+		super("PDF parser could not be loaded on the server", { cause });
+		this.name = "PdfParserUnavailableError";
+	}
+}
+
 let pdfjsPromise: Promise<typeof pdfjsTypes> | null = null;
 
 /**
- * Lazily load pdfjs-dist. Importing at module scope can break the Cloudflare
- * Workers runtime during bundling/SSR, so we defer to first use. The `canvas`
- * native dependency is stubbed via pnpm.overrides (see shims/canvas), which is
- * fine because we only parse the document structure here — we never render.
+ * Lazily load pdfjs-dist's **legacy** build.
+ *
+ * The default entry (`pdfjs-dist`) references browser-only globals such as
+ * `DOMMatrix` at module-evaluation time and throws
+ * `ReferenceError: DOMMatrix is not defined` under Node — which is what the
+ * server runtime (Next.js standalone server in the container) actually is. The
+ * `legacy` build targets non-DOM/Node environments and avoids those globals.
+ *
+ * Next.js's standalone output-file tracing does not reliably follow this
+ * dynamic subpath import, so the legacy build is *also* force-included via
+ * `outputFileTracingIncludes` in next.config.ts. Without that, the legacy
+ * build is missing from the deployed container, the import below throws, and
+ * every upload is wrongly rejected as an invalid PDF.
+ *
+ * The load is memoised, but a failed load is NOT cached — so a transient
+ * initialisation problem doesn't permanently poison every subsequent request.
  */
 function getPdfjs(): Promise<typeof pdfjsTypes> {
 	if (!pdfjsPromise) {
-		// Use the legacy build: it targets Node/non-DOM environments and does
-		// not rely on browser-only globals, which suits server-side parsing.
-		pdfjsPromise = import(
-			"pdfjs-dist/legacy/build/pdf.mjs"
-		) as unknown as Promise<typeof pdfjsTypes>;
+		pdfjsPromise = import("pdfjs-dist/legacy/build/pdf.mjs")
+			.then((mod) => mod as unknown as typeof pdfjsTypes)
+			.catch((err) => {
+				// Don't cache the failure — allow a retry on the next call.
+				pdfjsPromise = null;
+				throw new PdfParserUnavailableError(err);
+			});
 	}
 	return pdfjsPromise;
 }
@@ -42,8 +68,13 @@ function getPdfjs(): Promise<typeof pdfjsTypes> {
  *   valid PDF (callers treat < 1 as an invalid file).
  */
 export async function countPdfPages(buffer: Buffer): Promise<number> {
+	// Load the parser first. A failure here means the *server* is misconfigured
+	// (e.g. the pdfjs legacy build wasn't traced into the standalone bundle),
+	// not that the user's file is bad — so let it propagate as a real error
+	// instead of masquerading as "invalid PDF" (which returning 0 would do).
+	const pdfjs = await getPdfjs();
+
 	try {
-		const pdfjs = await getPdfjs();
 		// pdfjs mutates the underlying buffer, so hand it a fresh copy. It also
 		// expects a Uint8Array, not a Node Buffer view with a shared pool.
 		const data = new Uint8Array(
@@ -63,8 +94,11 @@ export async function countPdfPages(buffer: Buffer): Promise<number> {
 		const { numPages } = doc;
 		await doc.destroy();
 		return typeof numPages === "number" && numPages > 0 ? numPages : 0;
-	} catch {
-		// Corrupt/encrypted/non-PDF input — signal invalid to the caller.
+	} catch (err) {
+		// Genuinely corrupt/encrypted/non-PDF input — signal invalid to the
+		// caller. Log it so we can tell real bad files apart from unexpected
+		// parser regressions.
+		console.error("countPdfPages: failed to parse PDF", err);
 		return 0;
 	}
 }
