@@ -2,40 +2,28 @@
  * Server-side PDF utilities.
  *
  * Page counting is used to price orders, so it must be accurate and must never
- * trust client-supplied counts. Previously this scanned the raw PDF bytes for
- * `/Type /Page` markers, but that badly overcounts real-world PDFs: the marker
- * also appears in object streams, annotations/form fields, orphaned objects
- * left by incremental updates, and even inside content streams. A 200-page PDF
- * could be counted as 467.
+ * trust client-supplied counts.
  *
- * We now parse the document with pdfjs-dist (already a dependency, used
- * client-side by the PdfOrder component) and read the authoritative page count
- * from the parsed document.
+ * History:
+ *  - Originally this scanned the raw PDF bytes for `/Type /Page` markers, which
+ *    badly overcounts real-world PDFs — the marker also appears in object
+ *    streams, annotations/form fields, orphaned objects left by incremental
+ *    updates, and inside content streams. A 200-page PDF was counted as 467.
+ *  - We then tried pdfjs-dist, but its default build references browser-only
+ *    globals (`DOMMatrix`) and crashes under Node, and its legacy build was
+ *    unreliable to trace into the Next.js standalone/container bundle — causing
+ *    valid PDFs to be rejected as invalid in production.
+ *
+ * We now use `pdf-lib`: a dependency-free, pure-TypeScript PDF library that runs
+ * anywhere Node runs (no native addons, no DOM globals, no web worker, no
+ * bundler/file-tracing special-casing). It parses the document object graph and
+ * exposes an authoritative page count.
  */
 
-import type * as pdfjsTypes from "pdfjs-dist";
-
-let pdfjsPromise: Promise<typeof pdfjsTypes> | null = null;
+import { PDFDocument } from "pdf-lib";
 
 /**
- * Lazily load pdfjs-dist. Importing at module scope can break the Cloudflare
- * Workers runtime during bundling/SSR, so we defer to first use. The `canvas`
- * native dependency is stubbed via pnpm.overrides (see shims/canvas), which is
- * fine because we only parse the document structure here — we never render.
- */
-function getPdfjs(): Promise<typeof pdfjsTypes> {
-	if (!pdfjsPromise) {
-		// Use the legacy build: it targets Node/non-DOM environments and does
-		// not rely on browser-only globals, which suits server-side parsing.
-		pdfjsPromise = import(
-			"pdfjs-dist/legacy/build/pdf.mjs"
-		) as unknown as Promise<typeof pdfjsTypes>;
-	}
-	return pdfjsPromise;
-}
-
-/**
- * Count the number of pages in a PDF by parsing it with pdfjs.
+ * Count the number of pages in a PDF by parsing its structure.
  *
  * @param buffer Raw PDF bytes.
  * @returns The authoritative page count, or 0 if the file cannot be parsed as a
@@ -43,28 +31,21 @@ function getPdfjs(): Promise<typeof pdfjsTypes> {
  */
 export async function countPdfPages(buffer: Buffer): Promise<number> {
 	try {
-		const pdfjs = await getPdfjs();
-		// pdfjs mutates the underlying buffer, so hand it a fresh copy. It also
-		// expects a Uint8Array, not a Node Buffer view with a shared pool.
-		const data = new Uint8Array(
-			buffer.buffer.slice(
-				buffer.byteOffset,
-				buffer.byteOffset + buffer.byteLength,
-			),
-		);
-		const doc = await pdfjs.getDocument({
-			data,
-			// Server-side hardening: don't fetch external resources, don't rely
-			// on a worker thread, and avoid eval-based font handling.
-			isEvalSupported: false,
-			useWorkerFetch: false,
-			disableFontFace: true,
-		}).promise;
-		const { numPages } = doc;
-		await doc.destroy();
+		const doc = await PDFDocument.load(buffer, {
+			// We only need the page count, so skip the extra work of parsing all
+			// form fields, and don't refuse encrypted PDFs — a customer may well
+			// upload a password/permission-protected PDF and we can still read
+			// its page count without decrypting the content streams.
+			ignoreEncryption: true,
+			updateMetadata: false,
+		});
+		const numPages = doc.getPageCount();
 		return typeof numPages === "number" && numPages > 0 ? numPages : 0;
-	} catch {
-		// Corrupt/encrypted/non-PDF input — signal invalid to the caller.
+	} catch (err) {
+		// Corrupt / non-PDF input — signal invalid to the caller. Log it so a
+		// genuine bad file can be told apart from an unexpected parser
+		// regression.
+		console.error("countPdfPages: failed to parse PDF", err);
 		return 0;
 	}
 }

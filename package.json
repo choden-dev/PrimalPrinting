@@ -54,6 +54,7 @@
 		"nextjs-google-analytics": "^2.3.7",
 		"nodemailer": "^9.0.1",
 		"payload": "^3.83.0",
+		"pdf-lib": "^1.17.1",
 		"pdfjs-dist": "^5.6.205",
 		"pug": "^3.0.4",
 		"react": "19.2.5",
